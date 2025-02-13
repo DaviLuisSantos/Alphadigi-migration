@@ -6,6 +6,7 @@ using Alphadigi_migration.Services;
 using Alphadigi_migration;
 using Carter;
 using System;
+using FirebirdSql.Data.FirebirdClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +16,16 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddDbContext<AppDbContextFirebird>(options =>
-    options.UseFirebird("Server=localhost;Database=D:\\AcessoLinear\\Dados\\BANCODEDADOS.fdb;User=SYSDBA;Password=masterkey;"));
+    options.UseFirebird("Server=127.0.0.1;Database=D:\\AcessoLinear\\Dados\\BANCODEDADOS.fdb;User=SYSDBA;Password=masterkey;Pooling=true"));
 
 // Register AppDbContextSqlite
 builder.Services.AddDbContext<AppDbContextSqlite>(options =>
     options.UseSqlite("Data Source=database.db"));
 
 // Register VeiculoService
-builder.Services.AddScoped<VeiculoService>();
+builder.Services.AddScoped<IVeiculoService, VeiculoService>();
+builder.Services.AddScoped<IAlphadigiService,AlphadigiService>();
+builder.Services.AddScoped<IAlphadigiHearthBeatService,AlphadigiHearthBeatService>();
 
 builder.Services.AddCarter();
 
@@ -50,6 +53,14 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContextSqlite>();
     dbContext.Database.EnsureCreated();
 }
+
+using (var connection = new FbConnection("User=SYSDBA;Password=masterkey;Database=D:\\AcessoLinear\\Dados\\BANCODEDADOS.fdb;DataSource=127.0.0.1;Port=3050;Dialect=3;Charset=UTF8;Pooling=true"))
+{
+    await connection.OpenAsync();
+    Console.WriteLine("Conexão bem-sucedida!");
+}
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

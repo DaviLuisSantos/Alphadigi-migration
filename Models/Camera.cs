@@ -19,4 +19,5 @@ public class Camera
     public string Direcao { get; set; }
     [Column("ID_AREA")]
     public int IdArea { get; set; }
+    public Area Area { get; set; }
 }

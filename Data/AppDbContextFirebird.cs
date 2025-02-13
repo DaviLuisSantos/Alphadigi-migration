@@ -16,13 +16,16 @@ namespace Alphadigi_migration.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var connectionString = "Server=localhost;Database=D:\\AcessoLinear\\Dados\\BANCODEDADOS.fdb;User=SYSDBA;Password=masterkey;";
+                var connectionString = "Server=127.0.0.1;Database=D:\\AcessoLinear\\Dados\\BANCODEDADOS.fdb;User=SYSDBA;Password=masterkey;";
                 optionsBuilder.UseFirebird(connectionString);
             }
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Camera>()
+                .HasOne(c => c.Area)
+                .WithMany()
+                .HasForeignKey(c => c.IdArea);
         }
     }
 }

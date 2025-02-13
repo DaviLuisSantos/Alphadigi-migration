@@ -2,7 +2,16 @@
 
 namespace Alphadigi_migration.DTO.Alphadigi;
 
-public class AlarmInfoPlateDTO
+public class ProcessPlateDTO
+{
+    public string ip { get; set; }
+    public string plate { get; set; }
+    public bool isRealPlate { get; set; }
+    public bool isCad { get; set; }
+}
+
+
+    public class AlarmInfoPlateDTO
 {
     public AlarmInfoPlate AlarmInfoPlate { get; set; }
 }

@@ -1,49 +1,63 @@
-﻿using Alphadigi_migration.Models;
+﻿using Alphadigi_migration.Data;
+using Alphadigi_migration.Models;
 using Microsoft.EntityFrameworkCore;
-using Alphadigi_migration.Data;
-using Alphadigi_migration.DTO.Alphadigi;
+using Microsoft.Extensions.Logging; //Importe o logger
 
 namespace Alphadigi_migration.Services;
 
-public class VeiculoService
+public class VeiculoService : IVeiculoService
 {
-    private readonly AppDbContextFirebird _context;
-    public VeiculoService(AppDbContextFirebird context)
+    private readonly AppDbContextFirebird _contextFirebird;
+    private readonly ILogger<VeiculoService> _logger; //Adicione o logger
+    public VeiculoService(AppDbContextFirebird context, ILogger<VeiculoService> logger) //Injeta o logger
     {
-        _context = context;
+        _contextFirebird = context;
+        _logger = logger; //Salva o logger
     }
     public async Task<List<Veiculo>> GetVeiculos()
     {
-        return await _context.Veiculos.ToListAsync();
+        _logger.LogInformation("GetVeiculos chamado"); //Adicione logging
+        return await _contextFirebird.Veiculos.ToListAsync();
     }
-    public async Task<Veiculo> GetVeiculo(int id)
+    public async Task<List<IVeiculoService.VeiculoInfo>> GetVeiculosSend(int lastId) //Implementa a interface
     {
-        return await _context.Veiculos.FindAsync(id);
+        _logger.LogInformation($"GetVeiculosSend chamado com lastId: {lastId}"); //Adicione logging
+        return await _contextFirebird.Veiculos
+            .Where(v => v.Id > lastId)
+            .OrderBy(v => v.Id)
+            .Take(1000)
+            .Select(v => new IVeiculoService.VeiculoInfo //Use a classe da interface
+            {
+                Id = v.Id,
+                Placa = v.Placa
+            })
+            .ToListAsync();
     }
-    public async Task<Veiculo> AddVeiculo(Veiculo veiculo)
+
+    public async Task<Veiculo> getByPlate(string plate)
     {
-        _context.Veiculos.Add(veiculo);
-        await _context.SaveChangesAsync();
-        return veiculo;
-    }
-    public async Task<Veiculo> UpdateVeiculo(int id,Veiculo veiculo)
-    {
-        if (id != veiculo.Id)
-        {
-            throw new Exception("Id do veículo não confere");
-        }
-        _context.Entry(veiculo).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        return veiculo;
-    }
-    public async Task DeleteVeiculo(int id)
-    {
-        var veiculo = await _context.Veiculos.FindAsync(id);
-        if (veiculo == null)
-        {
-            throw new Exception("Veículo não encontrado");
-        }
-        _context.Veiculos.Remove(veiculo);
-        await _context.SaveChangesAsync();
+        _logger.LogInformation($"getByPlate chamado com placa: {plate}"); //Adicione logging
+        var resultado = _contextFirebird.Veiculos
+                .Select(v => new
+                {
+                    v.Id,
+                    v.Unidade,
+                    v.Marca,
+                    v.Modelo,
+                    v.Placa,
+                    v.Cor,
+                    v.IpCamUltAcesso,
+                    v.DataHoraUltAcesso,
+                    v.VeiculoDentro,
+                    v.IdRota,
+                    A = v.Placa
+                        .Take(7) // Pega os 7 primeiros caracteres da placa
+                        .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0) // Compara cada caractere
+                        .Sum() // Soma os resultados
+                })
+                .Where(v => v.A >= 6) // Filtra onde A >= 6
+                .OrderByDescending(v => v.A) // Ordena por A em ordem decrescente
+                .ToList();
+        return await _contextFirebird.Veiculos.Where(v => v.Placa == plate).FirstOrDefaultAsync();
     }
 }

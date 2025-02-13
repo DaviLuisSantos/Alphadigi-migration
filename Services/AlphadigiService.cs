@@ -1,10 +1,10 @@
-﻿using Alphadigi_migration.Data;
-using Alphadigi_migration.Models;
+﻿using Alphadigi_migration.Models;
 using Microsoft.EntityFrameworkCore;
+using Alphadigi_migration.Data;
 
 namespace Alphadigi_migration.Services;
 
-public class AlphadigiService
+public class AlphadigiService:IAlphadigiService
 {
     private readonly AppDbContextSqlite _contextSqlite;
     private readonly AppDbContextFirebird _contextFirebird;
@@ -15,13 +15,16 @@ public class AlphadigiService
         _contextFirebird = contextFirebird;
     }
 
-    public async Task<Alphadigi> getOrCreate(string ip)
+    public async Task<Alphadigi> GetOrCreate(string ip) 
     {
         var cameraSqlite = await _contextSqlite.Alphadigi.Where(c => c.Ip == ip).FirstOrDefaultAsync();
+        var cameraFire = await _contextFirebird.Cameras
+    .Where(c => c.Ip == ip)
+    .Include(c => c.Area)
+    .FirstOrDefaultAsync() ?? throw new Exception("Camera não encontrada");
+
         if (cameraSqlite == null)
         {
-            var cameraFire = await _contextFirebird.Cameras.Where(c => c.Ip == ip).FirstOrDefaultAsync() ?? throw new Exception("Camera não encontrada");
-
             var camera = new Alphadigi
             {
                 Ip = cameraFire.Ip,
@@ -34,8 +37,20 @@ public class AlphadigiService
             await _contextSqlite.SaveChangesAsync();
             return camera;
         }
+        else
+        {
+            bool sentidoFire = cameraFire.Direcao == "ENTRADA" ? true : false;
+            if (cameraSqlite.AreaId != cameraFire.IdArea || cameraSqlite.Sentido != sentidoFire)
+            {
+                cameraSqlite.AreaId = cameraFire.IdArea;
+                cameraSqlite.Sentido = sentidoFire;
+                _contextSqlite.Alphadigi.Update(cameraSqlite);
+                await _contextSqlite.SaveChangesAsync();
+            }
+        }
         return cameraSqlite;
-
     }
+
+
 
 }

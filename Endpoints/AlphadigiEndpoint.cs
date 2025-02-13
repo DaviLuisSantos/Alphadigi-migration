@@ -9,19 +9,29 @@ public class AlphadigiEndpoint : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/", (VeiculoService veiculo) =>
+        app.MapGet("/", (IVeiculoService veiculo) =>
         {
             return veiculo.GetVeiculos();
         })
         .IncludeInOpenApi();
 
-        app.MapPost("/LPR/placa", async (AlarmInfoPlateDTO requestBody, VeiculoService veiculoService) =>
+        app.MapPost("/LPR/placa", async (AlarmInfoPlateDTO requestBody, IVeiculoService veiculoService) =>
         {
 
             if (requestBody == null || requestBody.AlarmInfoPlate == null)
             {
                 return Results.BadRequest("Invalid request body");
             }
+
+            var alarm = requestBody.AlarmInfoPlate;
+
+            var placa = new ProcessPlateDTO
+            {
+                ip = alarm.ipaddr,
+                plate = alarm.result?.PlateResult?.license,
+                isRealPlate = alarm.result?.PlateResult?.realplate ?? false,
+                isCad = alarm.result.PlateResult.Whitelist == 2
+            };
 
             var plateResult = requestBody.AlarmInfoPlate.result?.PlateResult;
             if (plateResult == null)
@@ -32,13 +42,30 @@ public class AlphadigiEndpoint : CarterModule
             return Results.Ok();
         });
 
-        app.MapPost("/LPR/heartbeat", async (HeartbeatDTO requestBody, VeiculoService veiculo) =>
+        app.MapPost("/LPR/heartbeat", async (HttpContext context, HeartbeatDTO requestBody, IAlphadigiHearthBeatService hearthbeatService) =>
         {
             if (requestBody == null)
             {
                 return Results.BadRequest("Invalid request body");
             }
-            return Results.Ok();
+
+            var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+            if (ipAddress != null && ipAddress.StartsWith("::ffff:"))
+            {
+                ipAddress = ipAddress.Substring(7);
+            }
+
+            try
+            {
+                var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress); //Aguarde aqui
+                return Results.Ok(resposta); //Retorne os resultados do método corretamente.
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Erro no endpoint /LPR/heartbeat: {ex}");
+                return Results.Problem("Erro interno do servidor."); //Retorne um erro adequado.
+            }
         });
     }
 }

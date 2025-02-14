@@ -48,6 +48,7 @@ public class AlphadigiService:IAlphadigiService
                 await _contextSqlite.SaveChangesAsync();
             }
         }
+        cameraSqlite.Area = cameraFire.Area;
         return cameraSqlite;
     }
 

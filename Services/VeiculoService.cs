@@ -36,20 +36,12 @@ public class VeiculoService : IVeiculoService
 
     public async Task<Veiculo> getByPlate(string plate)
     {
-        _logger.LogInformation($"getByPlate chamado com placa: {plate}"); //Adicione logging
+        _logger.LogInformation($"getByPlate chamado com placa: {plate}"); // Adicione logging
         var resultado = _contextFirebird.Veiculos
+                .AsEnumerable() // Switch to client-side evaluation
                 .Select(v => new
                 {
-                    v.Id,
-                    v.Unidade,
-                    v.Marca,
-                    v.Modelo,
-                    v.Placa,
-                    v.Cor,
-                    v.IpCamUltAcesso,
-                    v.DataHoraUltAcesso,
-                    v.VeiculoDentro,
-                    v.IdRota,
+                    v,
                     A = v.Placa
                         .Take(7) // Pega os 7 primeiros caracteres da placa
                         .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0) // Compara cada caractere
@@ -57,7 +49,12 @@ public class VeiculoService : IVeiculoService
                 })
                 .Where(v => v.A >= 6) // Filtra onde A >= 6
                 .OrderByDescending(v => v.A) // Ordena por A em ordem decrescente
+                .Select(v => v.v) // Seleciona o objeto Veiculo completo
                 .ToList();
-        return await _contextFirebird.Veiculos.Where(v => v.Placa == plate).FirstOrDefaultAsync();
+        if (resultado.Count == 0)
+        {
+            return null;
+        }
+        return resultado.First();
     }
 }

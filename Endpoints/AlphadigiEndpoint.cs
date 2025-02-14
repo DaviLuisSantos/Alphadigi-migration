@@ -2,6 +2,7 @@
 using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
+using Newtonsoft.Json;
 
 namespace Alphadigi_migration;
 
@@ -15,7 +16,7 @@ public class AlphadigiEndpoint : CarterModule
         })
         .IncludeInOpenApi();
 
-        app.MapPost("/LPR/placa", async (AlarmInfoPlateDTO requestBody, IVeiculoService veiculoService) =>
+        app.MapPost("/LPR/placa", async (AlarmInfoPlateDTO requestBody, IAlphadigiPlateService plateService) =>
         {
 
             if (requestBody == null || requestBody.AlarmInfoPlate == null)
@@ -33,13 +34,14 @@ public class AlphadigiEndpoint : CarterModule
                 isCad = alarm.result.PlateResult.Whitelist == 2
             };
 
-            var plateResult = requestBody.AlarmInfoPlate.result?.PlateResult;
+            var plateResult = await plateService.ProcessPlate(placa);
             if (plateResult == null)
             {
                 return Results.BadRequest("PlateResult is null");
             }
+            string json = JsonConvert.SerializeObject(plateResult, Formatting.Indented);
 
-            return Results.Ok();
+            return Results.Json(plateResult);
         });
 
         app.MapPost("/LPR/heartbeat", async (HttpContext context, HeartbeatDTO requestBody, IAlphadigiHearthBeatService hearthbeatService) =>

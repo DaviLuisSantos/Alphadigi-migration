@@ -12,6 +12,8 @@ namespace Alphadigi_migration.Data
         }
         public DbSet<Veiculo> Veiculos { get; set; }
         public DbSet<Camera> Cameras { get; set; }
+        public DbSet<Area> Areas { get; set; }
+        public DbSet<Unidade> Unidade { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

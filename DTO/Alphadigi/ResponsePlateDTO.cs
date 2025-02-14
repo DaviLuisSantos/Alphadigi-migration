@@ -1,16 +1,17 @@
-﻿namespace Alphadigi_migration.DTO.Alphadigi;
+﻿using Newtonsoft.Json;
+
+namespace Alphadigi_migration.DTO.Alphadigi;
 
 public class ResponsePlateDTO
 {
-    public ResponseAlarmInfoPlate Response_AlarmInfoPlate { get; set; }
+    public ResponseAlarmInfoPlate Response_AlarmInfoPlate  { get; set; }
 }
 
 public class ResponseAlarmInfoPlate
 {
     public string Info { get; set; }
     public string Content { get; set; }
-    public string IsPay { get; set; } // Note: O JSON original usa "is_pay", mas em C# usamos PascalCase
-    public List<SerialData> SerialData { get; set; }
+    public List<SerialData>? SerialData { get; set; }
 }
 
 public class SerialData

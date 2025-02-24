@@ -17,8 +17,12 @@ public class AlphadigiService:IAlphadigiService
 
     public async Task<Alphadigi> GetOrCreate(string ip) 
     {
-        var cameraSqlite = await _contextSqlite.Alphadigi.Where(c => c.Ip == ip).FirstOrDefaultAsync();
-        var cameraFire = await _contextFirebird.Cameras
+        var cameraSqlite = await _contextSqlite.Alphadigi
+            .Where(c => c.Ip == ip)
+            .Include(a=>a.Area)
+            .FirstOrDefaultAsync();
+
+        var cameraFire = await _contextFirebird.Camera
     .Where(c => c.Ip == ip)
     .Include(c => c.Area)
     .FirstOrDefaultAsync() ?? throw new Exception("Camera não encontrada");
@@ -48,7 +52,7 @@ public class AlphadigiService:IAlphadigiService
                 await _contextSqlite.SaveChangesAsync();
             }
         }
-        cameraSqlite.Area = cameraFire.Area;
+        //cameraSqlite.Area = cameraFire.Area;
         return cameraSqlite;
     }
 

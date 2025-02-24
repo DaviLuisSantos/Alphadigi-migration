@@ -10,9 +10,9 @@ namespace Alphadigi_migration.Data
             
 
         }
-        public DbSet<Veiculo> Veiculos { get; set; }
-        public DbSet<Camera> Cameras { get; set; }
-        public DbSet<Area> Areas { get; set; }
+        public DbSet<Veiculo> Veiculo { get; set; }
+        public DbSet<Camera> Camera { get; set; }
+        public DbSet<Area> Area { get; set; }
         public DbSet<Unidade> Unidade { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -28,6 +28,12 @@ namespace Alphadigi_migration.Data
                 .HasOne(c => c.Area)
                 .WithMany()
                 .HasForeignKey(c => c.IdArea);
+
+            modelBuilder.Entity<Veiculo>()
+             .HasOne(v => v.UnidadeNavigation)
+             .WithMany()
+             .HasForeignKey(v => v.Unidade)
+             .HasPrincipalKey(u => u.Nome);
         }
     }
 }

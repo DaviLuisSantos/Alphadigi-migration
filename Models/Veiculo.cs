@@ -11,6 +11,8 @@ public class Veiculo
     public int Id { get; set; }
     [Column("UNIDADE")]
     public string Unidade { get; set; }
+    [ForeignKey("Unidade")]
+    public Unidade UnidadeNavigation { get; set; }
     [Column("PLACA")]
     public string Placa { get; set; }
     [Column("MARCA")]

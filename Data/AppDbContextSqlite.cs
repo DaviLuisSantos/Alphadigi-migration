@@ -8,6 +8,7 @@ public class AppDbContextSqlite : DbContext
     public AppDbContextSqlite(DbContextOptions<AppDbContextSqlite> options) : base(options) { }
 
     public DbSet<Alphadigi> Alphadigi { get; set; }
+    public DbSet<Area> Areas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -15,5 +16,13 @@ public class AppDbContextSqlite : DbContext
         {
             optionsBuilder.UseSqlite("Data Source=database.db");
         }
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Alphadigi>()
+            .HasOne(a => a.Area)
+            .WithMany()
+            .HasForeignKey(a => a.AreaId);
     }
 }

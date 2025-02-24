@@ -1,22 +1,47 @@
 ﻿using Alphadigi_migration.Data;
 using Alphadigi_migration.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace Alphadigi_migration.Services
+namespace Alphadigi_migration.Services;
+
+public class AreaService : IAreaService
 {
-    public class AreaService : IAreaService
+    private readonly AppDbContextFirebird _contextFirebird;
+    private readonly AppDbContextSqlite _contextSqlite;
+    private readonly ILogger<VeiculoService> _logger; //Adicione o logger
+    public AreaService(AppDbContextFirebird contextFire, AppDbContextSqlite contextSqlite, ILogger<VeiculoService> logger) //Injeta o logger
     {
-        private readonly AppDbContextFirebird _contextFirebird;
-        private readonly ILogger<VeiculoService> _logger; //Adicione o logger
-        public AreaService(AppDbContextFirebird context, ILogger<VeiculoService> logger) //Injeta o logger
-        {
-            _contextFirebird = context;
-            _logger = logger; //Salva o logger
-        }
+        _contextFirebird = contextFire;
+        _contextSqlite = contextSqlite;
+        _logger = logger; //Salva o logger
+    }
 
-        public async Task<Area> GetById(int id)
+    public async Task<Area> GetById(int id)
+    {
+        _logger.LogInformation("GetAreas chamado"); //Adicione logging
+        return await _contextFirebird.Area.FindAsync(id);
+    }
+
+    public async Task<bool> SyncAreas()
+    {
+
+        _logger.LogInformation("SyncAreas chamado"); //Adicione logging
+        var areas = await _contextFirebird.Area.ToListAsync();
+        foreach (var area in areas)
         {
-            _logger.LogInformation("GetAreas chamado"); //Adicione logging
-            return await _contextFirebird.Areas.FindAsync(id);
+            var areaSqlite = await _contextSqlite.Areas.FindAsync(area.Id);
+            if (areaSqlite == null)
+            {
+                _contextSqlite.Areas.Add(area);
+            }
+            else
+            {
+                areaSqlite.Nome = area.Nome;
+                _contextSqlite.Areas.Update(areaSqlite);
+            }
         }
+        await _contextSqlite.SaveChangesAsync();
+        return true;
+
     }
 }

@@ -60,6 +60,9 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContextSqlite>();
     dbContext.Database.EnsureCreated();
+
+    var areaService = scope.ServiceProvider.GetRequiredService<IAreaService>();
+     await areaService.SyncAreas();
 }
 
 using (var connection = new FbConnection("User=SYSDBA;Password=masterkey;Database=D:\\AcessoLinear\\Dados\\BANCODEDADOS.fdb;DataSource=127.0.0.1;Port=3050;Dialect=3;Charset=UTF8;Pooling=true"))
@@ -67,18 +70,7 @@ using (var connection = new FbConnection("User=SYSDBA;Password=masterkey;Databas
     await connection.OpenAsync();
     Console.WriteLine("Conexão bem-sucedida!");
 }
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
-{
-    
-    return "forecast";
-})
-.WithName("GetWeatherForecast");
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

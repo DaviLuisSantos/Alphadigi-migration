@@ -3,6 +3,7 @@ using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
 using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Alphadigi_migration;
 
@@ -31,7 +32,7 @@ public class AlphadigiEndpoint : CarterModule
                 ip = alarm.ipaddr,
                 plate = alarm.result?.PlateResult?.license,
                 isRealPlate = alarm.result?.PlateResult?.realplate ?? false,
-                isCad = alarm.result.PlateResult.Whitelist == 2
+                isCad = alarm.result?.PlateResult.Whitelist == 2
             };
 
             var plateResult = await plateService.ProcessPlate(placa);
@@ -39,9 +40,14 @@ public class AlphadigiEndpoint : CarterModule
             {
                 return Results.BadRequest("PlateResult is null");
             }
-            string json = JsonConvert.SerializeObject(plateResult, Formatting.Indented);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null,
+                WriteIndented = true
+            };
 
-            return Results.Json(plateResult);
+            return Results.Json(plateResult, options);
+
         });
 
         app.MapPost("/LPR/heartbeat", async (HttpContext context, HeartbeatDTO requestBody, IAlphadigiHearthBeatService hearthbeatService) =>

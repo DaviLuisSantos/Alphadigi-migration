@@ -17,7 +17,7 @@ public class Alphadigi
     [StringLength(100)]
     public string Nome { get; set; }
 
-    //[ForeignKey("Area")]
+    [ForeignKey("Area")]
     public int AreaId { get; set; }
     public Area Area { get; set; }
 

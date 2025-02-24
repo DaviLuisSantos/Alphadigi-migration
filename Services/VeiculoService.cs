@@ -17,12 +17,12 @@ public class VeiculoService : IVeiculoService
     public async Task<List<Veiculo>> GetVeiculos()
     {
         _logger.LogInformation("GetVeiculos chamado"); //Adicione logging
-        return await _contextFirebird.Veiculos.ToListAsync();
+        return await _contextFirebird.Veiculo.ToListAsync();
     }
     public async Task<List<IVeiculoService.VeiculoInfo>> GetVeiculosSend(int lastId) //Implementa a interface
     {
         _logger.LogInformation($"GetVeiculosSend chamado com lastId: {lastId}"); //Adicione logging
-        return await _contextFirebird.Veiculos
+        return await _contextFirebird.Veiculo
             .Where(v => v.Id > lastId)
             .OrderBy(v => v.Id)
             .Take(1000)
@@ -37,7 +37,8 @@ public class VeiculoService : IVeiculoService
     public async Task<Veiculo> getByPlate(string plate)
     {
         _logger.LogInformation($"getByPlate chamado com placa: {plate}"); // Adicione logging
-        var resultado = _contextFirebird.Veiculos
+        var resultado = _contextFirebird.Veiculo
+            .Include(v => v.UnidadeNavigation)
                 .AsEnumerable() // Switch to client-side evaluation
                 .Select(v => new
                 {
@@ -56,5 +57,18 @@ public class VeiculoService : IVeiculoService
             return null;
         }
         return resultado.First();
+    }
+
+    public async Task<bool> UpdateVagaVeiculo(int id, bool dentro)
+    {
+        _logger.LogInformation($"UpdateVagaVeiculo chamado com id: {id} e dentro: {dentro}"); //Adicione logging
+        var veiculo = await _contextFirebird.Veiculo.FindAsync(id);
+        if (veiculo == null)
+        {
+            return false;
+        }
+        veiculo.VeiculoDentro = dentro;
+        await _contextFirebird.SaveChangesAsync();
+        return true;
     }
 }

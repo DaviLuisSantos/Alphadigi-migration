@@ -1,17 +1,36 @@
-﻿namespace Alphadigi_migration.Services
+﻿using Alphadigi_migration.Models;
+using Alphadigi_migration.DTO.MonitorAcessoLinear;
+
+namespace Alphadigi_migration.Services;
+
+public class MonitorAcessoLinear
 {
-    public class MonitorAcessoLinear
+    private readonly IVeiculoService _veiculoService;
+
+    public MonitorAcessoLinear(IVeiculoService veiculoService)
     {
-        private readonly IVeiculoService _veiculoService;
+        _veiculoService = veiculoService;
+    }
 
-        public MonitorAcessoLinear(IVeiculoService veiculoService)
+    public async Task<bool> DadosVeiculo(DadosVeiculoMonitorDTO dados)
+    {
+        var envioUdp = new UdpDadosVeiculoMonitorDTO
         {
-            _veiculoService = veiculoService;
-        }
+            TotalVagas = "1 / 2",
+            CorAviso = MonitorColor(dados.Acesso),
+        };
+        return true;
+    }
 
-        public async Task<bool> DadosVeiculo()
+    public string MonitorColor(string acesso)
+    {
+        return acesso switch
         {
-            return true;
-        }
+            "NÃO CADASTRADO" => "clpurple",
+            "LIBERADO" => "clgreen",
+            "S/VG" => "clyellow",
+            "CADASTRADO" => "clgreen",
+            _ => "clpurple",
+        };
     }
 }

@@ -8,6 +8,7 @@ public interface IVeiculoService
     Task<List<Veiculo>> GetVeiculos();
     Task<List<VeiculoInfo>> GetVeiculosSend(int lastId);
     Task<Veiculo> getByPlate(string plate);
+    Task<bool> UpdateVagaVeiculo(int id, bool dentro);
 
     public class VeiculoInfo
     {

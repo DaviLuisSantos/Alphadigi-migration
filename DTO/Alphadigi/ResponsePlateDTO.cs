@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Alphadigi_migration.DTO.Alphadigi;
+﻿namespace Alphadigi_migration.DTO.Alphadigi;
 
 public class ResponsePlateDTO
 {
@@ -9,8 +7,8 @@ public class ResponsePlateDTO
 
 public class ResponseAlarmInfoPlate
 {
-    public string Info { get; set; }
-    public string Content { get; set; }
+    public string info { get; set; }
+    public string content { get; set; }
     public List<SerialData>? SerialData { get; set; }
 }
 

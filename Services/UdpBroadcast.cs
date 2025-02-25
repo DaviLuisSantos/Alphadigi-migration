@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Alphadigi_migration.DTO.MonitorAcessoLinear;
 
-namespace Alphadigi_migration.Service;
+namespace Alphadigi_migration.Services;
 
 public class UdpBroadcastService
 {

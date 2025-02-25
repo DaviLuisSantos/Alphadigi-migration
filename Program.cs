@@ -37,6 +37,11 @@ builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IAlphadigiHearthBeatService, AlphadigiHearthBeatService>();
 builder.Services.AddScoped<IAlphadigiPlateService, AlphadigiPlateService>();
 
+builder.Services.AddScoped<UnidadeService>();
+builder.Services.AddScoped<MonitorAcessoLinear>();
+builder.Services.AddScoped<UdpBroadcastService>();
+builder.Services.AddScoped<AccessHandlerFactory>(); 
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",

@@ -56,6 +56,13 @@ public class AlphadigiService:IAlphadigiService
         return cameraSqlite;
     }
 
-
+    public async Task<bool> UpdateLastPlate(Alphadigi camera, string plate,DateTime timestamp)
+    {
+        camera.UltimaPlaca = plate;
+        camera.UltimaHora = timestamp;
+        _contextSqlite.Alphadigi.Update(camera);
+        await _contextSqlite.SaveChangesAsync();
+        return true;
+    }
 
 }

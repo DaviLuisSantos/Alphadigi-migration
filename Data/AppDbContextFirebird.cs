@@ -14,6 +14,7 @@ namespace Alphadigi_migration.Data
         public DbSet<Camera> Camera { get; set; }
         public DbSet<Area> Area { get; set; }
         public DbSet<Unidade> Unidade { get; set; }
+        public DbSet<Acesso> Acesso { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

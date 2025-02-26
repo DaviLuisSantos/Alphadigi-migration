@@ -1,7 +1,9 @@
-﻿namespace Alphadigi_migration.DTO.MonitorAcessoLinear;
+﻿using Newtonsoft.Json;
+namespace Alphadigi_migration.DTO.MonitorAcessoLinear;
 
 public class UdpDadosVeiculoMonitorDTO
 {
+    [JsonProperty("TTVAGAS")]
     public string TotalVagas { get; set; }
     public string CorAviso { get; set; }
     public bool AvisoVisible { get; set; }

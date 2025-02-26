@@ -17,12 +17,12 @@ public class UnidadeService
 
     public async Task<QueryResult> GetUnidadeInfo(int idUnidade)
     {
-       var unidade = await _contextFirebird.Unidade
-            .FindAsync(idUnidade);
+        var unidade = await _contextFirebird.Unidade.FindAsync(idUnidade);
         var vagasTotais = unidade.Vagas;
-        var vagasOcupadas = await _contextFirebird.Veiculo
+        var vagasOcupadas = _contextFirebird.Veiculo
+            .AsEnumerable() // Switch to client-side evaluation
             .Where(v => v.Unidade == unidade.Nome && v.VeiculoDentro)
-            .CountAsync();
+            .Count();
 
         var retorno = new QueryResult
         {
@@ -31,7 +31,6 @@ public class UnidadeService
         };
 
         return retorno;
-
     }
 
     // Classe para armazenar o resultado da consulta

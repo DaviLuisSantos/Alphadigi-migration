@@ -1,8 +1,12 @@
-﻿using Alphadigi_migration.Models;
-using Alphadigi_migration.Data;
+﻿using Alphadigi_migration.Data;
+using Alphadigi_migration.Models;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-    namespace Alphadigi_migration.Services;
-
+namespace Alphadigi_migration.Services
+{
     public interface IAccessHandler
     {
         Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi alphadigi);
@@ -10,33 +14,54 @@ using Alphadigi_migration.Data;
 
     public class VisitaAccessHandler : IAccessHandler
     {
+        private readonly ILogger<VisitaAccessHandler> _logger;
+
+        public VisitaAccessHandler(ILogger<VisitaAccessHandler> logger)
+        {
+            _logger = logger;
+        }
+
         public Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi alphadigi)
         {
+            _logger.LogInformation($"Processando acesso de visitante para veículo com placa {veiculo?.Placa ?? "Visitante"}.");
             return Task.FromResult((false, "NÃO CADASTRADO"));
         }
     }
+
     public class SaidaSempreAbreAccessHandler : IAccessHandler
     {
         private readonly IVeiculoService _veiculoService;
+        private readonly ILogger<SaidaSempreAbreAccessHandler> _logger;
 
-        public SaidaSempreAbreAccessHandler(IVeiculoService veiculoService)
+        public SaidaSempreAbreAccessHandler(IVeiculoService veiculoService, ILogger<SaidaSempreAbreAccessHandler> logger)
         {
             _veiculoService = veiculoService;
+            _logger = logger;
         }
+
         public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi alphadigi)
         {
-            string acesso;
-
-            if (veiculo.Id != null)
+            _logger.LogInformation($"Iniciando HandleAccessAsync");
+            try
             {
-                await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
-                acesso = "CADASTRADO";
+                string acesso = "NÃO CADASTRADO";
+                if (veiculo != null && veiculo.Id != 0)
+                {
+                    _logger.LogInformation($"Aprovando saída do veículo cadastrado com ID {veiculo.Id}.");
+                    await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
+                    acesso = "CADASTRADO";
+                }
+                else
+                {
+                    _logger.LogInformation("Aprovando saída para veículo não cadastrado.");
+                }
+                return (true, acesso);
             }
-            else
+            catch (Exception e)
             {
-                acesso = "NÃO CADASTRADO";
+                _logger.LogError(e, $"Erro em  HandleAccessAsync. - SaidaSempreAbreAccessHandler");
+                throw;
             }
-            return (true, acesso);
         }
     }
 
@@ -44,110 +69,167 @@ using Alphadigi_migration.Data;
     {
         private readonly IVeiculoService _veiculoService;
         private readonly UnidadeService _unidadeService;
+        private readonly ILogger<ControlaVagaAccessHandler> _logger;
 
-        public ControlaVagaAccessHandler(IVeiculoService veiculoService, UnidadeService unidadeService)
+        public ControlaVagaAccessHandler(IVeiculoService veiculoService, UnidadeService unidadeService, ILogger<ControlaVagaAccessHandler> logger)
         {
             _veiculoService = veiculoService;
             _unidadeService = unidadeService;
+            _logger = logger;
         }
+
         public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi alphadigi)
         {
-            string acesso;
-            bool abre;
-            if (!alphadigi.Sentido)
+            _logger.LogInformation($"Iniciando HandleAccessAsync");
+            try
             {
-                await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
-                acesso = "";
-                abre = true;
-            }
-            else
-            {
-                var vagas = await _unidadeService.GetUnidadeInfo(veiculo.UnidadeNavigation.Id);
-                if (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro)
+                _logger.LogInformation($"Gerenciando controle de vaga para veículo com ID {veiculo?.Id ?? 0}, Sentido: {alphadigi.Sentido}.");
+                string acesso = "";
+                bool abre = true;
+
+                if (!alphadigi.Sentido) // Saída
                 {
-                    await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
+                    if (veiculo != null)
+                    {
+                        await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
+                        _logger.LogInformation($"Liberando vaga para veículo com ID {veiculo.Id}.");
+                    }
                     acesso = "";
-                    abre = true;
                 }
-                else
+                else // Entrada
                 {
-                    acesso = "S/VG";
-                    abre = false;
+                    if (veiculo != null && veiculo.UnidadeNavigation != null)
+                    {
+                        var vagas = await _unidadeService.GetUnidadeInfo(veiculo.UnidadeNavigation.Id);
+                        if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro))
+                        {
+                            await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
+                            _logger.LogInformation($"Concedendo acesso e ocupando vaga para veículo com ID {veiculo.Id}.");
+                            acesso = "";
+                        }
+                        else
+                        {
+                            acesso = "S/VG";
+                            abre = false;
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Não foi possível obter informações da unidade para veículo com ID {veiculo?.Id ?? 0}. Acesso negado");
+                        acesso = "S/VG";
+                        abre = false;
+                    }
                 }
+
+                return (abre, acesso);
             }
-            return (abre, acesso);
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Erro em  HandleAccessAsync. - ControlaVagaAccessHandler");
+                throw;
+            }
         }
     }
+
     public class NaoControlaVagaAccessHandler : IAccessHandler
     {
         private readonly IVeiculoService _veiculoService;
-        public NaoControlaVagaAccessHandler(IVeiculoService veiculoService)
+        private readonly ILogger<NaoControlaVagaAccessHandler> _logger;
+
+        public NaoControlaVagaAccessHandler(IVeiculoService veiculoService, ILogger<NaoControlaVagaAccessHandler> logger)
         {
             _veiculoService = veiculoService;
+            _logger = logger;
         }
+
         public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi alphadigi)
         {
-            string acesso;
-            bool abre;
-            if (!alphadigi.Sentido)
+            _logger.LogInformation($"Iniciando HandleAccessAsync");
+            try
             {
-                await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
-                acesso = "";
-                abre = true;
+                _logger.LogInformation($"Acesso sem controle de vaga para veículo com ID {veiculo?.Id ?? 0}, Sentido: {alphadigi.Sentido}.");
+
+                string acesso = "CADASTRADO";
+                bool abre = true;
+                if (veiculo != null)
+                {
+                    if (!alphadigi.Sentido) // Saída
+                    {
+                        await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
+                        _logger.LogInformation($"Registrando saída para veículo com ID {veiculo.Id}.");
+                    }
+                    else // Entrada
+                    {
+                        await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
+                        _logger.LogInformation($"Registrando entrada para veículo com ID {veiculo.Id}.");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Acesso negado: Veículo não encontrado");
+                    acesso = "NÃO CADASTRADO";
+                    abre = false;
+                }
+
+                return (abre, acesso);
             }
-            else
+            catch (Exception e)
             {
-                await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
-                acesso = "";
-                abre = true;
+                _logger.LogError(e, $"Erro em  HandleAccessAsync. - NaoControlaVagaAccessHandler");
+                throw;
             }
-            return (abre, acesso);
         }
     }
 
-    public class AccessHandlerFactory
+    public interface IAccessHandlerFactory
     {
-    private readonly AppDbContextSqlite _contextSqlite;
-    private readonly AppDbContextFirebird _contextFirebird;
-    private readonly IAlphadigiService _alphadigiService;
-    private readonly IVeiculoService _veiculoService;
-    private readonly UnidadeService _unidadeService;
-    private readonly ILogger<AlphadigiHearthBeatService> _logger;
-    private readonly MonitorAcessoLinear _monitorAcessoLinear;
-
-
-    public AccessHandlerFactory(
-            AppDbContextSqlite contextSqlite,
-            AppDbContextFirebird contextFirebird,
-            IAlphadigiService alphadigiService,
-            IVeiculoService veiculoService,
-            UnidadeService unidadeService,
-            MonitorAcessoLinear monitorAcessoLinear,
-            ILogger<AlphadigiHearthBeatService> logger) // Adicione o logger
-    {
-        _contextSqlite = contextSqlite;
-        _contextFirebird = contextFirebird;
-        _alphadigiService = alphadigiService;
-        _veiculoService = veiculoService;
-        _unidadeService = unidadeService;
-        _monitorAcessoLinear = monitorAcessoLinear;
-        _logger = logger; // Salve o logger
+        IAccessHandler GetAccessHandler(Area area);
     }
+
+    public class AccessHandlerFactory : IAccessHandlerFactory
+    {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<AccessHandlerFactory> _logger;
+
+        public AccessHandlerFactory(IServiceProvider serviceProvider, ILogger<AccessHandlerFactory> logger)
+        {
+            _serviceProvider = serviceProvider;
+            _logger = logger;
+        }
 
         public IAccessHandler GetAccessHandler(Area area)
         {
-            if (area.EntradaVisita || area.SaidaVisita)
+            _logger.LogInformation($"Iniciando GetAccessHandler");
+            try
             {
-                return new VisitaAccessHandler();
+                if (area == null)
+                {
+                    _logger.LogWarning($"Área nula! Retornando VisitaAccessHandler");
+                    return _serviceProvider.GetRequiredService<VisitaAccessHandler>();
+                }
+                if (area.EntradaVisita || area.SaidaVisita)
+                {
+                    _logger.LogInformation($"Retornando VisitaAccessHandler");
+                    return _serviceProvider.GetRequiredService<VisitaAccessHandler>();
+                }
+                if (area.SaidaSempreAbre)
+                {
+                    _logger.LogInformation($"Retornando SaidaSempreAbreAccessHandler");
+                    return _serviceProvider.GetRequiredService<SaidaSempreAbreAccessHandler>();
+                }
+                if (area.ControlaVaga)
+                {
+                    _logger.LogInformation($"Retornando ControlaVagaAccessHandler");
+                    return _serviceProvider.GetRequiredService<ControlaVagaAccessHandler>();
+                }
+                _logger.LogInformation($"Retornando NaoControlaVagaAccessHandler");
+                return _serviceProvider.GetRequiredService<NaoControlaVagaAccessHandler>();
             }
-            if (area.SaidaSempreAbre)
+            catch (Exception e)
             {
-                return new SaidaSempreAbreAccessHandler(_veiculoService);
+                _logger.LogError(e, $"Erro em  GetAccessHandler.");
+                throw;
             }
-            if (area.ControlaVaga)
-            {
-                return new ControlaVagaAccessHandler(_veiculoService, _unidadeService);
-            }
-            return new NaoControlaVagaAccessHandler(_veiculoService);
         }
     }
+}

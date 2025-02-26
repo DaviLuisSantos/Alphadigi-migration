@@ -4,6 +4,12 @@ using Alphadigi_migration.Data;
 
 namespace Alphadigi_migration.Services;
 
+public interface IAlphadigiService
+{
+    Task<Alphadigi> GetOrCreate(string ip);
+    Task<bool> UpdateLastPlate(Alphadigi camera, string plate, DateTime timestamp);
+}
+
 public class AlphadigiService:IAlphadigiService
 {
     private readonly AppDbContextSqlite _contextSqlite;

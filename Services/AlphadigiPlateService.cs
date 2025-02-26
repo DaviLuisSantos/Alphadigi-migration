@@ -2,11 +2,11 @@
 using Alphadigi_migration.Models;
 using Alphadigi_migration.DTO.Alphadigi;
 using Alphadigi_migration.DTO.Veiculo;
-using Alphadigi_migration.DTO.MonitorAcessoLinear;
+using Alphadigi_migration.DTO.Display;
 
 namespace Alphadigi_migration.Services;
 
-public class AlphadigiPlateService: IAlphadigiPlateService
+public class AlphadigiPlateService : IAlphadigiPlateService
 {
     private readonly AppDbContextSqlite _contextSqlite;
     private readonly AppDbContextFirebird _contextFirebird;
@@ -14,8 +14,9 @@ public class AlphadigiPlateService: IAlphadigiPlateService
     private readonly IVeiculoService _veiculoService;
     private readonly UnidadeService _unidadeService;
     private readonly ILogger<AlphadigiHearthBeatService> _logger;
-    private readonly AccessHandlerFactory _accessHandlerFactory;
+    private readonly IAccessHandlerFactory _accessHandlerFactory;
     private readonly MonitorAcessoLinear _monitorAcessoLinear;
+    private readonly IVeiculoAccessProcessor _veiculoAccessProcessor;
 
 
     public AlphadigiPlateService(
@@ -25,8 +26,9 @@ public class AlphadigiPlateService: IAlphadigiPlateService
             IVeiculoService veiculoService,
             UnidadeService unidadeService,
             MonitorAcessoLinear monitorAcessoLinear,
-            AccessHandlerFactory accessHandlerFactor,
-            ILogger<AlphadigiHearthBeatService> logger) // Adicione o logger
+            IAccessHandlerFactory accessHandlerFactor,
+            ILogger<AlphadigiHearthBeatService> logger,
+            IVeiculoAccessProcessor veiculoAccessProcessor) // Adicione o logger
     {
         _contextSqlite = contextSqlite;
         _contextFirebird = contextFirebird;
@@ -36,37 +38,55 @@ public class AlphadigiPlateService: IAlphadigiPlateService
         _monitorAcessoLinear = monitorAcessoLinear;
         _accessHandlerFactory = accessHandlerFactor;
         _logger = logger; // Salve o logger
+        _veiculoAccessProcessor = veiculoAccessProcessor;
     }
 
-    public async Task<Object> ProcessPlate(ProcessPlateDTO plateReaded)
+    public async Task<object> ProcessPlate(ProcessPlateDTO plateReaded)
     {
-        DateTime timeStamp = DateTime.Now;
+        _logger.LogInformation($"Iniciando ProcessPlate");
+        try
+        {
+            DateTime timeStamp = DateTime.Now;
 
-        var camera = await _alphadigiService.GetOrCreate(plateReaded.ip);
-        if (camera == null)
-        {
-            throw new Exception("Camera não encontrada");
-        }
+            var camera = await _alphadigiService.GetOrCreate(plateReaded.ip);
+            if (camera == null)
+            {
+                _logger.LogError($"Câmera não encontrada para o IP {plateReaded.ip}.");
+                throw new Exception("Camera não encontrada");
+            }
 
-        var veiculo = await _veiculoService.getByPlate(plateReaded.plate);
-        if (veiculo != null)
-        {
-            if(!await VerifyAntiPassback(veiculo, camera, timeStamp))
-                return await handleReturn(plateReaded.plate, plateReaded.ip, liberado: false);
-            var retorno = handleVeiculo(veiculo, camera, timeStamp);
+            var veiculo = await _veiculoService.getByPlate(plateReaded.plate);
+            if (veiculo == null)
+            {
+                veiculo = new Veiculo
+                {
+                    Placa = plateReaded.plate,
+                };
+            }
+            _logger.LogInformation($"Veículo encontrado para a placa {plateReaded.plate}.");
+
+            //Remove a chamada para AntiPassBack caso necessário, e já retorna para o ponto centralizado
+
+            var accessResult = await sendVeiculoAccessProcessor(veiculo, camera, timeStamp);
+            _logger.LogInformation($"Accesso do veículo com a placa {plateReaded.plate} com resultado {accessResult}");
+
+            var messageDisplay = sendCreatPackageDisplay(veiculo, accessResult.Acesso);
+
+            return await handleReturn(veiculo.Placa, accessResult.Acesso, accessResult.ShouldReturn, messageDisplay);
+
         }
-        if (veiculo == null)
+        catch (Exception e)
         {
-            return await handleReturn(plateReaded.plate, plateReaded.ip, liberado: true);
+            _logger.LogError(e, $"Erro em ProcessPlate.");
+            throw; //Sempre relance a exceção caso não consiga resolver!
         }
-        return veiculo;
     }
 
-    public async Task<bool> VerifyAntiPassback(Veiculo veiculo, Alphadigi alphadigi,DateTime timestamp)
+    public async Task<bool> VerifyAntiPassback(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp)
     {
         Area? Area, ultimaArea;
         DateTime? ultimoAcesso;
-        bool mesmaCamera, mesmaArea,dentroDoPassback;
+        bool mesmaCamera, mesmaArea, dentroDoPassback;
         mesmaCamera = veiculo.IpCamUltAcesso == alphadigi.Ip;
         Area = alphadigi.Area;
 
@@ -82,7 +102,7 @@ public class AlphadigiPlateService: IAlphadigiPlateService
         }
 
         ultimoAcesso = veiculo.DataHoraUltAcesso;
-        
+
         if (mesmaArea)
         {
             var tempoAntipassback = Area.TempoAntipassbackTimeSpan.Value;
@@ -96,154 +116,67 @@ public class AlphadigiPlateService: IAlphadigiPlateService
         return true;
     }
 
-    public async Task<bool> handleVeiculo(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp)
+    public async Task<(bool ShouldReturn, string Acesso)> sendVeiculoAccessProcessor(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp)
     {
-        var accessHandler = _accessHandlerFactory.GetAccessHandler(alphadigi.Area);
-
-        (bool shouldReturn, string acesso) = await accessHandler.HandleAccessAsync(veiculo, alphadigi);
+        (bool shouldReturn, string acesso) = await _veiculoAccessProcessor.ProcessVeiculoAccessAsync(veiculo, alphadigi, timestamp);
 
         // Atualiza informações do veículo (se não for visitante)
-        if (veiculo.Id != null)
+        if (veiculo.Placa != null)
         {
-            await sendUpdateLastAccess(acesso, veiculo.Id, timestamp);
+            await _alphadigiService.UpdateLastPlate(alphadigi, veiculo.Placa, timestamp);
             _logger.LogInformation($"Veículo {veiculo.Placa} atualizado no banco de dados.");
-
         }
 
-        await sendMonitorAcessoLinear(veiculo, alphadigi.Ip, acesso, timestamp);
-
-        return true; //Sempre retorna true agora
+        return (shouldReturn, acesso);
     }
 
-    private async Task<bool> sendMonitorAcessoLinear(Veiculo veiculo, string ipCamera, string acesso, DateTime timestamp)
+    public List<SerialData> sendCreatPackageDisplay(Veiculo veiculo, string acesso)
     {
-        var monitorAcesso = new DadosVeiculoMonitorDTO
+        var veiculoData = _veiculoService.prepareVeiculoDataString(veiculo);
+        string cor = "red";
+        if (acesso == "" || acesso == "CADASTRADO")
+            cor = "green";
+        int tempo = 5, estilo = 5;
+        var serialData = new List<CreatePackageDisplayDTO>();
+
+        var packageDisplayPlaca = new CreatePackageDisplayDTO
         {
-            Veiculo = veiculo,
-            Ip = ipCamera,
-            Acesso = acesso,
-            HoraAcesso = timestamp
+            Mensagem = veiculo.Placa,
+            Linha = 0,
+            Cor = "yellow",
+            Tempo = tempo,
+            Estilo = estilo
         };
-        return await _monitorAcessoLinear.DadosVeiculo(monitorAcesso);
-    }
+        serialData.Add(packageDisplayPlaca);
 
-
-    private async Task<bool> sendUpdateLastAccess(string ipCamera,int idVeiculo,DateTime timestamp)
-    {
-        var lastAccess = new LastAcessUpdateVeiculoDTO
+        var packageDisplayAcesso = new CreatePackageDisplayDTO
         {
-            IdVeiculo = idVeiculo,
-            IpCamera = ipCamera,
-            TimeAccess = timestamp
+            Mensagem = acesso,
+            Linha = 1,
+            Cor = cor,
+            Tempo = tempo,
+            Estilo = estilo
         };
-        return await _veiculoService.UpdateLastAccess(lastAccess);
+        serialData.Add(packageDisplayAcesso);
+
+        return DisplayService.recieveMessageAlphadigi(serialData);
     }
 
-    /*
-    bool shouldReturn,isVisita,isSaidaSempreAbre,isControlaVaga,isVisitante,abre;
-    string acesso;
-
-    var area = alphadigi.Area;
-    isVisitante = veiculo.Id==null;
-    isVisita = (area.EntradaVisita || area.SaidaVisita) && isVisitante;
-    isSaidaSempreAbre = area.SaidaSempreAbre && !alphadigi.Sentido;
-    isControlaVaga = area.ControlaVaga;
-
-    if (isVisita)
-    {
-        acesso = "NÃO CADASTRADO";
-        abre = false;
-    }
-    else if (isSaidaSempreAbre)
-    {
-        abre = true;
-        if (!isVisitante)
-        {
-            await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
-            acesso = "CADASTRADO";
-        }
-        else
-        {
-            acesso= "NÃO CADASTRADO";
-            abre = true;
-        }
-    }
-    else
-    {
-        if (isControlaVaga)
-        {
-            if (!alphadigi.Sentido)
-            {
-                await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
-                acesso = "";
-                abre = true;
-            }
-            else
-            {
-                var vagas = await _unidadeService.GetUnidadeInfo(veiculo.UnidadeNavigation.Id);
-                if (vagas.NumVagas > vagas.VagasOcupadasMoradores||veiculo.VeiculoDentro)
-                {
-                    await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
-                    acesso = "";
-                    abre = true;
-                }
-                else
-                {
-                    acesso = "S/VG";
-                    abre = false;
-                }
-            }
-        }
-        else
-        {
-            if (!isControlaVaga)
-            {
-                if (!alphadigi.Sentido)
-                {
-                    await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
-                    acesso = "";
-                    abre = true;
-                }
-                else
-                {
-                    await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
-                    acesso = "";
-                    abre = true;
-                }
-        }
-
-    }
-
-
-    }
-
-    if (!isVisita)
-    {
-        veiculo.DataHoraUltAcesso = timestamp;
-        veiculo.IpCamUltAcesso = alphadigi.Ip;
-        await _contextSqlite.SaveChangesAsync();
-    }
-
-    //_contextSqlite.Veiculo.Update(veiculo);
-
-    return true;
-}
-    */
-
-    public async Task<Object> handleReturn(string placa, string acesso, bool liberado)
+    public async Task<ResponsePlateDTO> handleReturn(string placa, string acesso, bool liberado, List<SerialData> messageData)
     {
         string info = liberado ? "ok" : "no";
         var retorno = new ResponsePlateDTO
         {
             Response_AlarmInfoPlate = new ResponseAlarmInfoPlate
             {
-               info = info,
-               content = "retransfer_stop",
+                info = info,
+                content = "retransfer_stop",
+                serialData = messageData
             }
         };
 
         return retorno;
     }
-        
+
 
 }

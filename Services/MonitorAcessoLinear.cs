@@ -7,42 +7,57 @@ public class MonitorAcessoLinear
 {
     private readonly IVeiculoService _veiculoService;
     private readonly UdpBroadcastService _udpBroadcastService;
+    private readonly UnidadeService _unidadeService;
 
-    public MonitorAcessoLinear(IVeiculoService veiculoService, UdpBroadcastService udpBroadcast)
+    public MonitorAcessoLinear(IVeiculoService veiculoService, UdpBroadcastService udpBroadcast,UnidadeService unidade)
     {
         _veiculoService = veiculoService;
         _udpBroadcastService = udpBroadcast;
+        _unidadeService = unidade;
     }
 
     public async Task<bool> DadosVeiculo(DadosVeiculoMonitorDTO dados)
     {
         var dadosVeiculo = _veiculoService.prepareVeiculoDataString(dados.Veiculo);
-        string ipCamera, acesso;
+        string ipCamera, acesso, unidade,vagas;
         ipCamera = dados.Ip;
         acesso = dados.Acesso;
+        unidade = dados.Veiculo.UnidadeNavigation?.Nome != null ? dados.Veiculo.UnidadeNavigation.Nome : "NÃO CADASTRADO";
+        
 
-        await SendDadosVeiculo(dadosVeiculo, acesso, ipCamera);
+        if (unidade == "NÃO CADASTRADO")
+        {
+            vagas = "NÃO CADASTRADO";
+        }
+        else
+        {
+            var vagasTotal = await _unidadeService.GetUnidadeInfo(dados.Veiculo.UnidadeNavigation.Id);
 
-        await sendListaVeiculo(dadosVeiculo, dados.Veiculo.Placa, dados.HoraAcesso, acesso, dados.Veiculo.UnidadeNavigation.Nome, ipCamera); 
+            vagas = $"{vagasTotal.VagasOcupadasMoradores} / {vagasTotal.NumVagas}"; 
+        }
+
+        await SendDadosVeiculo(dadosVeiculo, acesso, ipCamera, vagas);
+
+        await sendListaVeiculo(dadosVeiculo, dados.Veiculo.Placa, dados.HoraAcesso, acesso, unidade, ipCamera);
 
         return true;
     }
 
-    private async Task<bool> SendDadosVeiculo(string veiculo, string acesso,string ip)
+    private async Task<bool> SendDadosVeiculo(string veiculo, string acesso, string ip, string vagas)
     {
         var envioUdp = new UdpDadosVeiculoMonitorDTO
         {
-            TotalVagas = "1 / 2",
+            TotalVagas = vagas,
             CorAviso = MonitorColor(acesso),
             AvisoVisible = true,
             DadosVeiculo = veiculo,
             Obs = acesso
         };
-        await _udpBroadcastService.SendAsync(envioUdp,ip,true);
+        await _udpBroadcastService.SendAsync(envioUdp, ip, true);
         return true;
     }
 
-    private async Task<bool> sendListaVeiculo(string dadosVeiculo, string placa, DateTime HoraAcesso, string acesso, string nomeUnidade,string ip)
+    private async Task<bool> sendListaVeiculo(string dadosVeiculo, string placa, DateTime HoraAcesso, string acesso, string nomeUnidade, string ip)
     {
         string hora = HoraAcesso.ToString("HH:mm:ss");
 
@@ -56,7 +71,7 @@ public class MonitorAcessoLinear
             PlaPlacaLidaDiretoLPRca = ""
 
         };
-        await _udpBroadcastService.SendAsync(envioUdp,ip,false);
+        await _udpBroadcastService.SendAsync(envioUdp, ip, false);
         return true;
     }
 
@@ -64,7 +79,7 @@ public class MonitorAcessoLinear
     {
         return acesso switch
         {
-            "NÃO CADASTRADO" => "clpurple",
+            "NÃO CADASTRADO" => "clred",
             "LIBERADO" => "clgreen",
             "S/VG" => "clyellow",
             "CADASTRADO" => "clgreen",

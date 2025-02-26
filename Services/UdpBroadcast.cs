@@ -2,8 +2,12 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.Json;
+using System.Threading.Tasks;
 using Alphadigi_migration.DTO.MonitorAcessoLinear;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System.Globalization;
 
 namespace Alphadigi_migration.Services;
 
@@ -16,7 +20,7 @@ public class UdpBroadcastService
         _logger = logger;
     }
 
-    public async Task SendAsync(Object data, string ipAddress,bool dadosVeiculo)
+    public async Task SendAsync(object data, string ipAddress, bool dadosVeiculo)
     {
         int portSum = dadosVeiculo ? 33253 : 25253;
         try
@@ -29,12 +33,15 @@ public class UdpBroadcastService
                 IPAddress broadcastAddress = IPAddress.Broadcast;
                 IPEndPoint endPoint = new IPEndPoint(broadcastAddress, port);
 
-                var options = new JsonSerializerOptions
+                var settings = new JsonSerializerSettings
                 {
-                    PropertyNamingPolicy = new UpperCaseNamingPolicy()
+                    ContractResolver = new CustomContractResolver()
                 };
 
-                string jsonData = JsonSerializer.Serialize(data, options);
+                // Remove acentos dos valores do objeto
+                RemoveAcentosFromObject(data);
+
+                string jsonData = JsonConvert.SerializeObject(data, settings);
                 byte[] buffer = Encoding.ASCII.GetBytes(jsonData);
 
                 await socket.SendToAsync(new ArraySegment<byte>(buffer), SocketFlags.None, endPoint);
@@ -53,12 +60,53 @@ public class UdpBroadcastService
         string portString = ipAddress.Substring(ipAddress.Length - 3);
         return int.Parse(portString);
     }
+
+    private void RemoveAcentosFromObject(object obj)
+    {
+        if (obj == null) return;
+
+        var properties = obj.GetType().GetProperties();
+
+        foreach (var property in properties)
+        {
+            if (property.PropertyType == typeof(string))
+            {
+                string value = (string)property.GetValue(obj);
+                if (value != null)
+                {
+                    string normalizedValue = RemoveAcentos(value);
+                    property.SetValue(obj, normalizedValue);
+                }
+            }
+            else if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
+            {
+                RemoveAcentosFromObject(property.GetValue(obj));
+            }
+        }
+    }
+
+    private string RemoveAcentos(string text)
+    {
+        var normalizedString = text.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+    }
 }
 
-public class UpperCaseNamingPolicy : JsonNamingPolicy
+public class CustomContractResolver : DefaultContractResolver
 {
-    public override string ConvertName(string name)
+    protected override string ResolvePropertyName(string propertyName)
     {
-        return name.ToUpper();
+        return propertyName.ToUpper();
     }
 }

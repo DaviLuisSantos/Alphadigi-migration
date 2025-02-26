@@ -28,7 +28,7 @@ public class AlphadigiEndpoint : CarterModule
             var alarm = requestBody.AlarmInfoPlate;
 
             var placa = new ProcessPlateDTO
-            {
+            {  
                 ip = alarm.ipaddr,
                 plate = alarm.result?.PlateResult?.license,
                 isRealPlate = alarm.result?.PlateResult?.realplate ?? false,

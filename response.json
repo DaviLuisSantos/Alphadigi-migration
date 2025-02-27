@@ -1,0 +1,18 @@
+{
+  "Response_AlarmInfoPlate": {
+    "info": "no",
+    "content": "retransfer_stop",
+    "serialData": [
+      {
+        "serialChannel": 0,
+        "data": "AGT//2IaAAABAAoAAAAA//8AAAAAAAAHAExIVTRNMDFACw==",
+        "dataLen": 34
+      },
+      {
+        "serialChannel": 0,
+        "data": "AGT//2IXAQABAAoAAAAA/wAAAAAAAAAEAFMvVkeNVQ==",
+        "dataLen": 31
+      }
+    ]
+  }
+}

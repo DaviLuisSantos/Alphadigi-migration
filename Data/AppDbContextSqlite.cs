@@ -9,6 +9,7 @@ public class AppDbContextSqlite : DbContext
 
     public DbSet<Alphadigi> Alphadigi { get; set; }
     public DbSet<Area> Areas { get; set; }
+    public DbSet<PlacaLida> PlacaLida { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

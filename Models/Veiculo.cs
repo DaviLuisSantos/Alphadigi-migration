@@ -28,8 +28,8 @@ public class Veiculo
     [Column("COR")]
     public string Cor { get; set; }
 
-    [Column("VEICULO_DENTRO")]
-    private int? VeiculoDentroInt { get; set; }
+    [Column("VEICULO_DENTRO")] // Remove private
+    public int? VeiculoDentroInt { get; set; }
 
     [NotMapped]
     public bool VeiculoDentro

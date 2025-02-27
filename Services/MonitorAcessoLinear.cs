@@ -7,9 +7,9 @@ public class MonitorAcessoLinear
 {
     private readonly IVeiculoService _veiculoService;
     private readonly UdpBroadcastService _udpBroadcastService;
-    private readonly UnidadeService _unidadeService;
+    private readonly IUnidadeService _unidadeService;
 
-    public MonitorAcessoLinear(IVeiculoService veiculoService, UdpBroadcastService udpBroadcast,UnidadeService unidade)
+    public MonitorAcessoLinear(IVeiculoService veiculoService, UdpBroadcastService udpBroadcast, IUnidadeService unidade)
     {
         _veiculoService = veiculoService;
         _udpBroadcastService = udpBroadcast;

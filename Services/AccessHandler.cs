@@ -68,10 +68,10 @@ namespace Alphadigi_migration.Services
     public class ControlaVagaAccessHandler : IAccessHandler
     {
         private readonly IVeiculoService _veiculoService;
-        private readonly UnidadeService _unidadeService;
+        private readonly IUnidadeService _unidadeService;
         private readonly ILogger<ControlaVagaAccessHandler> _logger;
 
-        public ControlaVagaAccessHandler(IVeiculoService veiculoService, UnidadeService unidadeService, ILogger<ControlaVagaAccessHandler> logger)
+        public ControlaVagaAccessHandler(IVeiculoService veiculoService, IUnidadeService unidadeService, ILogger<ControlaVagaAccessHandler> logger)
         {
             _veiculoService = veiculoService;
             _unidadeService = unidadeService;

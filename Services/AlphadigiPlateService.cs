@@ -6,39 +6,32 @@ using Alphadigi_migration.DTO.Display;
 
 namespace Alphadigi_migration.Services;
 
+public interface IAlphadigiPlateService
+{
+    Task<Object> ProcessPlate(ProcessPlateDTO plateReaded);
+}
+
 public class AlphadigiPlateService : IAlphadigiPlateService
 {
-    private readonly AppDbContextSqlite _contextSqlite;
-    private readonly AppDbContextFirebird _contextFirebird;
     private readonly IAlphadigiService _alphadigiService;
     private readonly IVeiculoService _veiculoService;
-    private readonly UnidadeService _unidadeService;
     private readonly ILogger<AlphadigiHearthBeatService> _logger;
-    private readonly IAccessHandlerFactory _accessHandlerFactory;
-    private readonly MonitorAcessoLinear _monitorAcessoLinear;
+    private readonly AcessoService _acessoService;
     private readonly IVeiculoAccessProcessor _veiculoAccessProcessor;
 
 
     public AlphadigiPlateService(
-            AppDbContextSqlite contextSqlite,
-            AppDbContextFirebird contextFirebird,
             IAlphadigiService alphadigiService,
             IVeiculoService veiculoService,
-            UnidadeService unidadeService,
-            MonitorAcessoLinear monitorAcessoLinear,
-            IAccessHandlerFactory accessHandlerFactor,
+            AcessoService acessoService,
             ILogger<AlphadigiHearthBeatService> logger,
             IVeiculoAccessProcessor veiculoAccessProcessor) // Adicione o logger
     {
-        _contextSqlite = contextSqlite;
-        _contextFirebird = contextFirebird;
         _alphadigiService = alphadigiService;
         _veiculoService = veiculoService;
-        _unidadeService = unidadeService;
-        _monitorAcessoLinear = monitorAcessoLinear;
-        _accessHandlerFactory = accessHandlerFactor;
         _logger = logger; // Salve o logger
         _veiculoAccessProcessor = veiculoAccessProcessor;
+        _acessoService = acessoService;
     }
 
     public async Task<object> ProcessPlate(ProcessPlateDTO plateReaded)
@@ -124,6 +117,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         if (veiculo.Placa != null)
         {
             await _alphadigiService.UpdateLastPlate(alphadigi, veiculo.Placa, timestamp);
+            await _acessoService.saveVeiculoAcesso(alphadigi, veiculo, timestamp);
             _logger.LogInformation($"Veículo {veiculo.Placa} atualizado no banco de dados.");
         }
 
@@ -132,34 +126,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
     public List<SerialData> sendCreatPackageDisplay(Veiculo veiculo, string acesso)
     {
-        var veiculoData = _veiculoService.prepareVeiculoDataString(veiculo);
-        string cor = "red";
-        if (acesso == "" || acesso == "CADASTRADO")
-            cor = "green";
-        int tempo = 5, estilo = 5;
-        var serialData = new List<CreatePackageDisplayDTO>();
-
-        var packageDisplayPlaca = new CreatePackageDisplayDTO
-        {
-            Mensagem = veiculo.Placa,
-            Linha = 0,
-            Cor = "yellow",
-            Tempo = tempo,
-            Estilo = estilo
-        };
-        serialData.Add(packageDisplayPlaca);
-
-        var packageDisplayAcesso = new CreatePackageDisplayDTO
-        {
-            Mensagem = acesso,
-            Linha = 1,
-            Cor = cor,
-            Tempo = tempo,
-            Estilo = estilo
-        };
-        serialData.Add(packageDisplayAcesso);
-
-        return DisplayService.recieveMessageAlphadigi(serialData);
+        return DisplayService.recieveMessageAlphadigi(veiculo, acesso);
     }
 
     public async Task<ResponsePlateDTO> handleReturn(string placa, string acesso, bool liberado, List<SerialData> messageData)

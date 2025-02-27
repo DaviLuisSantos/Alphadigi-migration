@@ -34,16 +34,17 @@ public static class Display
             lengthPlus19,                   // Comprimento dos dados + 19-DL
             line,                           // Linha do texto-TWID
             styleIn,                        // Forma como o texto entra na tela-ETM
-            0x00,                           // Velocidade que o texto entra-ETS
+            0x01,                           // Velocidade que o texto entra-ETS
             0x00,                           // A maneira de ficar para o texto-DM
             duration,                       // Tempo em que o texto fica na tela-DT
             0x00,                           // Forma como o texto sai da tela-EXM
             0x00,                           // Velocidade que o texto sai-EXS
             0x00,                           // O valor do índice da fonte do texto-FINDEX
             0x00,                           // O número de vezes exibido-DRS
-            colorBytes[0], colorBytes[1], colorBytes[2], colorBytes[3],   // Cor a ser exibida na tela-TC (RGBA)
-            backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3], backgroundColor[4], // Cor de fundo-BC
+            colorBytes[0], colorBytes[1], colorBytes[2],   // Cor a ser exibida na tela-TC (RGBA)
+            backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3],backgroundColor[4], // Cor de fundo-BC
             length,                         // Tamanho do texto-TL
+            0x00,
         };
 
         buffer.AddRange(message);      // Mensagem
@@ -61,20 +62,12 @@ public static class Display
 
     private static string ColorToRgba(string color)
     {
-        //**IMPLEMENTE A LÓGICA DE CONVERSÃO DE CORES AQUI**
-        // Este é apenas um exemplo, adapte para sua necessidade
-        if (color.ToLower() == "red")
+        return color.ToUpper() switch
         {
-            return "#FF0000FF"; // Vermelho
-        }
-        else if (color.ToLower() == "green")
-        {
-            return "#00FF00FF"; // Verde
-        }
-        else
-        {
-            return "#00000000"; // Preto (transparente)
-        }
+            "RED" => "#FF0000",
+            "GREEN" => "#00FF00",
+            "YELLOW" => "#FFFF00",
+        };
     }
 
     private static byte[] StringToByteArray(string hex)

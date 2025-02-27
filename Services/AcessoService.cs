@@ -8,24 +8,25 @@ public class AcessoService
 {
     private readonly AppDbContextSqlite _contextSqlite;
     private readonly AppDbContextFirebird _contextFirebird;
-    private readonly VeiculoService _veiculoService;
+    private readonly IVeiculoService _veiculoService;
 
-    public AcessoService(AppDbContextSqlite contextSqlite, AppDbContextFirebird contextFirebird, VeiculoService veiculoService)
+    public AcessoService(AppDbContextSqlite contextSqlite, AppDbContextFirebird contextFirebird, IVeiculoService veiculoService)
     {
         _contextSqlite = contextSqlite;
         _contextFirebird = contextFirebird;
         _veiculoService = veiculoService;
     }
 
-    public async Task<bool> saveVeiculoAcesso(Alphadigi alphadigi,Veiculo veiculo,DateTime timestamp)
+    public async Task<bool> saveVeiculoAcesso(Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp)
     {
         string local = prepareLocalString(alphadigi);
         string dadosVeiculo = _veiculoService.prepareVeiculoDataString(veiculo);
+        string unidade = string.IsNullOrEmpty(veiculo.UnidadeNavigation.Nome) ? "NAO CADASTRADO" : veiculo.UnidadeNavigation.Nome;
         var acesso = new Acesso
         {
             Local = local,
             DataHora = timestamp,
-            Unidade = veiculo.UnidadeNavigation.Nome,
+            Unidade = unidade,
             Placa = veiculo.Placa,
             DadosVeiculo = dadosVeiculo,
             GrupoNome = ""

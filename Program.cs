@@ -38,7 +38,7 @@ builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IAlphadigiHearthBeatService, AlphadigiHearthBeatService>();
 builder.Services.AddScoped<IAlphadigiPlateService, AlphadigiPlateService>();
 
-builder.Services.AddScoped<UnidadeService>();
+builder.Services.AddScoped<IUnidadeService, UnidadeService>();
 builder.Services.AddScoped<MonitorAcessoLinear>();
 builder.Services.AddScoped<UdpBroadcastService>();
 
@@ -51,6 +51,8 @@ builder.Services.AddScoped<NaoControlaVagaAccessHandler>();
 // Registre a fábrica de handlers
 builder.Services.AddScoped<IAccessHandlerFactory, AccessHandlerFactory>();
 builder.Services.AddScoped<IVeiculoAccessProcessor, VeiculoAccessProcessor>();
+
+builder.Services.AddScoped<AcessoService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

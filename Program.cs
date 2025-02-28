@@ -51,6 +51,7 @@ builder.Services.AddScoped<NaoControlaVagaAccessHandler>();
 // Registre a fábrica de handlers
 builder.Services.AddScoped<IAccessHandlerFactory, AccessHandlerFactory>();
 builder.Services.AddScoped<IVeiculoAccessProcessor, VeiculoAccessProcessor>();
+builder.Services.AddScoped<PlacaLidaService>();
 
 builder.Services.AddScoped<AcessoService>();
 

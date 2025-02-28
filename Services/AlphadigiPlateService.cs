@@ -18,6 +18,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
     private readonly ILogger<AlphadigiHearthBeatService> _logger;
     private readonly AcessoService _acessoService;
     private readonly IVeiculoAccessProcessor _veiculoAccessProcessor;
+    private readonly PlacaLidaService _placaLidaService;
 
 
     public AlphadigiPlateService(
@@ -25,13 +26,15 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             IVeiculoService veiculoService,
             AcessoService acessoService,
             ILogger<AlphadigiHearthBeatService> logger,
-            IVeiculoAccessProcessor veiculoAccessProcessor) // Adicione o logger
+            IVeiculoAccessProcessor veiculoAccessProcessor,
+            PlacaLidaService placaLidaService) // Adicione o logger
     {
         _alphadigiService = alphadigiService;
         _veiculoService = veiculoService;
         _logger = logger; // Salve o logger
         _veiculoAccessProcessor = veiculoAccessProcessor;
         _acessoService = acessoService;
+        _placaLidaService = placaLidaService;
     }
 
     public async Task<object> ProcessPlate(ProcessPlateDTO plateReaded)
@@ -48,24 +51,45 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                 throw new Exception("Camera não encontrada");
             }
 
+            var Log = new PlacaLida
+            {
+                AlphadigiId = camera.Id,
+                Placa = plateReaded.plate,
+                DataHora = timeStamp,
+                AreaId = camera.AreaId,
+            };
+
+            await _placaLidaService.SavePlacaLida(Log);
+
+            bool veiculoCadastrado = true;
             var veiculo = await _veiculoService.getByPlate(plateReaded.plate);
             if (veiculo == null)
             {
+                veiculoCadastrado = false;
                 veiculo = new Veiculo
                 {
                     Placa = plateReaded.plate,
                 };
             }
-            _logger.LogInformation($"Veículo encontrado para a placa {plateReaded.plate}.");
-
-            //Remove a chamada para AntiPassBack caso necessário, e já retorna para o ponto centralizado
-
+            Log.Cadastrado = veiculoCadastrado;
+            await _placaLidaService.UpdatePlacaLida(Log);
+ 
             var accessResult = await sendVeiculoAccessProcessor(veiculo, camera, timeStamp);
             _logger.LogInformation($"Accesso do veículo com a placa {plateReaded.plate} com resultado {accessResult}");
 
+            Log.Liberado = accessResult.ShouldReturn;
+            Log.Acesso = accessResult.Acesso;
+
+            await _placaLidaService.UpdatePlacaLida(Log);
+
             var messageDisplay = sendCreatPackageDisplay(veiculo, accessResult.Acesso);
 
-            return await handleReturn(veiculo.Placa, accessResult.Acesso, accessResult.ShouldReturn, messageDisplay);
+            if(Log.Processado)
+            {
+                return await handleReturn(veiculo.Placa, accessResult.Acesso, accessResult.ShouldReturn, messageDisplay);
+            }
+
+              return await ProcessPlate(plateReaded);
 
         }
         catch (Exception e)
@@ -113,7 +137,6 @@ public class AlphadigiPlateService : IAlphadigiPlateService
     {
         (bool shouldReturn, string acesso) = await _veiculoAccessProcessor.ProcessVeiculoAccessAsync(veiculo, alphadigi, timestamp);
 
-        // Atualiza informações do veículo (se não for visitante)
         if (veiculo.Placa != null)
         {
             await _alphadigiService.UpdateLastPlate(alphadigi, veiculo.Placa, timestamp);

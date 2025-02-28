@@ -24,4 +24,5 @@ public class PlacaLida
     public bool Real { get; set; }
     public bool Cadastrado { get; set; }
     public bool Processado { get; set; }
+    public string? Acesso { get; set; }
 }

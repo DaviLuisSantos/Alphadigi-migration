@@ -14,11 +14,11 @@ public class PlacaLidaService
         _contextFirebird = contextFirebird;
     }
 
-    public async Task<int> CreatePlacaLida(PlacaLida placaLida)
+    public async Task<bool> SavePlacaLida(PlacaLida placaLida)
     {
         _contextSqlite.PlacaLida.Add(placaLida);
         await _contextSqlite.SaveChangesAsync();
-        return placaLida.Id;
+        return true;
     }
     public async Task<bool> UpdatePlacaLida(PlacaLida placaLida)
     {

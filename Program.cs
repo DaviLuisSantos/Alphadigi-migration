@@ -54,6 +54,7 @@ builder.Services.AddScoped<IVeiculoAccessProcessor, VeiculoAccessProcessor>();
 builder.Services.AddScoped<PlacaLidaService>();
 
 builder.Services.AddScoped<AcessoService>();
+builder.Services.AddScoped<DisplayService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

@@ -2,15 +2,23 @@
 using Alphadigi_migration.DTO.Alphadigi;
 using Alphadigi_migration.Models;
 using System.Drawing;
+using Alphadigi_migration.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alphadigi_migration.Services;
 
-public static class DisplayService
+public class DisplayService
 {
+    private readonly AppDbContextSqlite _contextSqlite;
 
-    public static List<SerialData> recieveMessageAlphadigi(Veiculo veiculo,string acesso)
+    public DisplayService(AppDbContextSqlite contextSqlite)
     {
-        var createPackageDisplayDTO = prepareCreatePackage(veiculo, acesso);
+        _contextSqlite = contextSqlite;
+    }
+
+    public async Task<List<SerialData>> recieveMessageAlphadigi(Veiculo veiculo, string acesso, Alphadigi alphadigi)
+    {
+        var createPackageDisplayDTO = await prepareCreatePackage(veiculo, acesso, alphadigi);
         var serialData = new List<SerialData>();
         foreach (var item in createPackageDisplayDTO)
         {
@@ -27,7 +35,7 @@ public static class DisplayService
         return serialData;
     }
 
-    public static ReturnDataDisplayDTO PrepareMessage(CreatePackageDisplayDTO createPackageDisplayDTO)
+    public ReturnDataDisplayDTO PrepareMessage(CreatePackageDisplayDTO createPackageDisplayDTO)
     {
         var package = Display.createPackage(createPackageDisplayDTO);
 
@@ -46,7 +54,7 @@ public static class DisplayService
         return returnDataDisplayDTO;
     }
 
-    public static List<CreatePackageDisplayDTO> prepareCreatePackage(Veiculo veiculo, string acesso)
+    public async Task<List<CreatePackageDisplayDTO>> prepareCreatePackage(Veiculo veiculo, string acesso, Alphadigi alphadigi)
     {
         string cor = "red";
         if (acesso == "" || acesso == "CADASTRADO")
@@ -69,21 +77,54 @@ public static class DisplayService
         };
         serialData.Add(packageDisplayPlaca);
 
-        if (acesso.Length > 8)
+        MensagemDisplay Mensagem = new();
+
+        var LastMessage = _contextSqlite.MensagemDisplay
+            .Where(x => x.Placa == veiculo.Placa)
+            .Where(x => x.Mensagem == acesso)
+            .Where(x => x.DataHora.AddSeconds(10) > DateTime.Now)
+            .Where(x => x.AlphadigiId == alphadigi.Id)
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefault();
+
+        var LastCamMessage = _contextSqlite.MensagemDisplay
+            .Where(x => x.AlphadigiId == alphadigi.Id)
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefault();
+
+        if (LastMessage == null || LastCamMessage.Id != LastMessage.Id)
         {
-            estilo = 15;
-            tempo = 1;
+            if (acesso.Length > 8)
+            {
+                estilo = 15;
+                tempo = 1;
+            }
+            var packageDisplayAcesso = new CreatePackageDisplayDTO
+            {
+                Mensagem = acesso,
+                Linha = 2,
+                Cor = cor,
+                Tempo = tempo,
+                Estilo = estilo
+            };
+            serialData.Add(packageDisplayAcesso);
+            MensagemDisplay mensagem = new()
+            {
+                Placa = veiculo.Placa,
+                Mensagem = acesso,
+                DataHora = DateTime.Now,
+                AlphadigiId = alphadigi.Id,
+            };
+            await SaveMensagemDisplay(mensagem);
         }
-        var packageDisplayAcesso = new CreatePackageDisplayDTO
-        {
-            Mensagem = acesso,
-            Linha = 2,
-            Cor = cor,
-            Tempo = tempo,
-            Estilo = estilo
-        };
-        serialData.Add(packageDisplayAcesso);
 
         return serialData;
+    }
+
+    public async Task<bool> SaveMensagemDisplay(MensagemDisplay mensagem)
+    {
+        _contextSqlite.MensagemDisplay.Add(mensagem);
+        await _contextSqlite.SaveChangesAsync();
+        return true;
     }
 }

@@ -10,6 +10,7 @@ public class AppDbContextSqlite : DbContext
     public DbSet<Alphadigi> Alphadigi { get; set; }
     public DbSet<Area> Areas { get; set; }
     public DbSet<PlacaLida> PlacaLida { get; set; }
+    public DbSet<MensagemDisplay> MensagemDisplay { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -25,5 +26,21 @@ public class AppDbContextSqlite : DbContext
             .HasOne(a => a.Area)
             .WithMany()
             .HasForeignKey(a => a.AreaId);
+
+        modelBuilder.Entity<PlacaLida>()
+            .HasOne(a => a.Alphadigi)
+            .WithMany()
+            .HasForeignKey(a => a.AlphadigiId);
+
+        modelBuilder.Entity<PlacaLida>()
+            .HasOne(a => a.Area)
+            .WithMany()
+            .HasForeignKey(a => a.AreaId);
+
+        modelBuilder.Entity<MensagemDisplay>()
+            .HasOne(a => a.Alphadigi)
+            .WithMany()
+            .HasForeignKey(a => a.AlphadigiId);
+
     }
 }

@@ -21,7 +21,7 @@ public class AcessoService
     {
         string local = prepareLocalString(alphadigi);
         string dadosVeiculo = _veiculoService.prepareVeiculoDataString(veiculo);
-        string unidade = string.IsNullOrEmpty(veiculo.UnidadeNavigation.Nome) ? "NAO CADASTRADO" : veiculo.UnidadeNavigation.Nome;
+        string unidade = veiculo.UnidadeNavigation == null || string.IsNullOrEmpty(veiculo.UnidadeNavigation.Nome) ? "NAO CADASTRADO" : veiculo.UnidadeNavigation.Nome;
         var acesso = new Acesso
         {
             Local = local,

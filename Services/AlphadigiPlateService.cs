@@ -19,6 +19,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
     private readonly AcessoService _acessoService;
     private readonly IVeiculoAccessProcessor _veiculoAccessProcessor;
     private readonly PlacaLidaService _placaLidaService;
+    private readonly DisplayService _displayService;
 
 
     public AlphadigiPlateService(
@@ -27,7 +28,8 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             AcessoService acessoService,
             ILogger<AlphadigiHearthBeatService> logger,
             IVeiculoAccessProcessor veiculoAccessProcessor,
-            PlacaLidaService placaLidaService) // Adicione o logger
+            PlacaLidaService placaLidaService,
+            DisplayService displayService) // Adicione o logger
     {
         _alphadigiService = alphadigiService;
         _veiculoService = veiculoService;
@@ -35,6 +37,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         _veiculoAccessProcessor = veiculoAccessProcessor;
         _acessoService = acessoService;
         _placaLidaService = placaLidaService;
+        _displayService = displayService;
     }
 
     public async Task<object> ProcessPlate(ProcessPlateDTO plateReaded)
@@ -73,8 +76,8 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             }
             Log.Cadastrado = veiculoCadastrado;
             await _placaLidaService.UpdatePlacaLida(Log);
- 
-            var accessResult = await sendVeiculoAccessProcessor(veiculo, camera, timeStamp);
+
+            var accessResult = await sendVeiculoAccessProcessor(veiculo, camera, timeStamp, Log);
             _logger.LogInformation($"Accesso do veículo com a placa {plateReaded.plate} com resultado {accessResult}");
 
             Log.Liberado = accessResult.ShouldReturn;
@@ -82,14 +85,14 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
             await _placaLidaService.UpdatePlacaLida(Log);
 
-            var messageDisplay = sendCreatPackageDisplay(veiculo, accessResult.Acesso);
+            var messageDisplay =await sendCreatPackageDisplay(veiculo, accessResult.Acesso, camera);
 
-            if(Log.Processado)
+            if (Log.Processado)
             {
                 return await handleReturn(veiculo.Placa, accessResult.Acesso, accessResult.ShouldReturn, messageDisplay);
             }
 
-              return await ProcessPlate(plateReaded);
+            return await ProcessPlate(plateReaded);
 
         }
         catch (Exception e)
@@ -133,7 +136,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         return true;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> sendVeiculoAccessProcessor(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp)
+    public async Task<(bool ShouldReturn, string Acesso)> sendVeiculoAccessProcessor(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp, PlacaLida log)
     {
         (bool shouldReturn, string acesso) = await _veiculoAccessProcessor.ProcessVeiculoAccessAsync(veiculo, alphadigi, timestamp);
 
@@ -144,12 +147,14 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             _logger.LogInformation($"Veículo {veiculo.Placa} atualizado no banco de dados.");
         }
 
+        log.Processado = true;
+        await _placaLidaService.UpdatePlacaLida(log);
         return (shouldReturn, acesso);
     }
 
-    public List<SerialData> sendCreatPackageDisplay(Veiculo veiculo, string acesso)
+    public async Task<List<SerialData>> sendCreatPackageDisplay(Veiculo veiculo, string acesso, Alphadigi alphadigi)
     {
-        return DisplayService.recieveMessageAlphadigi(veiculo, acesso);
+        return await  _displayService.recieveMessageAlphadigi(veiculo, acesso, alphadigi);
     }
 
     public async Task<ResponsePlateDTO> handleReturn(string placa, string acesso, bool liberado, List<SerialData> messageData)

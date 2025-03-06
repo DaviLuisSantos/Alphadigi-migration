@@ -1,0 +1,18 @@
+{
+  "Response_Heartbeat": {
+    "info": "no",
+    "content": null,
+    "serialData": [
+      {
+        "serialChannel": 0,
+        "data": "AGT//2IZAAABAAoAAAAA//8AAAAAAAAGAFNlZ21peIt4",
+        "dataLen": 33
+      },
+      {
+        "serialChannel": 0,
+        "data": "AGT//2IdAQ8BAAEAAAAA/wAAAAAAAAAKAFRlY25vbG9naWHm0g==",
+        "dataLen": 37
+      }
+    ]
+  }
+}

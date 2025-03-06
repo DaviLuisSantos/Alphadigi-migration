@@ -16,9 +16,9 @@ public class DisplayService
         _contextSqlite = contextSqlite;
     }
 
-    public async Task<List<SerialData>> recieveMessageAlphadigi(Veiculo veiculo, string acesso, Alphadigi alphadigi)
+    public async Task<List<SerialData>> recieveMessageAlphadigi(string placa, string acesso, Alphadigi alphadigi)
     {
-        var createPackageDisplayDTO = await prepareCreatePackage(veiculo, acesso, alphadigi);
+        var createPackageDisplayDTO = await prepareCreatePackage(placa, acesso, alphadigi);
         var serialData = new List<SerialData>();
         foreach (var item in createPackageDisplayDTO)
         {
@@ -54,7 +54,7 @@ public class DisplayService
         return returnDataDisplayDTO;
     }
 
-    public async Task<List<CreatePackageDisplayDTO>> prepareCreatePackage(Veiculo veiculo, string acesso, Alphadigi alphadigi)
+    public async Task<List<CreatePackageDisplayDTO>> prepareCreatePackage(string placa, string acesso, Alphadigi alphadigi)
     {
         string cor = "red";
         if (acesso == "" || acesso == "CADASTRADO")
@@ -69,7 +69,7 @@ public class DisplayService
 
         var packageDisplayPlaca = new CreatePackageDisplayDTO
         {
-            Mensagem = veiculo.Placa,
+            Mensagem = placa,
             Linha = 1,
             Cor = "yellow",
             Tempo = tempo,
@@ -80,7 +80,7 @@ public class DisplayService
         MensagemDisplay Mensagem = new();
 
         var LastMessage = _contextSqlite.MensagemDisplay
-            .Where(x => x.Placa == veiculo.Placa)
+            .Where(x => x.Placa == placa)
             .Where(x => x.Mensagem == acesso)
             .Where(x => x.DataHora.AddSeconds(10) > DateTime.Now)
             .Where(x => x.AlphadigiId == alphadigi.Id)
@@ -110,7 +110,7 @@ public class DisplayService
             serialData.Add(packageDisplayAcesso);
             MensagemDisplay mensagem = new()
             {
-                Placa = veiculo.Placa,
+                Placa = placa,
                 Mensagem = acesso,
                 DataHora = DateTime.Now,
                 AlphadigiId = alphadigi.Id,

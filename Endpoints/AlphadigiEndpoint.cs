@@ -2,6 +2,7 @@
 using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.IO;
 using System.Text.Json;
 
@@ -26,13 +27,16 @@ public class AlphadigiEndpoint : CarterModule
             }
 
             var alarm = requestBody.AlarmInfoPlate;
+            var result = alarm.result?.PlateResult;
 
             var placa = new ProcessPlateDTO
             {  
                 ip = alarm.ipaddr,
-                plate = alarm.result?.PlateResult?.license,
-                isRealPlate = alarm.result?.PlateResult?.realplate ?? false,
-                isCad = alarm.result?.PlateResult.Whitelist == 2
+                plate = result?.license,
+                isRealPlate = result?.realplate ?? false,
+                isCad = result?.Whitelist == 2,
+                carImage = result?.imageFile,
+                plateImage = result?.imageFragmentFile
             };
 
             var plateResult = await plateService.ProcessPlate(placa);
@@ -72,8 +76,20 @@ public class AlphadigiEndpoint : CarterModule
 
             try
             {
-                var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress); //Aguarde aqui
-                return Results.Ok(resposta); //Retorne os resultados do método corretamente.
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = null,
+                    WriteIndented = true
+                };
+
+                var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress);
+
+                var jsonResult = JsonSerializer.Serialize(resposta, options);
+
+                var filePath = "responseHb.json"; // Defina o caminho do arquivo
+                await File.WriteAllTextAsync(filePath, jsonResult);
+
+                return Results.Json(resposta, options);
             }
             catch (Exception ex)
             {

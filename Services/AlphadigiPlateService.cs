@@ -60,6 +60,8 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                 Placa = plateReaded.plate,
                 DataHora = timeStamp,
                 AreaId = camera.AreaId,
+                Placa_Img= plateReaded.plateImage
+
             };
 
             await _placaLidaService.SavePlacaLida(Log);
@@ -154,7 +156,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
     public async Task<List<SerialData>> sendCreatPackageDisplay(Veiculo veiculo, string acesso, Alphadigi alphadigi)
     {
-        return await  _displayService.recieveMessageAlphadigi(veiculo, acesso, alphadigi);
+        return await  _displayService.recieveMessageAlphadigi(veiculo.Placa, acesso, alphadigi);
     }
 
     public async Task<ResponsePlateDTO> handleReturn(string placa, string acesso, bool liberado, List<SerialData> messageData)

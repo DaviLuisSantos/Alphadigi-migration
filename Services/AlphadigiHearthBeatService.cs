@@ -18,17 +18,20 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
     private readonly IAlphadigiService _alphadigiService;
     private readonly IVeiculoService _veiculoService;
     private readonly ILogger<AlphadigiHearthBeatService> _logger;
+    private readonly DisplayService _displayService;
 
     public AlphadigiHearthBeatService(
         AppDbContextSqlite contextSqlite,
         IAlphadigiService alphadigiService,
         IVeiculoService veiculoService,
-        ILogger<AlphadigiHearthBeatService> logger) // Adicione o logger
+        ILogger<AlphadigiHearthBeatService> logger,
+        DisplayService displayService) // Adicione o logger
     {
         _contextSqlite = contextSqlite;
         _alphadigiService = alphadigiService;
         _veiculoService = veiculoService;
         _logger = logger; // Salve o logger
+        _displayService = displayService;
     }
 
     public async Task<object> ProcessHearthBeat(string ip)
@@ -68,8 +71,14 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 response = await HandleCreate(alphadigi);
                 newStage = response == null ? "FINAL" : "SEND";
                 break;
+            case "FINAL":
+                response = await HandleNormal(alphadigi);
+                newStage = "FINAL";
+                break;
             default:
-                return null;
+                response = await HandleNormal(alphadigi);
+                newStage = "DELETE";
+                break;
         }
 
         alphadigi.Estado = newStage;
@@ -118,9 +127,24 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         return envio;
     }
 
-        public async Task<List<SerialData>> handleDisplay(string Nome)
+    public async Task<ResponseHeathbeatDTO> HandleNormal(Alphadigi alphadigi)
     {
+        var messageData = await sendDisplay("Segmix", alphadigi);
+        ResponseHeathbeatDTO retorno = new()
+        {
+            Response_Heartbeat = new ResponseAlarmInfoPlate
+            {
+                info = "no",
+                serialData = messageData
+            }
+        };
+        return retorno;
+    }
 
+    public async Task<List<SerialData>> sendDisplay(string Nome, Alphadigi alphadigi)
+    {
+        var pacote = await _displayService.recieveMessageAlphadigi(Nome, "Tecnologia", alphadigi);
+        return pacote;
     }
 
 }

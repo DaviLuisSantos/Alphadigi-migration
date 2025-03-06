@@ -1,6 +1,7 @@
-﻿namespace Alphadigi_migration.DTO.Alphadigi
+﻿namespace Alphadigi_migration.DTO.Alphadigi;
+
+public class ResponseHeathbeatDTO
 {
-    public class ResponseHeathbeatDTO
-    {
-    }
+        public ResponseAlarmInfoPlate Response_Heartbeat { get; set; }
+    
 }

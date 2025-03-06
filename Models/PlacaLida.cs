@@ -9,8 +9,8 @@ public class PlacaLida
     [Key]
     public int Id { get; set; }
     public string Placa { get; set; }
-    public string? Pic_Big { get; set; }
-    public string? Pic_Small { get; set; }
+    public string? Carro_Img { get; set; }
+    public string? Placa_Img { get; set; }
     public bool Liberado { get; set; }
 
     [ForeignKey("Alphadigi")]

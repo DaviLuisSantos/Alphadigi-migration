@@ -15,20 +15,17 @@ public interface IAlphadigiHearthBeatService
 public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
 {
     private readonly AppDbContextSqlite _contextSqlite;
-    private readonly AppDbContextFirebird _contextFirebird;
     private readonly IAlphadigiService _alphadigiService;
     private readonly IVeiculoService _veiculoService;
     private readonly ILogger<AlphadigiHearthBeatService> _logger;
 
     public AlphadigiHearthBeatService(
         AppDbContextSqlite contextSqlite,
-        AppDbContextFirebird contextFirebird,
         IAlphadigiService alphadigiService,
         IVeiculoService veiculoService,
         ILogger<AlphadigiHearthBeatService> logger) // Adicione o logger
     {
         _contextSqlite = contextSqlite;
-        _contextFirebird = contextFirebird;
         _alphadigiService = alphadigiService;
         _veiculoService = veiculoService;
         _logger = logger; // Salve o logger
@@ -114,11 +111,16 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 }).ToList()
             }
         };
-
         // Salva as mudanças no banco de dados
         _contextSqlite.Update(alphadigi);
         await _contextSqlite.SaveChangesAsync();
 
         return envio;
     }
+
+        public async Task<List<SerialData>> handleDisplay(string Nome)
+    {
+
+    }
+
 }

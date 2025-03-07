@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.DTO.Alphadigi;
+﻿using Alphadigi_migration.DTO.PlacaLida;
 using Alphadigi_migration.Services;
 using Carter;
 using System.Text.Json;
@@ -9,33 +9,19 @@ public class LogEndpoint : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/Log/heartbeat", async (HttpContext context, HeartbeatDTO requestBody, IAlphadigiHearthBeatService hearthbeatService) =>
+        app.MapPost("/Log/getDatePlate", async (LogGetDatePlateDTO logPayload, PlacaLidaService logService) =>
         {
-            if (requestBody == null)
+            var options = new JsonSerializerOptions
             {
-                return Results.BadRequest("Invalid request body");
-            }
-
-            var ipAddress = context.Connection.RemoteIpAddress?.ToString();
-            if (ipAddress != null && ipAddress.StartsWith("::ffff:"))
-            {
-                ipAddress = ipAddress.Substring(7);
-            }
-
+                PropertyNamingPolicy = null,
+                WriteIndented = true
+            };
             try
-            {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = null,
-                    WriteIndented = true
-                };
+            {  
 
-                var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress);
+                var resposta = await logService.GetDatePlate(logPayload);
 
                 var jsonResult = JsonSerializer.Serialize(resposta, options);
-
-                var filePath = "responseHb.json"; // Defina o caminho do arquivo
-                await File.WriteAllTextAsync(filePath, jsonResult);
 
                 return Results.Json(resposta, options);
             }

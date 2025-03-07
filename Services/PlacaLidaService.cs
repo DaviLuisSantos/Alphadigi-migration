@@ -1,4 +1,5 @@
-﻿using Alphadigi_migration.Models;
+﻿using Alphadigi_migration.DTO.PlacaLida;
+using Alphadigi_migration.Models;
 using Alphadigi_migration.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,13 +28,18 @@ public class PlacaLidaService
         await _contextSqlite.SaveChangesAsync();
         return true;
     }
-    public async Task<List<PlacaLida>> GetLogs(DateTime data, int page, int pageSize, string search = "")
+    public async Task<List<PlacaLida>> GetDatePlate(LogGetDatePlateDTO logPayload)
     {
+        string? placa = logPayload.Search;
+        DateTime data = logPayload.Data;
+        int page = logPayload.Page;
+        int pageSize = logPayload.PageSize;
+
         var query = _contextSqlite.PlacaLida.AsQueryable();
 
-        if (!string.IsNullOrEmpty(search))
+        if (!string.IsNullOrEmpty(placa))
         {
-            query = query.Where(p => p.Placa.Contains(search));
+            query = query.Where(p => p.Placa.Contains(placa));
         }
 
         query = query.Where(p => p.DataHora.Date == data.Date);

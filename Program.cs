@@ -8,6 +8,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using Carter.Response;
 using Carter.ResponseNegotiators.SystemTextJson;
+using Alphadigi_migration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,7 +73,7 @@ builder.Services.AddCors(options =>
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.ListenAnyIP(3332); // Escuta em todos os endereços IP na porta 3332
-    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Escuta em todos os endereços IP na porta 5001 com HTTPS
+    //serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Escuta em todos os endereços IP na porta 5001 com HTTPS
 });
 
 var app = builder.Build();
@@ -91,6 +92,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<RequestTimingMiddleware>();
 
 app.UseCors("AllowAllOrigins");
 

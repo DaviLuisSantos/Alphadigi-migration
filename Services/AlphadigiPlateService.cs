@@ -60,7 +60,8 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                 Placa = plateReaded.plate,
                 DataHora = timeStamp,
                 AreaId = camera.AreaId,
-                Placa_Img= plateReaded.plateImage
+                Placa_Img= plateReaded.plateImage,
+                Carro_Img=plateReaded.carImage
 
             };
 

@@ -50,11 +50,11 @@ public class AlphadigiEndpoint : CarterModule
                 WriteIndented = true
             };
 
-            var jsonResult = System.Text.Json.JsonSerializer.Serialize(plateResult, options);
+            //var jsonResult = System.Text.Json.JsonSerializer.Serialize(plateResult, options);
 
             // Salva o JSON em um arquivo
-            var filePath = "response.json"; // Defina o caminho do arquivo
-            await File.WriteAllTextAsync(filePath, jsonResult);
+            //var filePath = "response.json"; // Defina o caminho do arquivo
+            //await File.WriteAllTextAsync(filePath, jsonResult);
 
             return Results.Json(plateResult, options);
 

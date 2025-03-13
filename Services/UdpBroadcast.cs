@@ -57,7 +57,9 @@ public class UdpBroadcastService
 
     private int ExtractPortFromIp(string ipAddress)
     {
-        string portString = ipAddress.Substring(ipAddress.Length - 3);
+        string[] parts = ipAddress.Split('.');
+        string lastPart = parts[^1];
+        string portString = lastPart.PadLeft(3, '0');
         return int.Parse(portString);
     }
 

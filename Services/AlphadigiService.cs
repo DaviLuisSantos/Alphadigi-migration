@@ -12,6 +12,9 @@ public interface IAlphadigiService
     Task<bool> SyncAlphadigi();
     Task<Alphadigi> Get(string ip);
     Task<List<Alphadigi>> GetAll();
+    Task<bool> Update(Alphadigi camera);
+    Task<bool> updateStage(string stage);
+    Task<bool> Delete(int id);
 }
 
 public class AlphadigiService:IAlphadigiService
@@ -31,7 +34,7 @@ public class AlphadigiService:IAlphadigiService
     public async Task<bool> SyncAlphadigi()
     {
 
-        _logger.LogInformation("SyncAreas chamado"); //Adicione logging
+        _logger.LogInformation("SyncAlphadigi chamado"); //Adicione logging
         var camerasFire = await _contextFirebird.Camera.ToListAsync();
         foreach (var cameraFire in camerasFire)
         {
@@ -63,6 +66,13 @@ public class AlphadigiService:IAlphadigiService
     {
         _logger.LogInformation("GetAll chamado");
         return await _contextSqlite.Alphadigi.Include(c=>c.Area).ToListAsync();
+    }
+
+    public async Task<bool> Update(Alphadigi camera)
+    {
+        _contextSqlite.Alphadigi.Update(camera);
+        await _contextSqlite.SaveChangesAsync();
+        return true;
     }
 
     public async Task<Alphadigi> Get(string ip)
@@ -176,6 +186,30 @@ public class AlphadigiService:IAlphadigiService
         camera.UltimaPlaca = plate;
         camera.UltimaHora = timestamp;
         _contextSqlite.Alphadigi.Update(camera);
+        await _contextSqlite.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> updateStage(string stage)
+    {
+        var cameras = await _contextSqlite.Alphadigi.ToListAsync();
+        foreach (var camera in cameras)
+        {
+            camera.Estado = stage;
+            _contextSqlite.Alphadigi.Update(camera);
+        }
+        await _contextSqlite.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> Delete(int id)
+    {
+        var camera = await _contextSqlite.Alphadigi.FindAsync(id);
+        if (camera == null)
+        {
+            return false;
+        }
+        _contextSqlite.Alphadigi.Remove(camera);
         await _contextSqlite.SaveChangesAsync();
         return true;
     }

@@ -30,7 +30,7 @@ public class AlphadigiEndpoint : CarterModule
             var result = alarm.result?.PlateResult;
 
             var placa = new ProcessPlateDTO
-            {  
+            {
                 ip = alarm.ipaddr,
                 plate = result?.license,
                 isRealPlate = result?.realplate ?? false,
@@ -97,6 +97,17 @@ public class AlphadigiEndpoint : CarterModule
                 Console.WriteLine($"Erro no endpoint /LPR/heartbeat: {ex}");
                 return Results.Problem("Erro interno do servidor."); //Retorne um erro adequado.
             }
+        });
+
+        app.MapPost("/LPR/create", async (HttpContext context, string placa, IAlphadigiService alphadigiService) =>
+        {
+            if (placa == null)
+            {
+                return Results.BadRequest("Invalid request body");
+            }
+            await alphadigiService.updateStage("SEND");
+
+            return Results.Ok();
         });
     }
 }

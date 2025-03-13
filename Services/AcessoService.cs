@@ -1,5 +1,6 @@
 ﻿using Alphadigi_migration.Data;
 using Alphadigi_migration.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Alphadigi_migration.Services;
 
@@ -18,6 +19,12 @@ public class AcessoService
 
     public async Task<bool> saveVeiculoAcesso(Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp)
     {
+
+        bool estaNoAntiPassback = await verifyPassBack(veiculo.Placa, alphadigi.Area.TempoAntipassbackTimeSpan, timestamp);
+        if (estaNoAntiPassback)
+        {
+            return false;
+        }
         string local = prepareLocalString(alphadigi);
         string dadosVeiculo = _veiculoService.prepareVeiculoDataString(veiculo);
         string unidade = veiculo.UnidadeNavigation == null || string.IsNullOrEmpty(veiculo.UnidadeNavigation.Nome) ? "NAO CADASTRADO" : veiculo.UnidadeNavigation.Nome;
@@ -33,6 +40,18 @@ public class AcessoService
         _contextFirebird.Acesso.Add(acesso);
         await _contextFirebird.SaveChangesAsync();
         return true;
+    }
+
+    private async Task<bool> verifyPassBack(string placa, TimeSpan? tempoAntipassback, DateTime timestamp)
+    {
+        tempoAntipassback = tempoAntipassback ?? TimeSpan.FromSeconds(10);
+        var timeLimit = timestamp - tempoAntipassback;
+
+        var recentAccesses = await _contextFirebird.Acesso
+            .Where(a => a.Placa == placa && a.DataHora >= timeLimit)
+            .ToListAsync();
+
+        return recentAccesses.Any();
     }
 
     private string prepareLocalString(Alphadigi alphadigi)

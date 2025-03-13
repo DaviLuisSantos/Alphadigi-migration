@@ -2,6 +2,7 @@
 using Alphadigi_migration.Data;
 using Alphadigi_migration.DTO.MonitorAcessoLinear;
 using Alphadigi_migration.DTO.Veiculo;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Alphadigi_migration.Services;
 
@@ -41,7 +42,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
         {
             // 1. Preparação: Extrair informações e definir variáveis
             Area area = alphadigi.Area;
-            bool isVisitante = veiculo.Id == 0||veiculo.Id == null;
+            bool isVisitante = veiculo.Id == 0 || veiculo.Id == null;
             bool isVisita = (area.EntradaVisita || area.SaidaVisita) && isVisitante;
             bool isSaidaSempreAbre = area.SaidaSempreAbre && !alphadigi.Sentido;
             bool isControlaVaga = area.ControlaVaga;
@@ -113,15 +114,22 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
             // 3. Atualizar informações do veículo (se não for visitante)
             if (!isVisita && veiculo != null && veiculo.Id != 0)
             {
-                await sendUpdateLastAccess(alphadigi.Ip, veiculo.Id, timestamp);
+                bool mesmaCamera = veiculo.IpCamUltAcesso == alphadigi.Ip;
+                var tempo = timestamp - alphadigi.Area.TempoAntipassbackTimeSpan;
+                bool estaNoTempo = veiculo.DataHoraUltAcesso.HasValue && (tempo > veiculo.DataHoraUltAcesso.Value);
+                if (!mesmaCamera || estaNoTempo)
+                {
+                    await sendUpdateLastAccess(alphadigi.Ip, veiculo.Id, timestamp);
+                }
+                
                 await _contextFirebird.SaveChangesAsync();
                 _logger.LogInformation($"Informações do veículo {veiculo.Placa} Atualizada.");
             }
 
-            if(alphadigi.UltimaPlaca!= veiculo.Placa)
+            if (alphadigi.UltimaPlaca != veiculo.Placa)
             {
                 bool monitor = await sendMonitorAcessoLinear(veiculo, alphadigi.Ip, acesso, timestamp);
-            } 
+            }
 
             return (shouldReturn, acesso);
         }
@@ -152,6 +160,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
             IpCamera = ipCamera,
             TimeAccess = timestamp
         };
+
         return await _veiculoService.UpdateLastAccess(lastAccess);
     }
 }

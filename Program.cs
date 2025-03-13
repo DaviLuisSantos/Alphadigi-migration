@@ -1,12 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using FirebirdSql.EntityFrameworkCore.Firebird;
 using Alphadigi_migration.Data;
 using Alphadigi_migration.Services;
 using Carter;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-using Newtonsoft.Json;
-using Carter.Response;
 using Carter.ResponseNegotiators.SystemTextJson;
 using Alphadigi_migration;
 
@@ -69,11 +64,13 @@ builder.Services.AddCors(options =>
 });
 
 // Configure Kestrel
+// Configure Kestrel
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(3332); // Escuta em todos os endereços IP na porta 3332
-    //serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Escuta em todos os endereços IP na porta 5001 com HTTPS
+    var kestrelConfig = builder.Configuration.GetSection("Kestrel");
+    serverOptions.Configure(kestrelConfig);
 });
+
 
 var app = builder.Build();
 

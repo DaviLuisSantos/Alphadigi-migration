@@ -17,7 +17,7 @@ public class LogEndpoint : CarterModule
                 WriteIndented = true
             };
             try
-            {  
+            {
 
                 var resposta = await logService.GetDatePlate(logPayload);
 

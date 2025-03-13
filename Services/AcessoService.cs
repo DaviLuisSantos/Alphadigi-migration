@@ -1,6 +1,5 @@
 ﻿using Alphadigi_migration.Data;
 using Alphadigi_migration.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Alphadigi_migration.Services;
 
@@ -36,8 +35,8 @@ public class AcessoService
         return true;
     }
 
-    private string prepareLocalString(Alphadigi alphadigi) {
-
+    private string prepareLocalString(Alphadigi alphadigi)
+    {
         if (alphadigi == null) { 
         return "Sem local";
         }

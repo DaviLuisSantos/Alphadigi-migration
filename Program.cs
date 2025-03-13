@@ -27,7 +27,6 @@ var sqliteConnectionString = builder.Configuration.GetConnectionString("SqliteCo
 // Register the Firebird context
 builder.Services.AddDbContext<AppDbContextFirebird>(options =>
     options.UseFirebird(firebirdConnectionString));
-
 // Register the SQLite context
 builder.Services.AddDbContext<AppDbContextSqlite>(options =>
     options.UseSqlite(sqliteConnectionString));
@@ -86,6 +85,8 @@ using (var scope = app.Services.CreateScope())
 
     var areaService = scope.ServiceProvider.GetRequiredService<IAreaService>();
     await areaService.SyncAreas();
+    var alphadigiService = scope.ServiceProvider.GetRequiredService<IAlphadigiService>();
+    await alphadigiService.SyncAlphadigi();
 }
 
 if (app.Environment.IsDevelopment())
@@ -99,4 +100,4 @@ app.UseCors("AllowAllOrigins");
 
 app.MapCarter();
 
-app.Run();
+ app.Run();

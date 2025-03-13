@@ -57,10 +57,21 @@ public class DisplayService
     public async Task<List<CreatePackageDisplayDTO>> prepareCreatePackage(string placa, string acesso, Alphadigi alphadigi)
     {
         string cor = "red";
-        if (acesso == "" || acesso == "CADASTRADO")
-            cor = "green";
-        else if (acesso == "NÃO CADASTRADO")
-            acesso = "NAO CADADASTRADO";
+
+        switch(acesso)
+        {
+            case "":
+            case "CADASTRADO":
+                cor = "green";
+                break;
+            case "NÃO CADASTRADO":
+                acesso = "NAO CADADASTRADO";
+                break;
+            case "S/VG":
+                cor = "yellow";
+                acesso = "SEM VAGA";
+                break;
+        }
 
         acesso = acesso == "" ? "LIBERADO" : acesso;
         int tempo = 10, estilo = 0;

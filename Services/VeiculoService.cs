@@ -8,7 +8,7 @@ namespace Alphadigi_migration.Services;
 public interface IVeiculoService
 {
     Task<List<Veiculo>> GetVeiculos();
-    Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSend(int lastId);
+    Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSend(int lastId); 
     Task<Veiculo> getByPlate(string plate);
     Task<bool> UpdateVagaVeiculo(int id, bool dentro);
     Task<bool> UpdateLastAccess(LastAcessUpdateVeiculoDTO lastAccess);
@@ -110,9 +110,26 @@ public class VeiculoService : IVeiculoService
             veiculo.IpCamUltAcesso = lastAccess.IpCamera;
             veiculo.DataHoraUltAcesso = lastAccess.TimeAccess;
             _contextFirebird.Veiculo.Update(veiculo);
-            await _contextFirebird.SaveChangesAsync();
+             await _contextFirebird.SaveChangesAsync();
             _logger.LogInformation($"Veículo com ID {lastAccess.IdVeiculo} atualizado com sucesso.");
             return true;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Trata o conflito de concorrência
+            var entry = ex.Entries.Single();
+            var databaseValues = await entry.GetDatabaseValuesAsync();
+
+            if (databaseValues == null)
+            {
+                // O registro foi excluído por outra transação
+                throw new Exception("O veículo foi excluído por outra transação.");
+            }
+            else
+            {
+                // Outra transação modificou o registro
+                throw new Exception("Outra transação modificou o veículo. Tente novamente.");
+            }
         }
         catch (Exception e)
         {

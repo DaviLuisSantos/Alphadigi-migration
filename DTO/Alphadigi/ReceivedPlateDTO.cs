@@ -58,9 +58,9 @@ public class PlateResult
     public int vehicleId { get; set; }
     public bool realplate { get; set; }
     public int retryflag { get; set; }
-    public string imageFile { get; set; }
+    public string? imageFile { get; set; }
     public int imageFileLen { get; set; }
-    public string imageFragmentFile { get; set; }
+    public string? imageFragmentFile { get; set; }
     public int imageFragmentFileLen { get; set; }
 }
 

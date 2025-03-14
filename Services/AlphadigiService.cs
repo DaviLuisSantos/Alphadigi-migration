@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Alphadigi_migration.Data;
 using Microsoft.Extensions.Logging;
+using Alphadigi_migration.DTO.Alphadigi;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Alphadigi_migration.Services;
 
@@ -179,6 +181,19 @@ public class AlphadigiService:IAlphadigiService
             _logger.LogError(ex, $"Erro ao obter ou criar camera para o IP: {ip}");
             throw;
         }
+    }
+
+    public async Task<Alphadigi> Create(CreateAlphadigiDTO alphadigiDTO)
+    {
+        INSERIR AUTO-AdHocMapper NO PROJETO
+        Alphadigi? newAlphadigi = new()
+        {
+            Ip = alphadigiDTO.Ip,
+            Nome = alphadigiDTO.Nome,
+            AreaId = alphadigiDTO.AreaId,
+            Sentido = alphadigiDTO.Sentido,
+            Estado = "DELETE",
+        };
     }
 
     public async Task<bool> UpdateLastPlate(Alphadigi camera, string plate,DateTime timestamp)

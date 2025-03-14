@@ -25,7 +25,7 @@ public class Alphadigi
 
     [Required]
     [StringLength(50)]
-    public string? Estado { get; set; }
+    public string? Estado { get; set; } = "DELETE";
 
     public int? UltimoId { get; set; }
 

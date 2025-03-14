@@ -1,18 +1,3 @@
 {
-  "Response_Heartbeat": {
-    "info": "no",
-    "content": null,
-    "serialData": [
-      {
-        "serialChannel": 0,
-        "data": "AGT//2IZAAABAAoAAAAA//8AAAAAAAAGAFNlZ21peIt4AA==",
-        "dataLen": 34
-      },
-      {
-        "serialChannel": 0,
-        "data": "AGT//2IdAQ8BAAEAAAAA/wAAAAAAAAAKAFRlY25vbG9naWHm0gA=",
-        "dataLen": 38
-      }
-    ]
-  }
+  "DeleteWhiteListAll": 1
 }

@@ -4,6 +4,7 @@ using Alphadigi_migration.Services;
 using Carter;
 using Carter.ResponseNegotiators.SystemTextJson;
 using Alphadigi_migration;
+using Alphadigi_migration.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,9 @@ builder.Services.AddScoped<PlacaLidaService>();
 
 builder.Services.AddScoped<AcessoService>();
 builder.Services.AddScoped<DisplayService>();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 // Configure CORS
 builder.Services.AddCors(options =>

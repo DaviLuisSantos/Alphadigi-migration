@@ -12,7 +12,7 @@ public class CameraEndpoint : CarterModule
 {
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("/camera/",async (IAlphadigiService cameras) =>
+        app.MapGet("/camera/", async (IAlphadigiService cameras) =>
         {
             return await cameras.GetAll();
         })
@@ -20,7 +20,7 @@ public class CameraEndpoint : CarterModule
 
         app.MapPost("/camera/create", async (CreateAlphadigiDTO alphadigi, IAlphadigiService camera) =>
         {
-            return await camera.
+            return await camera.Create(alphadigi);
         })
         .IncludeInOpenApi();
 

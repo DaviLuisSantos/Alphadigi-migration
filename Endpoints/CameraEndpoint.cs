@@ -24,7 +24,7 @@ public class CameraEndpoint : CarterModule
         })
         .IncludeInOpenApi();
 
-        app.MapPut("/camera/update", async (Alphadigi alphadigi, IAlphadigiService cameras) =>
+        app.MapPut("/camera/update", async (UpdateAlphadigiDTO alphadigi, IAlphadigiService cameras) =>
         {
             return await cameras.Update(alphadigi);
         })

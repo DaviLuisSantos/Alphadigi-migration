@@ -42,10 +42,11 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
     public async Task<object> ProcessPlate(ProcessPlateDTO plateReaded)
     {
-        _logger.LogInformation($"Iniciando ProcessPlate");
         try
         {
             DateTime timeStamp = DateTime.Now;
+
+            _logger.LogInformation("placa recebida: " + plateReaded.plate);
 
             var camera = await _alphadigiService.GetOrCreate(plateReaded.ip);
             if (camera == null)
@@ -60,8 +61,8 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                 Placa = plateReaded.plate,
                 DataHora = timeStamp,
                 AreaId = camera.AreaId,
-                Placa_Img= plateReaded.plateImage,
-                Carro_Img=plateReaded.carImage
+                Placa_Img = plateReaded.plateImage,
+                Carro_Img = plateReaded.carImage
 
             };
 
@@ -88,7 +89,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
             await _placaLidaService.UpdatePlacaLida(Log);
 
-            var messageDisplay =await sendCreatPackageDisplay(veiculo, accessResult.Acesso, camera);
+            var messageDisplay = await sendCreatPackageDisplay(veiculo, accessResult.Acesso, camera);
 
             if (Log.Processado)
             {
@@ -157,7 +158,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
     public async Task<List<SerialData>> sendCreatPackageDisplay(Veiculo veiculo, string acesso, Alphadigi alphadigi)
     {
-        return await  _displayService.recieveMessageAlphadigi(veiculo.Placa, acesso, alphadigi);
+        return await _displayService.recieveMessageAlphadigi(veiculo.Placa, acesso, alphadigi);
     }
 
     public async Task<ResponsePlateDTO> handleReturn(string placa, string acesso, bool liberado, List<SerialData> messageData)
@@ -168,7 +169,6 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             Response_AlarmInfoPlate = new ResponseAlarmInfoPlate
             {
                 info = info,
-                content = "retransfer_stop",
                 serialData = messageData
             }
         };

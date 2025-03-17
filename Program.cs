@@ -5,6 +5,11 @@ using Carter;
 using Carter.ResponseNegotiators.SystemTextJson;
 using Alphadigi_migration;
 using Alphadigi_migration.Models;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Filters;
+using IniParser;
+using IniParser.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,22 +17,41 @@ builder.Services.AddCarter(configurator: c =>
     c.WithResponseNegotiator<SystemTextJsonResponseNegotiator>()
 );
 
-// Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
-// Get connection strings from configuration
-var firebirdConnectionString = builder.Configuration.GetConnectionString("FirebirdConnection");
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.log",
+                  rollingInterval: RollingInterval.Day,
+                  retainedFileCountLimit: 7,
+                  outputTemplate: "{Timestamp:HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}")
+    .Filter.ByExcluding(Matching.FromSource("Microsoft.EntityFrameworkCore"))
+    //.Filter.ByExcluding(Matching.FromSource("Microsoft.AspNetCore"))
+    .Filter.ByExcluding(Matching.FromSource("Microsoft.Hosting"))
+    .CreateLogger();
+
+var parser = new FileIniDataParser();
+IniData data = parser.ReadFile(builder.Configuration.GetConnectionString("ConfigConnection"));
+string host = data["BD"]["host"];
+
+if (host != "localhost")
+{
+    throw new InvalidOperationException("The server can only be started on localhost.");
+}
+
+var end = data["BD"]["end"];
+
+var firebirdConnectionString = $"Server=127.0.0.1;Database={end};{builder.Configuration.GetConnectionString("FirebirdConnection")}";
+
 var sqliteConnectionString = builder.Configuration.GetConnectionString("SqliteConnection");
 
-// Register the Firebird context
 builder.Services.AddDbContext<AppDbContextFirebird>(options =>
     options.UseFirebird(firebirdConnectionString));
-// Register the SQLite context
+
 builder.Services.AddDbContext<AppDbContextSqlite>(options =>
     options.UseSqlite(sqliteConnectionString));
 
-// Registre os serviços
 builder.Services.AddScoped<IAlphadigiService, AlphadigiService>();
 builder.Services.AddScoped<IVeiculoService, VeiculoService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
@@ -38,13 +62,6 @@ builder.Services.AddScoped<IUnidadeService, UnidadeService>();
 builder.Services.AddScoped<MonitorAcessoLinear>();
 builder.Services.AddScoped<UdpBroadcastService>();
 
-// Registre os handlers
-builder.Services.AddScoped<VisitaAccessHandler>();
-builder.Services.AddScoped<SaidaSempreAbreAccessHandler>();
-builder.Services.AddScoped<ControlaVagaAccessHandler>();
-builder.Services.AddScoped<NaoControlaVagaAccessHandler>();
-
-// Registre a fábrica de handlers
 builder.Services.AddScoped<IAccessHandlerFactory, AccessHandlerFactory>();
 builder.Services.AddScoped<IVeiculoAccessProcessor, VeiculoAccessProcessor>();
 builder.Services.AddScoped<PlacaLidaService>();
@@ -54,8 +71,6 @@ builder.Services.AddScoped<DisplayService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-
-// Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -67,18 +82,16 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Configure Kestrel
-// Configure Kestrel
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     var kestrelConfig = builder.Configuration.GetSection("Kestrel");
     serverOptions.Configure(kestrelConfig);
 });
 
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
-// Configure o banco de dados SQLite
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContextSqlite>();
@@ -101,4 +114,4 @@ app.UseCors("AllowAllOrigins");
 
 app.MapCarter();
 
- app.Run();
+app.Run();

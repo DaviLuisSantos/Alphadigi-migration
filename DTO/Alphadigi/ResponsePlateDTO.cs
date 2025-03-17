@@ -8,7 +8,6 @@ public class ResponsePlateDTO
 public class ResponseAlarmInfoPlate
 {
     public string info { get; set; }
-    public string content { get; set; }
     public List<SerialData>? serialData { get; set; }
 }
 

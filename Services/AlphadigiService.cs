@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Alphadigi_migration.Data;
 using Microsoft.Extensions.Logging;
 using Alphadigi_migration.DTO.Alphadigi;
-using Microsoft.EntityFrameworkCore.Metadata;
 using AutoMapper;
 
 namespace Alphadigi_migration.Services;
@@ -15,13 +14,13 @@ public interface IAlphadigiService
     Task<bool> SyncAlphadigi();
     Task<Alphadigi> Get(string ip);
     Task<List<Alphadigi>> GetAll();
-    Task<bool> Update(Alphadigi camera);
+    Task<bool> Update(UpdateAlphadigiDTO camera);
     Task<bool> updateStage(string stage);
     Task<bool> Delete(int id);
     Task<Alphadigi> Create(CreateAlphadigiDTO alphadigiDTO);
 }
 
-public class AlphadigiService:IAlphadigiService
+public class AlphadigiService : IAlphadigiService
 {
     private readonly AppDbContextSqlite _contextSqlite;
     private readonly AppDbContextFirebird _contextFirebird;
@@ -33,8 +32,7 @@ public class AlphadigiService:IAlphadigiService
         _contextSqlite = contextSqlite;
         _contextFirebird = contextFirebird;
         _mapper = mapper;
-        _logger = logger; // Atribui o ILogger
-        _logger.LogInformation("AlphadigiService criado.");
+        _logger = logger;
     }
 
     public async Task<bool> SyncAlphadigi()
@@ -71,7 +69,7 @@ public class AlphadigiService:IAlphadigiService
     public async Task<List<Alphadigi>> GetAll()
     {
         _logger.LogInformation("GetAll chamado");
-        return await _contextSqlite.Alphadigi.Include(c=>c.Area).ToListAsync();
+        return await _contextSqlite.Alphadigi.Include(c => c.Area).ToListAsync();
     }
     public async Task<Alphadigi> Create(CreateAlphadigiDTO alphadigiDTO)
     {
@@ -81,12 +79,30 @@ public class AlphadigiService:IAlphadigiService
         return newAlphadigi;
     }
 
-    public async Task<bool> Update(Alphadigi camera)
+    public async Task<bool> Update(UpdateAlphadigiDTO alphadigi)
     {
-        _contextSqlite.Alphadigi.Update(camera);
+        var camera = _mapper.Map<Alphadigi>(alphadigi);
+
+        var existingCamera = await _contextSqlite.Alphadigi.FindAsync(camera.Id);
+        if (existingCamera == null)
+        {
+            return false;
+        }
+
+        _contextSqlite.Entry(existingCamera).CurrentValues.SetValues(camera);
+
+        foreach (var property in _contextSqlite.Entry(camera).Properties)
+        {
+            if (property.CurrentValue == null)
+            {
+                _contextSqlite.Entry(existingCamera).Property(property.Metadata.Name).IsModified = false;
+            }
+        }
+
         await _contextSqlite.SaveChangesAsync();
         return true;
     }
+
 
     public async Task<Alphadigi> Get(string ip)
     {
@@ -194,7 +210,7 @@ public class AlphadigiService:IAlphadigiService
         }
     }
 
-    public async Task<bool> UpdateLastPlate(Alphadigi camera, string plate,DateTime timestamp)
+    public async Task<bool> UpdateLastPlate(Alphadigi camera, string plate, DateTime timestamp)
     {
         camera.UltimaPlaca = plate;
         camera.UltimaHora = timestamp;

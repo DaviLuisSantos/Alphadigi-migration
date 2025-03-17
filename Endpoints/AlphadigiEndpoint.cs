@@ -39,6 +39,7 @@ public class AlphadigiEndpoint : CarterModule
                 plateImage = result?.imageFragmentFile
             };
 
+
             var plateResult = await plateService.ProcessPlate(placa);
             if (plateResult == null)
             {
@@ -50,14 +51,7 @@ public class AlphadigiEndpoint : CarterModule
                 WriteIndented = true
             };
 
-            //var jsonResult = System.Text.Json.JsonSerializer.Serialize(plateResult, options);
-
-            // Salva o JSON em um arquivo
-            //var filePath = "response.json"; // Defina o caminho do arquivo
-            //await File.WriteAllTextAsync(filePath, jsonResult);
-
             return Results.Json(plateResult, options);
-
 
         });
 

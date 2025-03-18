@@ -26,7 +26,9 @@ public class CameraEndpoint : CarterModule
 
         app.MapPut("/camera/update", async (UpdateAlphadigiDTO alphadigi, IAlphadigiService cameras) =>
         {
-            return await cameras.Update(alphadigi);
+            var res = await cameras.Update(alphadigi);
+
+            return res ? Results.Ok() : Results.InternalServerError("Erro ao atualizar");
         })
         .IncludeInOpenApi();
 

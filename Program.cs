@@ -68,6 +68,7 @@ builder.Services.AddScoped<PlacaLidaService>();
 
 builder.Services.AddScoped<AcessoService>();
 builder.Services.AddScoped<DisplayService>();
+builder.Services.AddScoped<CondominioService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -101,6 +102,8 @@ using (var scope = app.Services.CreateScope())
     await areaService.SyncAreas();
     var alphadigiService = scope.ServiceProvider.GetRequiredService<IAlphadigiService>();
     await alphadigiService.SyncAlphadigi();
+    var condominioService = scope.ServiceProvider.GetRequiredService<CondominioService>();
+    await condominioService.SyncCondominio();
 }
 
 if (app.Environment.IsDevelopment())

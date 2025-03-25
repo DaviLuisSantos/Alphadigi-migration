@@ -14,6 +14,7 @@ namespace Alphadigi_migration.Data
         public DbSet<Area> Area { get; set; }
         public DbSet<Unidade> Unidade { get; set; }
         public DbSet<Acesso> Acesso { get; set; }
+        public DbSet<Condominio> Condominio { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

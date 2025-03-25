@@ -10,10 +10,12 @@ namespace Alphadigi_migration.Services;
 public class DisplayService
 {
     private readonly AppDbContextSqlite _contextSqlite;
+    private readonly ILogger<DisplayService> _logger;
 
-    public DisplayService(AppDbContextSqlite contextSqlite)
+    public DisplayService(AppDbContextSqlite contextSqlite, ILogger<DisplayService> logger)
     {
         _contextSqlite = contextSqlite;
+        _logger = logger;
     }
 
     public async Task<List<SerialData>> recieveMessageAlphadigi(string placa, string acesso, Alphadigi alphadigi)
@@ -41,7 +43,7 @@ public class DisplayService
 
         // Convert the byte array to a hexadecimal string
         var hexString = BitConverter.ToString(package).Replace("-", "");
-        Console.WriteLine(hexString);
+        _logger.LogInformation($"PACOTE GERADO: {hexString}");
 
         var package64 = Convert.ToBase64String(package);
 
@@ -58,7 +60,7 @@ public class DisplayService
     {
         string cor = "red";
 
-        switch(acesso)
+        switch (acesso)
         {
             case "":
             case "CADASTRADO":
@@ -73,6 +75,8 @@ public class DisplayService
                 break;
         }
 
+        if (acesso != "NAO CADADASTRADO" && placa == "BEM VINDO") cor = "yellow";
+
         acesso = acesso == "" ? "LIBERADO" : acesso;
         int tempo = 10, estilo = 0;
 
@@ -82,9 +86,9 @@ public class DisplayService
         {
             Mensagem = placa,
             Linha = 1,
-            Cor = "yellow",
-            Tempo = tempo,
-            Estilo = estilo
+            Cor = placa == "BEM VINDO" ? "green" : "yellow",
+            Tempo = placa.Length > 8 ? 1 : tempo,
+            Estilo = placa.Length > 8 ? 15 : estilo
         };
         serialData.Add(packageDisplayPlaca);
 

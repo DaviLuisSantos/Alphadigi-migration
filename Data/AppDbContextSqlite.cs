@@ -11,6 +11,7 @@ public class AppDbContextSqlite : DbContext
     public DbSet<Area> Areas { get; set; }
     public DbSet<PlacaLida> PlacaLida { get; set; }
     public DbSet<MensagemDisplay> MensagemDisplay { get; set; }
+    public DbSet<Condominio> Condominio { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

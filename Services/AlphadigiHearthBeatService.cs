@@ -19,19 +19,22 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
     private readonly IVeiculoService _veiculoService;
     private readonly ILogger<AlphadigiHearthBeatService> _logger;
     private readonly DisplayService _displayService;
+    private readonly CondominioService _condominioService;
 
     public AlphadigiHearthBeatService(
         AppDbContextSqlite contextSqlite,
         IAlphadigiService alphadigiService,
         IVeiculoService veiculoService,
         ILogger<AlphadigiHearthBeatService> logger,
-        DisplayService displayService) // Adicione o logger
+        DisplayService displayService,
+        CondominioService condominioService)
     {
         _contextSqlite = contextSqlite;
         _alphadigiService = alphadigiService;
         _veiculoService = veiculoService;
-        _logger = logger; // Salve o logger
+        _logger = logger;
         _displayService = displayService;
+        _condominioService = condominioService;
     }
 
     public async Task<object> ProcessHearthBeat(string ip)
@@ -129,7 +132,9 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
 
     public async Task<ResponseHeathbeatDTO> HandleNormal(Alphadigi alphadigi)
     {
-        var messageData = await sendDisplay("Segmix", alphadigi);
+        var condominio = await _condominioService.get();
+        var nome = condominio.Nome;
+        var messageData = await sendDisplay(nome, alphadigi);
         ResponseHeathbeatDTO retorno = new()
         {
             Response_Heartbeat = new ResponseAlarmInfoPlate
@@ -143,7 +148,9 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
 
     public async Task<List<SerialData>> sendDisplay(string Nome, Alphadigi alphadigi)
     {
-        var pacote = await _displayService.recieveMessageAlphadigi(Nome, "Tecnologia", alphadigi);
+        var linha1 = "BEM VINDO";
+        var linha2 = "SAINT MICHEL";
+        var pacote = await _displayService.recieveMessageAlphadigi(linha1, Nome, alphadigi);
         return pacote;
     }
 

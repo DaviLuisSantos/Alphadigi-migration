@@ -74,7 +74,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
                 {
                     _logger.LogInformation($"Processando saída.");
                     await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
-                    acesso = "";
+                    acesso = "CADASTRADO";
                     shouldReturn = true;
                 }
                 else // Entrada
@@ -84,7 +84,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
                     if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro))
                     {
                         await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
-                        acesso = "";
+                        acesso = "CADASTRADO";
                         shouldReturn = true;
                     }
                     else

@@ -31,7 +31,7 @@ public class PlacaLidaService
     public async Task<List<PlacaLida>> GetDatePlate(LogGetDatePlateDTO logPayload)
     {
         string? placa = logPayload.Search;
-        DateTime data = DateTime.ParseExact(logPayload.Date, "dd-MM-yyyy", null);
+        DateTime data = DateTime.ParseExact(logPayload.Date, "yyyy-MM-dd", null);
         int page = logPayload.Page;
         int pageSize = logPayload.PageSize;
 
@@ -45,7 +45,7 @@ public class PlacaLidaService
         query = query.Where(p => p.DataHora.Date == data.Date);
 
         // Adiciona a ordenação decrescente por DataHora
-        query = query.OrderByDescending(p => p.DataHora);
+        query = query.Include(x => x.Alphadigi).OrderByDescending(p => p.DataHora);
 
         return await query
             .Skip((page - 1) * pageSize)

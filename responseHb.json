@@ -4,13 +4,8 @@
     "serialData": [
       {
         "serialChannel": 0,
-        "data": "AGT//2IcAA8BAAEAAAAAAP8AAAAAAAAJAEJFTSBWSU5ET8t7AA==",
-        "dataLen": 37
-      },
-      {
-        "serialChannel": 0,
-        "data": "AGT//2I1AQ8BAAEAAAAA//8AAAAAAAAiAENPTkRPTUlOSU8gR0VSQUwgUklWSUVSQSBERUkgRklPUkkIXgA=",
-        "dataLen": 62
+        "data": "AGT//wUI6QcECwYRHymyMw==",
+        "dataLen": 16
       }
     ]
   }

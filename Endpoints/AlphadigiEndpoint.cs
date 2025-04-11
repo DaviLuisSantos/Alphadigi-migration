@@ -2,6 +2,7 @@
 using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.IO;
 using System.Text.Json;
@@ -50,7 +51,9 @@ public class AlphadigiEndpoint : CarterModule
                 PropertyNamingPolicy = null,
                 WriteIndented = true
             };
-
+            var filePath = "response.json"; // Defina o caminho do arquivo
+            var jsonResult = JsonSerializer.Serialize(plateResult, options);
+            await File.WriteAllTextAsync(filePath, jsonResult);
             return Results.Json(plateResult, options);
 
         });
@@ -99,7 +102,7 @@ public class AlphadigiEndpoint : CarterModule
             {
                 return Results.BadRequest("Invalid request body");
             }
-            await alphadigiService.updateStage("SEND");
+            await alphadigiService.UpdateStage("SEND");
 
             return Results.Ok();
         });

@@ -149,8 +149,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
     public async Task<List<SerialData>> sendDisplay(string Nome, Alphadigi alphadigi)
     {
         var linha1 = "BEM VINDO";
-        var linha2 = "SAINT MICHEL";
-        var pacote = await _displayService.recieveMessageAlphadigi(linha1, Nome, alphadigi);
+        var pacote = await _displayService.recieveMessageHearthbeatAlphadigi(linha1, Nome, alphadigi);
         return pacote;
     }
 

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Alphadigi_migration.Data;
 using Alphadigi_migration.Services;
+using Alphadigi_migration.Repositories;
 using Carter;
 using Carter.ResponseNegotiators.SystemTextJson;
 using Alphadigi_migration;
@@ -52,7 +53,9 @@ builder.Services.AddDbContext<AppDbContextFirebird>(options =>
 builder.Services.AddDbContext<AppDbContextSqlite>(options =>
     options.UseSqlite(sqliteConnectionString));
 
+builder.Services.AddScoped<IAlphadigiRepository, AlphadigiRepository>();
 builder.Services.AddScoped<IAlphadigiService, AlphadigiService>();
+
 builder.Services.AddScoped<IVeiculoService, VeiculoService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IAlphadigiHearthBeatService, AlphadigiHearthBeatService>();

@@ -148,7 +148,9 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
 
     public async Task<List<SerialData>> sendDisplay(string Nome, Alphadigi alphadigi)
     {
-        var linha1 = "BEM VINDO";
+        string? linha1 = "BEM VINDO";
+        if (!alphadigi.Sentido)
+            linha1 = "ATE LOGO";
         var pacote = await _displayService.recieveMessageHearthbeatAlphadigi(linha1, Nome, alphadigi);
         return pacote;
     }

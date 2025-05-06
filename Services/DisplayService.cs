@@ -161,7 +161,9 @@ public class DisplayService
             .OrderByDescending(x => x.Id)
             .FirstOrDefault();
 
-        if ((LastMessage == null || LastCamMessage.Id != LastMessage.Id) && (LastCamMessage.Placa != placa))
+
+        if (LastMessage == null || (LastCamMessage != null && LastCamMessage.Id != LastMessage.Id && LastCamMessage.Placa != placa))
+
         {
             if (acesso.Length > 8)
             {

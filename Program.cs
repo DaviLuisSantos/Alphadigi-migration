@@ -67,7 +67,7 @@ builder.Services.AddScoped<UdpBroadcastService>();
 
 builder.Services.AddScoped<IAccessHandlerFactory, AccessHandlerFactory>();
 builder.Services.AddScoped<IVeiculoAccessProcessor, VeiculoAccessProcessor>();
-builder.Services.AddScoped<PlacaLidaService>();
+builder.Services.AddScoped<IPlacaLidaService, PlacaLidaService>();
 
 builder.Services.AddScoped<AcessoService>();
 builder.Services.AddScoped<DisplayService>();
@@ -107,6 +107,12 @@ using (var scope = app.Services.CreateScope())
     await alphadigiService.SyncAlphadigi();
     var condominioService = scope.ServiceProvider.GetRequiredService<CondominioService>();
     await condominioService.SyncCondominio();
+
+    var schedulerService = new DailyTaskSchedulerService(() =>
+    {
+        alphadigiService.UpdateStage("DELETE").Wait();
+    });
+
 }
 
 if (app.Environment.IsDevelopment())

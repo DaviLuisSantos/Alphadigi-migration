@@ -1,11 +1,16 @@
 {
   "Response_AlarmInfoPlate": {
-    "info": "no",
+    "info": "ok",
     "serialData": [
       {
         "serialChannel": 0,
-        "data": "AGT//25LAAMAAAAKAP//AAAHUkpQNjU4Nw0CAAAAAP8AAAAIYEQtYE0tYFkNAwAAAAD//wAACGBIOmBOOmBTAINkAAAAAAAAAAAAAAAAAAAAAAAA",
-        "dataLen": 84
+        "data": "AGT//25eAAQAAAAKAP//AAAHTFRJMTYyNg0BAAAKAAD/AAAITElCRVJBRE8NAgAAAAD/AAAACGBELWBNLWBZDQMAAAAA//8AAAhgSDpgTjpgUwAQqgAAAAAAAAAAAAAAAAAAAAAAAA==",
+        "dataLen": 103
+      },
+      {
+        "serialChannel": 0,
+        "data": "AGT//w8GAAEAAAAFJLc=",
+        "dataLen": 14
       }
     ]
   }

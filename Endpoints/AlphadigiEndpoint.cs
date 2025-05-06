@@ -2,9 +2,6 @@
 using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.IO;
 using System.Text.Json;
 
 namespace Alphadigi_migration;
@@ -85,7 +82,7 @@ public class AlphadigiEndpoint : CarterModule
 
                 var filePath = "responseHb.json"; // Defina o caminho do arquivo
                 await File.WriteAllTextAsync(filePath, jsonResult);
-
+                
                 return Results.Json(resposta, options);
             }
             catch (Exception ex)
@@ -97,6 +94,17 @@ public class AlphadigiEndpoint : CarterModule
         });
 
         app.MapPost("/LPR/create", async (HttpContext context, string placa, IAlphadigiService alphadigiService) =>
+        {
+            if (placa == null)
+            {
+                return Results.BadRequest("Invalid request body");
+            }
+            await alphadigiService.UpdateStage("SEND");
+
+            return Results.Ok();
+        });
+
+        app.MapPost("/LPR/delete", async (HttpContext context, string placa, IAlphadigiService alphadigiService) =>
         {
             if (placa == null)
             {

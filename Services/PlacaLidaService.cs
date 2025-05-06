@@ -1,11 +1,16 @@
-﻿using Alphadigi_migration.DTO.PlacaLida;
+﻿using Alphadigi_migration.Data;
+using Alphadigi_migration.DTO.PlacaLida;
 using Alphadigi_migration.Models;
-using Alphadigi_migration.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Alphadigi_migration.Services;
+public interface IPlacaLidaService
+{
+    Task<bool> SavePlacaLida(PlacaLida placaLida);
+    Task<bool> UpdatePlacaLida(PlacaLida placaLida);
+    Task<List<PlacaLida>> GetDatePlate(LogGetDatePlateDTO logPayload);
+}
 
-public class PlacaLidaService
+public class PlacaLidaService : IPlacaLidaService
 {
     private readonly AppDbContextSqlite _contextSqlite;
     private readonly AppDbContextFirebird _contextFirebird;
@@ -22,12 +27,14 @@ public class PlacaLidaService
         await _contextSqlite.SaveChangesAsync();
         return true;
     }
+
     public async Task<bool> UpdatePlacaLida(PlacaLida placaLida)
     {
         _contextSqlite.PlacaLida.Update(placaLida);
         await _contextSqlite.SaveChangesAsync();
         return true;
     }
+
     public async Task<List<PlacaLida>> GetDatePlate(LogGetDatePlateDTO logPayload)
     {
         string? placa = logPayload.Search;

@@ -18,7 +18,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
     private readonly ILogger<AlphadigiHearthBeatService> _logger;
     private readonly AcessoService _acessoService;
     private readonly IVeiculoAccessProcessor _veiculoAccessProcessor;
-    private readonly PlacaLidaService _placaLidaService;
+    private readonly IPlacaLidaService _placaLidaService;
     private readonly DisplayService _displayService;
 
 
@@ -28,7 +28,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             AcessoService acessoService,
             ILogger<AlphadigiHearthBeatService> logger,
             IVeiculoAccessProcessor veiculoAccessProcessor,
-            PlacaLidaService placaLidaService,
+            IPlacaLidaService placaLidaService,
             DisplayService displayService) // Adicione o logger
     {
         _alphadigiService = alphadigiService;

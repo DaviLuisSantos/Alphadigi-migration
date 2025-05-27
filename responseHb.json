@@ -4,12 +4,12 @@
     "serialData": [
       {
         "serialChannel": 0,
-        "data": "AGT//256AAQADwABAAD/AAAJQkVNIFZJTkRPDQEPAAEA//8AACJDT05ET01JTklPIEdFUkFMIFJJVklFUkEgREVJIEZJT1JJDQIAAAAA/wAAAAhgRC1gTS1gWQ0DAAAAAP//AAAIYEg6YE46YFMA\u002BFQAAAAAAAAAAAAAAAAAAAAAAAA=",
-        "dataLen": 131
+        "data": "AGT//25UAAIADwABAAD/AAAJQkVNIFZJTkRPDQEPAAEA//8AACJDT05ET01JTklPIEdFUkFMIFJJVklFUkEgREVJIEZJT1JJALzSAAAAAAAAAAAAAAAAAAAAAAAA",
+        "dataLen": 93
       },
       {
         "serialChannel": 0,
-        "data": "AGT//wUI6QcEEQUOMhKG8A==",
+        "data": "AGT//wUI6QcFGwMREw439w==",
         "dataLen": 16
       }
     ]

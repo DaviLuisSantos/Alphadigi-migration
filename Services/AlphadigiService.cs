@@ -14,6 +14,7 @@ public interface IAlphadigiService
     Task<Alphadigi> Get(string ip);
     Task<List<Alphadigi>> GetAll();
     Task<bool> Update(UpdateAlphadigiDTO camera);
+    Task<Alphadigi> Update(Alphadigi camera);
     Task<bool> UpdateStage(string stage);
     Task<bool> Delete(int id);
     Task<Alphadigi> Create(CreateAlphadigiDTO alphadigiDTO);
@@ -37,6 +38,7 @@ public class AlphadigiService : IAlphadigiService
     public Task<Alphadigi> Create(CreateAlphadigiDTO alphadigiDTO) => _repository.Create(alphadigiDTO);
 
     public Task<bool> Update(UpdateAlphadigiDTO alphadigi) => _repository.Update(alphadigi);
+    public Task<Alphadigi> Update(Alphadigi camera) => _repository.Update(camera);
 
     public Task<Alphadigi> Get(string ip) => _repository.Get(ip);
 

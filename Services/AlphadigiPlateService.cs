@@ -54,6 +54,11 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                 _logger.LogError($"Câmera não encontrada para o IP {plateReaded.ip}.");
                 throw new Exception("Camera não encontrada");
             }
+            if (camera.LinhasDisplay != 0 && plateReaded.modelo == "TOTEM")
+            {
+                camera.LinhasDisplay = 0;
+                camera = await _alphadigiService.Update(camera);
+            }
 
             var Log = new PlacaLida
             {

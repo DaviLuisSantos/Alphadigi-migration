@@ -28,9 +28,8 @@ public class Alphadigi
     public string? Estado { get; set; } = "DELETE";
 
     public int? UltimoId { get; set; }
-
     [StringLength(10)]
     public string? UltimaPlaca { get; set; }
-
     public DateTime? UltimaHora { get; set; }
+    public int LinhasDisplay { get; set; } = 2;
 }

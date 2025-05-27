@@ -10,6 +10,7 @@ public class ProcessPlateDTO
     public bool isCad { get; set; }
     public string carImage { get; set; }
     public string plateImage { get; set; }
+    public string modelo { get; set; }
 }
 
 

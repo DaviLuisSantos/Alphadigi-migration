@@ -16,6 +16,7 @@ public interface IAlphadigiRepository
     Task<Alphadigi> Get(string ip);
     Task<List<Alphadigi>> GetAll();
     Task<bool> Update(UpdateAlphadigiDTO camera);
+    Task<Alphadigi> Update(Alphadigi camera);
     Task<bool> UpdateStage(string stage);
     Task<bool> Delete(int id);
     Task<Alphadigi> Create(CreateAlphadigiDTO alphadigiDTO);
@@ -133,6 +134,28 @@ public class AlphadigiRepository : IAlphadigiRepository
             return false;
         }
     }
+    public async Task<Alphadigi> Update(Alphadigi camera)
+    {
+        try
+        {
+            var existingCamera = await _contextSqlite.Alphadigi.FindAsync(camera.Id);
+            if (existingCamera == null)
+            {
+                return null;
+            }
+
+            _contextSqlite.Entry(existingCamera).CurrentValues.SetValues(camera);
+
+            await _contextSqlite.SaveChangesAsync();
+            return existingCamera;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao atualizar câmera");
+            throw;
+        }
+    }
+
 
     private void SetUnmodifiedProperties(Alphadigi existingCamera, Alphadigi camera)
     {

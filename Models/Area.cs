@@ -12,7 +12,7 @@ public class Area
     public int Id { get; set; }
 
     [Column("DESCRICAO")]
-    public string Nome { get; set; }
+    public string? Nome { get; set; }
 
     [Column("CONTROLA_VAGA")]
     public bool ControlaVaga { get; set; }
@@ -33,7 +33,7 @@ public class Area
     public bool ExibeNaoCadastradoSoEntrada { get; set; }
 
     [Column("TEMPO_ANTIPASSBACK")]
-    public string TempoAntipassback { get; set; }
+    public string? TempoAntipassback { get; set; }
 
     // Propriedade não mapeada para obter o TempoAntipassback como TimeSpan
     [NotMapped]

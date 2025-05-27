@@ -10,13 +10,13 @@ public class Camera
     [Column("ID")]
     public int Id { get; set; }
     [Column("LOCAL")]
-    public string Nome { get; set; }
+    public string? Nome { get; set; }
     [Column("IP")]
-    public string Ip { get; set; }
+    public string? Ip { get; set; }
     [Column("MODELO")]
-    public string Modelo { get; set; }
+    public string? Modelo { get; set; }
     [Column("DIRECAO")]
-    public string Direcao { get; set; }
+    public string? Direcao { get; set; }
     [Column("ID_AREA")]
     public int IdArea { get; set; }
     public Area Area { get; set; }

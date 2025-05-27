@@ -111,6 +111,9 @@ public class DisplayService
 
     public async Task<List<CreatePackageDisplayDTO>> prepareCreatePackage(string placa, string acesso, Alphadigi alphadigi)
     {
+        if (alphadigi.LinhasDisplay == 0)
+            return null;
+
         string cor = "red";
 
         switch (acesso)
@@ -192,26 +195,28 @@ public class DisplayService
         {
             return null;
         }
-
-        var packageDisplayData = new CreatePackageDisplayDTO
+        if (alphadigi.LinhasDisplay == 4)
         {
-            Mensagem = "`D-`M-`Y",
-            Linha = 3,
-            Cor = "red",
-            Tempo = 0,
-            Estilo = 0
-        };
-        serialData.Add(packageDisplayData);
+            var packageDisplayData = new CreatePackageDisplayDTO
+            {
+                Mensagem = "`D-`M-`Y",
+                Linha = 3,
+                Cor = "red",
+                Tempo = 0,
+                Estilo = 0
+            };
+            serialData.Add(packageDisplayData);
 
-        var packageDisplayHora = new CreatePackageDisplayDTO
-        {
-            Mensagem = "`H:`N:`S",
-            Linha = 4,
-            Cor = "yellow",
-            Tempo = 0,
-            Estilo = 0
-        };
-        serialData.Add(packageDisplayHora);
+            var packageDisplayHora = new CreatePackageDisplayDTO
+            {
+                Mensagem = "`H:`N:`S",
+                Linha = 4,
+                Cor = "yellow",
+                Tempo = 0,
+                Estilo = 0
+            };
+            serialData.Add(packageDisplayHora);
+        }
 
         return serialData;
     }

@@ -151,8 +151,8 @@ public static class Display
         const byte PnHigh = 0xFF;
         const byte PnLow = 0xFF;
         const byte CommandMultiLineText = 0x6E;
-        const int FixedHeaderAndParamSize = 19; // Tamanho dos dados fixos antes da mensagem (bytes 6 a 24)
-        const int MaxDlPayloadSize = 255 - FixedHeaderAndParamSize; // Máximo tamanho da mensagem para DL caber em 1 byte
+        const int FixedHeaderAndParamSize = 19;
+        const int MaxDlPayloadSize = 255 - FixedHeaderAndParamSize;
 
         // Validações iniciais
         if (lines == null)

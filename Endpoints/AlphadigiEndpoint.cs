@@ -34,7 +34,8 @@ public class AlphadigiEndpoint : CarterModule
                 isRealPlate = result?.realplate ?? false,
                 isCad = result?.Whitelist == 2,
                 carImage = result?.imageFile,
-                plateImage = result?.imageFragmentFile
+                plateImage = result?.imageFragmentFile,
+                modelo = alarm?.deviceName
             };
 
 

@@ -1,12 +1,6 @@
 {
   "Response_AlarmInfoPlate": {
-    "info": "ok",
-    "serialData": [
-      {
-        "serialChannel": 0,
-        "data": "AGT//w8GAAEAAAAFJLc=",
-        "dataLen": 14
-      }
-    ]
+    "info": "no",
+    "serialData": []
   }
 }

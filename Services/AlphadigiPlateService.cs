@@ -83,6 +83,13 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                     Placa = plateReaded.plate,
                 };
             }
+            if(veiculo!=null && !plateReaded.isCad)
+            {
+                camera.UltimoId = veiculo.Id-1;
+                camera.Estado = "SEND";
+                await _alphadigiService.Update(camera);
+            }
+
             Log.Cadastrado = veiculoCadastrado;
             await _placaLidaService.UpdatePlacaLida(Log);
 

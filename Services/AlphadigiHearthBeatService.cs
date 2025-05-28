@@ -115,7 +115,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         {
             AddWhiteList = new AddWhiteList
             {
-                add_data = veiculosEnvio.Select(item => new AddData
+                Add_data = veiculosEnvio.Select(item => new AddData
                 {
                     Carnum = item.Placa,
                     Startime = "20200718155220",

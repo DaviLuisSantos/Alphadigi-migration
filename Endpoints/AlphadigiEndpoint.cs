@@ -71,26 +71,20 @@ public class AlphadigiEndpoint : CarterModule
 
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = null,
-                    WriteIndented = true
-                };
-
                 var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress);
 
-                var jsonResult = JsonSerializer.Serialize(resposta, options);
+                var jsonResult = JsonSerializer.Serialize(resposta);
 
-                var filePath = "responseHb.json"; // Defina o caminho do arquivo
+                var filePath = "responseHb.json";
+
                 await File.WriteAllTextAsync(filePath, jsonResult);
-                
-                return Results.Json(resposta, options);
+
+                return Results.Json(resposta);
             }
             catch (Exception ex)
             {
-                // Log the exception
                 Console.WriteLine($"Erro no endpoint /LPR/heartbeat: {ex}");
-                return Results.Problem("Erro interno do servidor."); //Retorne um erro adequado.
+                return Results.Problem("Erro interno do servidor."); 
             }
         });
 

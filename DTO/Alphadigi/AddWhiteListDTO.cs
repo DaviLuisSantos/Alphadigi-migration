@@ -7,7 +7,7 @@ public class AddWhiteListDTO
 
 public class AddWhiteList
 {
-    public List<AddData> add_data { get; set; }
+    public List<AddData> Add_data { get; set; }
 }
 
 public class AddData

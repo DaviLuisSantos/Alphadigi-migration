@@ -1,17 +1,1 @@
-{
-  "Response_Heartbeat": {
-    "info": "no",
-    "serialData": [
-      {
-        "serialChannel": 0,
-        "data": "AGT//25UAAIADwABAAD/AAAJQkVNIFZJTkRPDQEPAAEA//8AACJDT05ET01JTklPIEdFUkFMIFJJVklFUkEgREVJIEZJT1JJALzSAAAAAAAAAAAAAAAAAAAAAAAA",
-        "dataLen": 93
-      },
-      {
-        "serialChannel": 0,
-        "data": "AGT//wUI6QcFGwMREw439w==",
-        "dataLen": 16
-      }
-    ]
-  }
-}
+{"Response_Heartbeat":{"info":"no","serialData":[{"serialChannel":0,"data":"AGT//wUI6QcFHAQLKzNwlQ==","dataLen":16}]}}

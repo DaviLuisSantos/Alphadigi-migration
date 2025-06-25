@@ -5,12 +5,11 @@ using Alphadigi_migration.Repositories;
 using Carter;
 using Carter.ResponseNegotiators.SystemTextJson;
 using Alphadigi_migration;
-using Alphadigi_migration.Models;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Filters;
 using IniParser;
 using IniParser.Model;
+using Alphadigi_migration.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,38 +52,9 @@ builder.Services.AddDbContext<AppDbContextFirebird>(options =>
 builder.Services.AddDbContext<AppDbContextSqlite>(options =>
     options.UseSqlite(sqliteConnectionString));
 
-builder.Services.AddScoped<IAlphadigiRepository, AlphadigiRepository>();
-builder.Services.AddScoped<IAlphadigiService, AlphadigiService>();
+builder.Services.AddApplicationServices(builder.Configuration);
 
-builder.Services.AddScoped<IVeiculoService, VeiculoService>();
-builder.Services.AddScoped<IAreaService, AreaService>();
-builder.Services.AddScoped<IAlphadigiHearthBeatService, AlphadigiHearthBeatService>();
-builder.Services.AddScoped<IAlphadigiPlateService, AlphadigiPlateService>();
-
-builder.Services.AddScoped<IUnidadeService, UnidadeService>();
-builder.Services.AddScoped<MonitorAcessoLinear>();
-builder.Services.AddScoped<UdpBroadcastService>();
-
-builder.Services.AddScoped<IAccessHandlerFactory, AccessHandlerFactory>();
-builder.Services.AddScoped<IVeiculoAccessProcessor, VeiculoAccessProcessor>();
-builder.Services.AddScoped<IPlacaLidaService, PlacaLidaService>();
-
-builder.Services.AddScoped<AcessoService>();
-builder.Services.AddScoped<DisplayService>();
-builder.Services.AddScoped<CondominioService>();
-
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
-});
+builder.Services.AddSingleton(builder.Configuration);
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {

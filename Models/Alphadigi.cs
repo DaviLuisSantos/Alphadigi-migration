@@ -32,4 +32,5 @@ public class Alphadigi
     public string? UltimaPlaca { get; set; }
     public DateTime? UltimaHora { get; set; }
     public int LinhasDisplay { get; set; } = 2;
+    public bool Enviado { get; set; } = false;
 }

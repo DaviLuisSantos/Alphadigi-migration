@@ -17,5 +17,6 @@ namespace Alphadigi_migration.DTO.Alphadigi
         [Required]
         [StringLength(50)]
         public string? Estado { get; set; } = "DELETE";
+
     }
 }

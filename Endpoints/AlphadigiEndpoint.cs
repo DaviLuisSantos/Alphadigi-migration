@@ -1,4 +1,5 @@
 ﻿using Alphadigi_migration.DTO.Alphadigi;
+using Alphadigi_migration.Factories;
 using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
@@ -56,35 +57,49 @@ public class AlphadigiEndpoint : CarterModule
 
         });
 
-        app.MapPost("/LPR/heartbeat", async (HttpContext context, HeartbeatDTO requestBody, IAlphadigiHearthBeatService hearthbeatService) =>
+        app.MapPost("/LPR/heartbeat", async (HttpContext context, IHeartbeatFactory factory, IAlphadigiHearthBeatService hearthbeatService) =>
         {
-            if (requestBody == null)
-            {
-                return Results.BadRequest("Invalid request body");
-            }
-
-            var ipAddress = context.Connection.RemoteIpAddress?.ToString();
-            if (ipAddress != null && ipAddress.StartsWith("::ffff:"))
-            {
-                ipAddress = ipAddress.Substring(7);
-            }
-
             try
             {
-                var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress);
+                using var reader = new StreamReader(context.Request.Body);
+                var body = await reader.ReadToEndAsync();
 
-                var jsonResult = JsonSerializer.Serialize(resposta);
+                var request = factory.Create(body);
+                if (request == null)
+                    return Results.BadRequest("Formato de requisição não reconhecido.");
 
-                var filePath = "responseHb.json";
+                var ipAddress = context.Connection.RemoteIpAddress?.ToString();
+                if (ipAddress?.StartsWith("::ffff:") == true)
+                    ipAddress = ipAddress[7..];
 
-                await File.WriteAllTextAsync(filePath, jsonResult);
+                switch (request)
+                {
+                    case HeartbeatDTO dto:
+                        var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress);
+                        return Results.Json(resposta);
 
-                return Results.Json(resposta);
+                    case ReturnAddPlateDTO dto:
+                        // Lógica para Response_AddWhiteList
+                        if (dto.Response_AddWhiteList == null)
+                            return Results.BadRequest("Response_AddWhiteList não pode ser nulo.");
+                        await hearthbeatService.HandleCreateReturn(ipAddress);
+                        return Results.Ok($"Adição processada para: {dto.Response_AddWhiteList.serialno}");
+
+                    case ReturnDelPlateDTO dto:
+                        // Lógica para Response_DelWhiteListAll
+                        if (dto.Response_DelWhiteListAll == null)
+                            return Results.BadRequest("Response_DelWhiteListAll não pode ser nulo.");
+                        await hearthbeatService.HandleDeleteReturn(ipAddress);
+                        return Results.Ok($"Remoção processada para: {dto.Response_DelWhiteListAll.serialno}");
+
+                    default:
+                        return Results.BadRequest("Tipo não suportado.");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Erro no endpoint /LPR/heartbeat: {ex}");
-                return Results.Problem("Erro interno do servidor."); 
+                return Results.Problem("Erro interno do servidor.");
             }
         });
 

@@ -1,6 +1,7 @@
 ﻿using Alphadigi_migration.Data;
 using Alphadigi_migration.Models;
 using Alphadigi_migration.DTO.Alphadigi;
+using System.Text.Json;
 
 namespace Alphadigi_migration.Services;
 
@@ -9,7 +10,9 @@ public interface IAlphadigiHearthBeatService
     Task<object> ProcessHearthBeat(string ip);
     Task<object> HandleAlphadigiStage(Alphadigi alphadigi);
     DeleteWhiteListAllDTO HandleDelete(Alphadigi alphadigi);
+    Task<bool> HandleDeleteReturn(string ip);
     Task<AddWhiteListDTO> HandleCreate(Alphadigi alphadigi);
+    Task<bool> HandleCreateReturn(string ip);
 }
 
 public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
@@ -59,20 +62,44 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         string stage = alphadigi.Estado ?? "DELETE";
         string newStage = null;
         object response = null;
+        bool Enviado = false;
 
         switch (stage)
         {
             case "DELETE":
-                response = HandleDelete(alphadigi);
-                newStage = "CREATE";
+                if (!alphadigi.Enviado)
+                {
+                    response = HandleDelete(alphadigi);
+                }
+                else
+                {
+                    newStage = "CREATE";
+                    Enviado = false;
+                }
                 break;
             case "CREATE":
-                response = await HandleCreate(alphadigi);
-                newStage = "SEND";
+                if (!alphadigi.Enviado)
+                {
+                    response = await HandleCreate(alphadigi);
+                    newStage = "SEND";
+                }
+                else
+                {
+                    newStage = "SEND";
+                    Enviado = false;
+                }
                 break;
             case "SEND":
                 response = await HandleCreate(alphadigi);
-                newStage = response == null ? "FINAL" : "SEND";
+                if(response == null)
+                {
+                    newStage = "FINAL";
+                }
+                if (Enviado)
+                {
+                    newStage = response == null ? "FINAL" : "SEND";
+                    Enviado = false;
+                }
                 break;
             case "FINAL":
                 response = await HandleNormal(alphadigi);
@@ -84,7 +111,12 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 break;
         }
 
-        alphadigi.Estado = newStage;
+        if (newStage != null)
+        {
+            alphadigi.Estado = newStage;
+        }
+
+        alphadigi.Enviado = Enviado;
         _contextSqlite.Update(alphadigi);
         await _contextSqlite.SaveChangesAsync();
         return response;
@@ -96,6 +128,24 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         {
             DeleteWhiteListAll = 1
         };
+    }
+
+    public async Task<bool> HandleDeleteReturn(string ip)
+    {
+        _logger.LogInformation($"hendleDeleteReturn chamado com IP: {ip}"); // Log do parâmetro
+        try
+        {
+            var alphadigi = await _alphadigiService.GetOrCreate(ip);
+            alphadigi.Enviado = true;
+            _contextSqlite.Update(alphadigi);
+            await _contextSqlite.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro em hendleDeleteReturn");
+            return false; // Retorna false em caso de erro
+        }
     }
 
     public async Task<AddWhiteListDTO> HandleCreate(Alphadigi alphadigi)
@@ -127,7 +177,31 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         _contextSqlite.Update(alphadigi);
         await _contextSqlite.SaveChangesAsync();
 
+        var filePath = "responseCreateHb.json";
+
+        var jsonResult = JsonSerializer.Serialize(envio);
+
+        await File.WriteAllTextAsync(filePath, jsonResult);
+
         return envio;
+    }
+
+    public async Task<bool> HandleCreateReturn(string ip)
+    {
+        _logger.LogInformation($"hendleCreateReturn chamado com IP: {ip}"); // Log do parâmetro
+        try
+        {
+            var alphadigi = await _alphadigiService.GetOrCreate(ip);
+            alphadigi.Enviado = true;
+            _contextSqlite.Update(alphadigi);
+            await _contextSqlite.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro em hendleCreateReturn");
+            return false; // Retorna false em caso de erro
+        }
     }
 
     public async Task<ResponseHeathbeatDTO> HandleNormal(Alphadigi alphadigi)
@@ -151,7 +225,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         string? linha1 = "BEM VINDO";
         if (!alphadigi.Sentido)
             linha1 = "ATE LOGO";
-        var pacote = await _displayService.recieveMessageHearthbeatAlphadigi(linha1, Nome, alphadigi);
+        var pacote = await _displayService.RecieveMessageAlphadigi(linha1, Nome, alphadigi);
         return pacote;
     }
 

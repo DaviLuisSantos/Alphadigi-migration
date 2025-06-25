@@ -46,7 +46,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         {
             DateTime timeStamp = DateTime.Now;
 
-            _logger.LogInformation("placa recebida: " + plateReaded.plate);
+            _logger.LogInformation("placa recebida: " + plateReaded.plate + " Camera: " + plateReaded.ip);
 
             var camera = await _alphadigiService.GetOrCreate(plateReaded.ip);
             if (camera == null)
@@ -83,9 +83,9 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                     Placa = plateReaded.plate,
                 };
             }
-            if(veiculo!=null && !plateReaded.isCad)
+            if (veiculo != null && !plateReaded.isCad)
             {
-                camera.UltimoId = veiculo.Id-1;
+                camera.UltimoId = veiculo.Id - 1;
                 camera.Estado = "SEND";
                 await _alphadigiService.Update(camera);
             }
@@ -170,8 +170,14 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
     public async Task<List<SerialData>> sendCreatPackageDisplay(Veiculo veiculo, string acesso, Alphadigi alphadigi)
     {
-        return await _displayService.recieveMessageAlphadigi(veiculo.Placa, acesso, alphadigi);
+        string placaFormatada = veiculo.Placa;
+        if (!string.IsNullOrEmpty(placaFormatada) && placaFormatada.Length > 3)
+        {
+            placaFormatada = placaFormatada.Insert(3, "-");
+        }
+        return await _displayService.RecieveMessageAlphadigi(placaFormatada, acesso, alphadigi);
     }
+
 
     public async Task<ResponsePlateDTO> handleReturn(string placa, string acesso, bool liberado, List<SerialData> messageData)
     {

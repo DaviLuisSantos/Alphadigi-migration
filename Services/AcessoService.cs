@@ -21,14 +21,14 @@ public class AcessoService
 
     public async Task<bool> saveVeiculoAcesso(Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp)
     {
-        /*
+        
         bool estaNoAntiPassback = await verifyPassBack(veiculo, alphadigi, timestamp);
 
         if (estaNoAntiPassback)
         {
             return false;
         }
-        */
+       
         string local = prepareLocalString(alphadigi);
         string dadosVeiculo = _veiculoService.prepareVeiculoDataString(veiculo);
         string unidade = veiculo.UnidadeNavigation == null || string.IsNullOrEmpty(veiculo.UnidadeNavigation.Nome) ? "NAO CADASTRADO" : veiculo.UnidadeNavigation.Nome;

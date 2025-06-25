@@ -4,227 +4,231 @@ using Alphadigi_migration.Models;
 using System.Drawing;
 using Alphadigi_migration.Data;
 using Microsoft.EntityFrameworkCore;
+using Alphadigi_migration.Repositories;
+using AutoMapper;
 
 namespace Alphadigi_migration.Services;
 
 public class DisplayService
 {
-    private readonly AppDbContextSqlite _contextSqlite;
+    private readonly MensagemDisplayService _mensagemDisplayService;
+    private readonly IMapper _mapper;
     private readonly ILogger<DisplayService> _logger;
 
-    public DisplayService(AppDbContextSqlite contextSqlite, ILogger<DisplayService> logger)
+    private const string Green = "green";
+    private const string Yellow = "yellow";
+    private const string Red = "red";
+    private const string WelcomeMessage = "BEM VINDO";
+    private const string Cadastrado = "CADASTRADO";
+    private const string NaoCadastrado = "NÃO CADASTRADO";
+    private const string NaoCadastradoFixed = "NAO CADADASTRADO";
+    private const string SemVaga = "S/VG";
+    private const string SemVagaFixed = "SEM VAGA";
+    private const string Liberado = "LIBERADO";
+    private const string SinalSerialData = "AGT//w8GAAEAAAAFJLc=";
+    private const int SinalSerialDataLen = 14;
+
+    public DisplayService(MensagemDisplayService mensagemDisplayService, IMapper mapper, ILogger<DisplayService> logger)
     {
-        _contextSqlite = contextSqlite;
+        _mensagemDisplayService = mensagemDisplayService;
         _logger = logger;
+        _mapper = mapper;
     }
 
-    public async Task<List<SerialData>> recieveMessageAlphadigi(string placa, string acesso, Alphadigi alphadigi)
+    public async Task<List<SerialData>> RecieveMessageAlphadigi(string placa, string acesso, Alphadigi alphadigi)
     {
-        var createPackageDisplayDTO = await prepareCreatePackage(placa, acesso, alphadigi);
-        var serialData = new List<SerialData>();
+        var serialDataList = new List<SerialData>();
+        var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
 
-        if (createPackageDisplayDTO != null)
+        if (packageDisplayList != null)
         {
-            var package = PrepareMessage(createPackageDisplayDTO);
-            var serialDataItem = new SerialData
+            var package = PrepareMessage(packageDisplayList);
+            serialDataList.Add(CreateSerialData(package));
+        }
+
+        if (acesso == Cadastrado)
+        {
+            serialDataList.Add(new SerialData
             {
                 serialChannel = 0,
-                data = package.Message,
-                dataLen = package.Size
-            };
+                data = SinalSerialData,
+                dataLen = SinalSerialDataLen
+            });
+        }
 
-            serialData.Add(serialDataItem);
-        }
-        if (acesso == "CADASTRADO")
-        {
-            var sinalSerial = new SerialData
-            {
-                serialChannel = 0,
-                data = "AGT//w8GAAEAAAAFJLc=",
-                dataLen = 14
-            };
-            serialData.Add(sinalSerial);
-        }
-        return serialData;
+        return serialDataList;
     }
 
-    public async Task<List<SerialData>> recieveMessageHearthbeatAlphadigi(string placa, string acesso, Alphadigi alphadigi)
+    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(string placa, string acesso, Alphadigi alphadigi)
     {
-        var createPackageDisplayDTO = await prepareCreatePackage(placa, acesso, alphadigi);
-        var serialData = new List<SerialData>();
+        var serialDataList = new List<SerialData>();
+        var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
 
-        if (createPackageDisplayDTO != null)
+        if (packageDisplayList != null)
         {
-            var package = PrepareMessage(createPackageDisplayDTO);
-            var serialDataItem = new SerialData
-            {
-                serialChannel = 0,
-                data = package.Message,
-                dataLen = package.Size
-            };
-
-            serialData.Add(serialDataItem);
+            var package = PrepareMessage(packageDisplayList);
+            serialDataList.Add(CreateSerialData(package));
         }
-        var dataUpdate = syncDateDisplay();
-        var serialDataItem2 = new SerialData
-        {
-            serialChannel = 0,
-            data = dataUpdate.Message,
-            dataLen = dataUpdate.Size
-        };
-        serialData.Add(serialDataItem2);
-        return serialData;
+
+        var syncPackage = SyncDateDisplay();
+        serialDataList.Add(CreateSerialData(syncPackage));
+
+        return serialDataList;
     }
 
-    public ReturnDataDisplayDTO PrepareMessage(List<CreatePackageDisplayDTO> createPackageDisplayDTO)
+    public ReturnDataDisplayDTO PrepareMessage(List<CreatePackageDisplayDTO> packageDisplayList)
     {
-        var package = Display.CreateMultiLinePackage(createPackageDisplayDTO);
-
-        // Convert the byte array to a hexadecimal string
-        var hexString = BitConverter.ToString(package).Replace("-", "");
-        _logger.LogInformation($"PACOTE GERADO: {hexString}");
-
-        var package64 = Convert.ToBase64String(package);
-
-        var returnDataDisplayDTO = new ReturnDataDisplayDTO
+        var package = Display.CreateMultiLinePackage(packageDisplayList);
+        LogPackage(package);
+        return new ReturnDataDisplayDTO
         {
-            Message = package64,
+            Message = Convert.ToBase64String(package),
             Size = package.Length
         };
-
-        return returnDataDisplayDTO;
     }
-    public ReturnDataDisplayDTO syncDateDisplay()
+
+    public ReturnDataDisplayDTO SyncDateDisplay()
     {
         var package = Display.CreateTimeSyncPackage();
-        // Convert the byte array to a hexadecimal string
-        var hexString = BitConverter.ToString(package).Replace("-", "");
-        _logger.LogInformation($"PACOTE GERADO: {hexString}");
-        var package64 = Convert.ToBase64String(package);
-        var returnDataDisplayDTO = new ReturnDataDisplayDTO
+        LogPackage(package);
+        return new ReturnDataDisplayDTO
         {
-            Message = package64,
+            Message = Convert.ToBase64String(package),
             Size = package.Length
         };
-        return returnDataDisplayDTO;
     }
 
-    public async Task<List<CreatePackageDisplayDTO>> prepareCreatePackage(string placa, string acesso, Alphadigi alphadigi)
+    public async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(string placa, string acesso, Alphadigi alphadigi)
     {
         if (alphadigi.LinhasDisplay == 0)
             return null;
 
-        string cor = "red";
-
-        switch (acesso)
+        var (displayColor, displayAcesso) = GetDisplayColorAndAcesso(placa, acesso);
+        var serialDataList = new List<CreatePackageDisplayDTO>
         {
-            case "":
-            case "CADASTRADO":
-                cor = "green";
-                acesso = "LIBERADO";
-                break;
-            case "NÃO CADASTRADO":
-                acesso = "NAO CADADASTRADO";
-                break;
-            case "S/VG":
-                cor = "yellow";
-                acesso = "SEM VAGA";
-                break;
-        }
-
-        if (acesso != "NAO CADADASTRADO" && placa == "BEM VINDO") cor = "yellow";
-
-        acesso = acesso == "" ? "LIBERADO" : acesso;
-        int tempo = 10, estilo = 0;
-
-        var serialData = new List<CreatePackageDisplayDTO>();
-
-        var packageDisplayPlaca = new CreatePackageDisplayDTO
-        {
-            Mensagem = placa,
-            Linha = 1,
-            Cor = placa == "BEM VINDO" ? "green" : "yellow",
-            Tempo = placa.Length > 8 ? 1 : tempo,
-            Estilo = placa.Length > 8 ? 15 : estilo
+            CreatePlacaDisplayDTO(placa)
         };
-        serialData.Add(packageDisplayPlaca);
 
-        MensagemDisplay Mensagem = new();
+        var lastMessage = await _mensagemDisplayService.FindLastMensagem(new FindLastMessage(placa, displayAcesso, alphadigi.Id));
+        var lastCamMessage = await _mensagemDisplayService.FindLastCamMensagem(alphadigi.Id);
 
-        var LastMessage = _contextSqlite.MensagemDisplay
-            .Where(x => x.Placa == placa)
-            .Where(x => x.Mensagem == acesso)
-            .Where(x => x.DataHora.AddSeconds(12) > DateTime.Now)
-            .Where(x => x.AlphadigiId == alphadigi.Id)
-            .OrderByDescending(x => x.Id)
-            .FirstOrDefault();
-
-        var LastCamMessage = _contextSqlite.MensagemDisplay
-            .Where(x => x.AlphadigiId == alphadigi.Id)
-            .OrderByDescending(x => x.Id)
-            .FirstOrDefault();
-
-
-        if (LastMessage == null || (LastCamMessage != null && LastCamMessage.Id != LastMessage.Id && LastCamMessage.Placa != placa))
-
+        if (ShouldAddAcessoLine(lastMessage, lastCamMessage, placa))
         {
-            if (acesso.Length > 8)
-            {
-                estilo = 15;
-                tempo = 1;
-            }
-            var packageDisplayAcesso = new CreatePackageDisplayDTO
-            {
-                Mensagem = acesso,
-                Linha = 2,
-                Cor = cor,
-                Tempo = tempo,
-                Estilo = estilo
-            };
-            serialData.Add(packageDisplayAcesso);
-            MensagemDisplay mensagem = new()
-            {
-                Placa = placa,
-                Mensagem = acesso,
-                DataHora = DateTime.Now,
-                AlphadigiId = alphadigi.Id,
-            };
-            await SaveMensagemDisplay(mensagem);
+            serialDataList.Add(CreateAcessoDisplayDTO(displayAcesso, displayColor));
+            await SaveMensagemDisplayAsync(placa, displayAcesso, alphadigi.Id);
         }
-        else if (LastCamMessage.Placa == "BEM VINDO")
+        else if (lastCamMessage?.Placa == WelcomeMessage)
         {
             return null;
         }
+
         if (alphadigi.LinhasDisplay == 4)
         {
-            var packageDisplayData = new CreatePackageDisplayDTO
-            {
-                Mensagem = "`D-`M-`Y",
-                Linha = 3,
-                Cor = "red",
-                Tempo = 0,
-                Estilo = 0
-            };
-            serialData.Add(packageDisplayData);
-
-            var packageDisplayHora = new CreatePackageDisplayDTO
-            {
-                Mensagem = "`H:`N:`S",
-                Linha = 4,
-                Cor = "yellow",
-                Tempo = 0,
-                Estilo = 0
-            };
-            serialData.Add(packageDisplayHora);
+            serialDataList.Add(CreateDateDisplayDTO());
+            serialDataList.Add(CreateTimeDisplayDTO());
         }
 
-        return serialData;
+        return serialDataList;
     }
 
-    public async Task<bool> SaveMensagemDisplay(MensagemDisplay mensagem)
+    #region Private Helper Methods
+
+    private static SerialData CreateSerialData(ReturnDataDisplayDTO package)
     {
-        _contextSqlite.MensagemDisplay.Add(mensagem);
-        await _contextSqlite.SaveChangesAsync();
-        return true;
+        return new SerialData
+        {
+            serialChannel = 0,
+            data = package.Message,
+            dataLen = package.Size
+        };
     }
+
+    private void LogPackage(byte[] package)
+    {
+        var hexString = BitConverter.ToString(package).Replace("-", "");
+        _logger.LogInformation($"PACOTE GERADO: {hexString}");
+    }
+
+    private static (string Color, string Acesso) GetDisplayColorAndAcesso(string placa, string acesso)
+    {
+        return acesso switch
+        {
+            "" or Cadastrado => (Green, Liberado),
+            NaoCadastrado => (Red, NaoCadastradoFixed),
+            SemVaga => (Yellow, SemVagaFixed),
+            _ => (placa == WelcomeMessage ? Yellow : Red, acesso == "" ? Liberado : acesso)
+        };
+    }
+
+    private static CreatePackageDisplayDTO CreatePlacaDisplayDTO(string placa)
+    {
+        int tempo = placa.Length > 8 ? 1 : 10;
+        int estilo = placa.Length > 8 ? 15 : 0;
+        return new CreatePackageDisplayDTO
+        {
+            Mensagem = placa,
+            Linha = 1,
+            Cor = placa == WelcomeMessage ? Green : Yellow,
+            Tempo = tempo,
+            Estilo = estilo
+        };
+    }
+
+    private static CreatePackageDisplayDTO CreateAcessoDisplayDTO(string acesso, string cor)
+    {
+        int tempo = acesso.Length > 8 ? 1 : 10;
+        int estilo = acesso.Length > 8 ? 15 : 0;
+        return new CreatePackageDisplayDTO
+        {
+            Mensagem = acesso,
+            Linha = 2,
+            Cor = cor,
+            Tempo = tempo,
+            Estilo = estilo
+        };
+    }
+
+    private static CreatePackageDisplayDTO CreateDateDisplayDTO()
+    {
+        return new CreatePackageDisplayDTO
+        {
+            Mensagem = "`D-`M-`Y",
+            Linha = 3,
+            Cor = Red,
+            Tempo = 0,
+            Estilo = 0
+        };
+    }
+
+    private static CreatePackageDisplayDTO CreateTimeDisplayDTO()
+    {
+        return new CreatePackageDisplayDTO
+        {
+            Mensagem = "`H:`N:`S",
+            Linha = 4,
+            Cor = Yellow,
+            Tempo = 0,
+            Estilo = 0
+        };
+    }
+
+    private static bool ShouldAddAcessoLine(MensagemDisplay lastMessage, MensagemDisplay lastCamMessage, string placa)
+    {
+        return lastMessage == null ||
+               (lastCamMessage != null && lastCamMessage.Id != lastMessage.Id && lastCamMessage.Placa != placa);
+    }
+
+    private async Task SaveMensagemDisplayAsync(string placa, string acesso, int alphadigiId)
+    {
+        var mensagem = new MensagemDisplay
+        {
+            Placa = placa,
+            Mensagem = acesso,
+            DataHora = DateTime.Now,
+            AlphadigiId = alphadigiId
+        };
+        await _mensagemDisplayService.SaveMensagemDisplay(mensagem);
+    }
+
+    #endregion
 }

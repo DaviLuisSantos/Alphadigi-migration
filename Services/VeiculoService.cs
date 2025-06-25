@@ -8,7 +8,7 @@ namespace Alphadigi_migration.Services;
 public interface IVeiculoService
 {
     Task<List<Veiculo>> GetVeiculos();
-    Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSend(int lastId); 
+    Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSend(int lastId);
     Task<Veiculo> getByPlate(string plate);
     Task<bool> UpdateVagaVeiculo(int id, bool dentro);
     Task<bool> UpdateLastAccess(LastAcessUpdateVeiculoDTO lastAccess);
@@ -35,13 +35,16 @@ public class VeiculoService : IVeiculoService
     {
         _logger.LogInformation($"GetVeiculosSend chamado com lastId: {lastId}");
         return await _contextFirebird.Veiculo
-            .Where(v => v.Id > lastId)
+            .Where(v => v.Id > lastId
+                && v.Placa != null
+                && v.Placa.Trim().Length == 7
+                && !EF.Functions.Like(v.Placa.Trim(), "% %"))
             .OrderBy(v => v.Id)
-            .Take(1000)
+            .Take(50)
             .Select(v => new VeiculoInfoSendAlphadigi
             {
                 Id = v.Id,
-                Placa = v.Placa
+                Placa = v.Placa.Trim()
             })
             .ToListAsync();
     }
@@ -77,7 +80,7 @@ public class VeiculoService : IVeiculoService
         try
         {
             //Find não rastreia as informações, por isso estávamos tendo problemas. Usamos o FirstOrDefault
-            var veiculo = await _contextFirebird.Veiculo.FirstOrDefaultAsync(x=>x.Id==id);
+            var veiculo = await _contextFirebird.Veiculo.FirstOrDefaultAsync(x => x.Id == id);
             if (veiculo == null)
             {
                 _logger.LogWarning($"Veículo com ID {id} não encontrado.");
@@ -110,7 +113,7 @@ public class VeiculoService : IVeiculoService
             veiculo.IpCamUltAcesso = lastAccess.IpCamera;
             veiculo.DataHoraUltAcesso = lastAccess.TimeAccess;
             _contextFirebird.Veiculo.Update(veiculo);
-             await _contextFirebird.SaveChangesAsync();
+            await _contextFirebird.SaveChangesAsync();
             _logger.LogInformation($"Veículo com ID {lastAccess.IdVeiculo} atualizado com sucesso.");
             return true;
         }

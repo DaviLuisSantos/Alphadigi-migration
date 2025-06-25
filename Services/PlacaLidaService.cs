@@ -40,7 +40,7 @@ public class PlacaLidaService : IPlacaLidaService
         string? placa = logPayload.Search;
         DateTime data = DateTime.ParseExact(logPayload.Date, "yyyy-MM-dd", null);
         int page = logPayload.Page;
-        int pageSize = logPayload.PageSize;
+        int pageSize = logPayload.PageSize; 
 
         var query = _contextSqlite.PlacaLida.AsQueryable();
 

@@ -3,6 +3,7 @@ using Alphadigi_migration.Models;
 using Alphadigi_migration.DTO.Alphadigi;
 using Alphadigi_migration.DTO.Veiculo;
 using Alphadigi_migration.DTO.Display;
+using Alphadigi_migration.Interfaces;
 
 namespace Alphadigi_migration.Services;
 
@@ -29,11 +30,11 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             ILogger<AlphadigiHearthBeatService> logger,
             IVeiculoAccessProcessor veiculoAccessProcessor,
             IPlacaLidaService placaLidaService,
-            DisplayService displayService) // Adicione o logger
+            DisplayService displayService)
     {
         _alphadigiService = alphadigiService;
         _veiculoService = veiculoService;
-        _logger = logger; // Salve o logger
+        _logger = logger;
         _veiculoAccessProcessor = veiculoAccessProcessor;
         _acessoService = acessoService;
         _placaLidaService = placaLidaService;
@@ -83,10 +84,12 @@ public class AlphadigiPlateService : IAlphadigiPlateService
                     Placa = plateReaded.plate,
                 };
             }
-            if (veiculo != null && !plateReaded.isCad)
+            if (veiculo != null && !plateReaded.isCad && veiculoCadastrado)
             {
-                camera.UltimoId = veiculo.Id - 1;
-                camera.Estado = "SEND";
+                //07/02/2025 - Retirado estava entrando em envio toda hora, atrapalhando a mensagem stand by do display
+                //camera.UltimoId = veiculo.Id - 1;
+                //camera.Estado = "SEND";
+                camera.UltimoId = 0;
                 await _alphadigiService.Update(camera);
             }
 
@@ -114,7 +117,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         catch (Exception e)
         {
             _logger.LogError(e, $"Erro em ProcessPlate.");
-            throw; //Sempre relance a exceção caso não consiga resolver!
+            throw;
         }
     }
 

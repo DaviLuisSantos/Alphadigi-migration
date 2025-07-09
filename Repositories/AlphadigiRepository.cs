@@ -138,16 +138,9 @@ public class AlphadigiRepository : IAlphadigiRepository
     {
         try
         {
-            var existingCamera = await _contextSqlite.Alphadigi.FindAsync(camera.Id);
-            if (existingCamera == null)
-            {
-                return null;
-            }
-
-            _contextSqlite.Entry(existingCamera).CurrentValues.SetValues(camera);
-
+            _contextSqlite.Update(camera);
             await _contextSqlite.SaveChangesAsync();
-            return existingCamera;
+            return camera;
         }
         catch (Exception ex)
         {

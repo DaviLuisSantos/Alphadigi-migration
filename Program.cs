@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Alphadigi_migration.Data;
 using Alphadigi_migration.Services;
 using Alphadigi_migration.Repositories;
+using Alphadigi_migration.Interfaces;
 using Carter;
 using Carter.ResponseNegotiators.SystemTextJson;
 using Alphadigi_migration;

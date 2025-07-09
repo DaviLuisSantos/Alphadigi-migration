@@ -16,13 +16,15 @@ public class DailyTaskSchedulerService
 
     public void Start()
     {
-        // Calcula o tempo até a próxima meia-noite
         DateTime now = DateTime.Now;
-        DateTime nextMidnight = now.Date.AddDays(1);
-        TimeSpan timeUntilMidnight = nextMidnight - now;
+        DateTime next3AM = now.Date.AddHours(3);
+        if (now >= next3AM)
+        {
+            next3AM = next3AM.AddDays(1);
+        }
+        TimeSpan timeUntil3AM = next3AM - now;
 
-        // Cria e inicia o timer
-        timer = new Timer(ExecuteTask, null, timeUntilMidnight, TimeSpan.FromDays(1));
+        timer = new Timer(ExecuteTask, null, timeUntil3AM, TimeSpan.FromDays(1));
     }
 
     public void Stop()
@@ -32,13 +34,15 @@ public class DailyTaskSchedulerService
 
     private void ExecuteTask(object state)
     {
-        // Executa a tarefa
         taskToExecute?.Invoke();
 
-        // Recalcula e ajusta o timer para a próxima meia-noite (opcional, mas pode ser mais preciso)
         DateTime now = DateTime.Now;
-        DateTime nextMidnight = now.Date.AddDays(1);
-        TimeSpan timeUntilMidnight = nextMidnight - now;
-        timer.Change(timeUntilMidnight, TimeSpan.FromDays(1));
+        DateTime next3AM = now.Date.AddHours(3);
+        if (now >= next3AM)
+        {
+            next3AM = next3AM.AddDays(1);
+        }
+        TimeSpan timeUntil3AM = next3AM - now;
+        timer.Change(timeUntil3AM, TimeSpan.FromDays(1));
     }
 }

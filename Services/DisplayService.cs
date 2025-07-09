@@ -112,8 +112,12 @@ public class DisplayService
         var lastMessage = await _mensagemDisplayService.FindLastMensagem(new FindLastMessage(placa, displayAcesso, alphadigi.Id));
         var lastCamMessage = await _mensagemDisplayService.FindLastCamMensagem(alphadigi.Id);
 
+       
+
+        // Only save the message if needed
         if (ShouldAddAcessoLine(lastMessage, lastCamMessage, placa))
         {
+            // Always add the access/status line
             serialDataList.Add(CreateAcessoDisplayDTO(displayAcesso, displayColor));
             await SaveMensagemDisplayAsync(placa, displayAcesso, alphadigi.Id);
         }
@@ -215,7 +219,7 @@ public class DisplayService
     private static bool ShouldAddAcessoLine(MensagemDisplay lastMessage, MensagemDisplay lastCamMessage, string placa)
     {
         return lastMessage == null ||
-               (lastCamMessage != null && lastCamMessage.Id != lastMessage.Id && lastCamMessage.Placa != placa);
+               (lastCamMessage.Id == 0 || (lastCamMessage != null && lastCamMessage.Id != lastMessage.Id && lastCamMessage.Placa != placa));
     }
 
     private async Task SaveMensagemDisplayAsync(string placa, string acesso, int alphadigiId)

@@ -1,8 +1,10 @@
 ﻿using Alphadigi_migration.DTO.Alphadigi;
 using Alphadigi_migration.Factories;
+using Alphadigi_migration.Interfaces;
 using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace Alphadigi_migration;
@@ -76,6 +78,15 @@ public class AlphadigiEndpoint : CarterModule
                 {
                     case HeartbeatDTO dto:
                         var resposta = await hearthbeatService.ProcessHearthBeat(ipAddress);
+                        if (resposta is ResponseHeathbeatDTO)
+                        {
+                            var options = new JsonSerializerOptions
+                            {
+                                PropertyNamingPolicy = null,
+                                WriteIndented = true
+                            };
+                            return Results.Json(resposta, options);
+                        }
                         return Results.Json(resposta);
 
                     case ReturnAddPlateDTO dto:

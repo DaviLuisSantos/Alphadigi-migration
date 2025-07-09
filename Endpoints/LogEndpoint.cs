@@ -2,7 +2,8 @@
 using Carter;
 using Microsoft.Extensions.Logging; // Adicionar using para ILogger
 using System.Text.Json;
-using Microsoft.AspNetCore.Http; // Adicionar using para IResult e StatusCodes
+using Microsoft.AspNetCore.Http;
+using Alphadigi_migration.Interfaces; // Adicionar using para IResult e StatusCodes
 
 namespace Alphadigi_migration.Endpoints
 {

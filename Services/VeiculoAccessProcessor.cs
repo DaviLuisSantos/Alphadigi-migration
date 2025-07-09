@@ -3,13 +3,9 @@ using Alphadigi_migration.Data;
 using Alphadigi_migration.DTO.MonitorAcessoLinear;
 using Alphadigi_migration.DTO.Veiculo;
 using Microsoft.AspNetCore.Components.Web;
+using Alphadigi_migration.Interfaces;
 
 namespace Alphadigi_migration.Services;
-
-public interface IVeiculoAccessProcessor
-{
-    Task<(bool ShouldReturn, string Acesso)> ProcessVeiculoAccessAsync(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp);
-}
 
 public class VeiculoAccessProcessor : IVeiculoAccessProcessor
 {

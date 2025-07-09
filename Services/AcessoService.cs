@@ -1,34 +1,37 @@
 ﻿using Alphadigi_migration.Data;
+using Alphadigi_migration.Interfaces;
 using Alphadigi_migration.Models;
+using Alphadigi_migration.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Alphadigi_migration.Services;
 
 public class AcessoService
 {
-    private readonly AppDbContextSqlite _contextSqlite;
-    private readonly AppDbContextFirebird _contextFirebird;
+    private readonly AcessoRepository _acessoRepository;
     private readonly IVeiculoService _veiculoService;
     private readonly IAlphadigiService _alphadigi;
 
-    public AcessoService(AppDbContextSqlite contextSqlite, AppDbContextFirebird contextFirebird, IVeiculoService veiculoService, IAlphadigiService alphadigi)
+    public AcessoService(AcessoRepository acessoRepository, IVeiculoService veiculoService, IAlphadigiService alphadigi)
     {
-        _contextSqlite = contextSqlite;
-        _contextFirebird = contextFirebird;
+        _acessoRepository = acessoRepository;
         _veiculoService = veiculoService;
         _alphadigi = alphadigi;
     }
 
     public async Task<bool> saveVeiculoAcesso(Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp)
     {
-        
-        bool estaNoAntiPassback = await verifyPassBack(veiculo, alphadigi, timestamp);
+        bool estaNoAntiPassback = false;
+        if (veiculo.Id != 0)
+        {
+            estaNoAntiPassback = await verifyPassBack(veiculo, alphadigi, timestamp);
+        }
 
         if (estaNoAntiPassback)
         {
             return false;
         }
-       
+
         string local = prepareLocalString(alphadigi);
         string dadosVeiculo = _veiculoService.prepareVeiculoDataString(veiculo);
         string unidade = veiculo.UnidadeNavigation == null || string.IsNullOrEmpty(veiculo.UnidadeNavigation.Nome) ? "NAO CADASTRADO" : veiculo.UnidadeNavigation.Nome;
@@ -41,8 +44,7 @@ public class AcessoService
             DadosVeiculo = dadosVeiculo,
             GrupoNome = ""
         };
-        _contextFirebird.Acesso.Add(acesso);
-        await _contextFirebird.SaveChangesAsync();
+        await _acessoRepository.SaveAcesso(acesso);
         return true;
     }
 
@@ -58,21 +60,19 @@ public class AcessoService
         {
             return false;
         }
-
-        tempoAntipassback = tempoAntipassback ?? TimeSpan.FromSeconds(10);
+        tempoAntipassback = (tempoAntipassback == null || tempoAntipassback == TimeSpan.Zero) ? TimeSpan.FromSeconds(10) : tempoAntipassback;
         var timeLimit = timestamp - tempoAntipassback;
 
-        var recentAccesses = await _contextFirebird.Acesso
-            .Where(a => a.Placa == placa && a.DataHora >= timeLimit)
-            .ToListAsync();
+        var recentAccesses = await _acessoRepository.VerifyAntiPassback(veiculo, timeLimit);
 
-        return recentAccesses.Any();
+        return recentAccesses != null;
     }
 
     private string prepareLocalString(Alphadigi alphadigi)
     {
-        if (alphadigi == null) { 
-        return "Sem local";
+        if (alphadigi == null)
+        {
+            return "Sem local";
         }
         else
         {

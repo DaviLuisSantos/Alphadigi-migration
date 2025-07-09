@@ -4,13 +4,10 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Alphadigi_migration.Interfaces;
 
 namespace Alphadigi_migration.Services
 {
-    public interface IAccessHandler
-    {
-        Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi alphadigi);
-    }
 
     public class VisitaAccessHandler : IAccessHandler
     {

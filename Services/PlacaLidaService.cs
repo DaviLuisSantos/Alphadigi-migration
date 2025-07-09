@@ -1,14 +1,8 @@
 ﻿using Alphadigi_migration.Data;
 using Alphadigi_migration.DTO.PlacaLida;
+using Alphadigi_migration.Interfaces;
 using Alphadigi_migration.Models;
 using Microsoft.EntityFrameworkCore;
-
-public interface IPlacaLidaService
-{
-    Task<bool> SavePlacaLida(PlacaLida placaLida);
-    Task<bool> UpdatePlacaLida(PlacaLida placaLida);
-    Task<List<PlacaLida>> GetDatePlate(LogGetDatePlateDTO logPayload);
-}
 
 public class PlacaLidaService : IPlacaLidaService
 {

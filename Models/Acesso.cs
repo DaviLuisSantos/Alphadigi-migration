@@ -21,4 +21,6 @@ public class Acesso
     public string DadosVeiculo { get; set; }
     [Column("GRUPO_NOME")]
     public string GrupoNome { get; set; }
+    [Column("FOTO")]
+    public string? Foto { get; set; }
 }

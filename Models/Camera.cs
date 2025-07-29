@@ -19,5 +19,8 @@ public class Camera
     public string? Direcao { get; set; }
     [Column("ID_AREA")]
     public int IdArea { get; set; }
+    [Column("FOTO_EVENTO")]
+    public bool? FotoEvento { get; set; } = false;
     public Area Area { get; set; }
+
 }

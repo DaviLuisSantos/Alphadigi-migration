@@ -70,6 +70,7 @@ public class AlphadigiRepository : IAlphadigiRepository
                 AreaId = cameraFire.IdArea,
                 Sentido = cameraFire.Direcao == "ENTRADA",
                 Estado = "DELETE",
+                FotoEvento = cameraFire.FotoEvento
             };
             _contextSqlite.Alphadigi.Add(camera);
         }

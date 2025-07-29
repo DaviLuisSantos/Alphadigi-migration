@@ -2,7 +2,8 @@
 using Alphadigi_migration.Interfaces;
 using Alphadigi_migration.Models;
 using Alphadigi_migration.Repositories;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using SkiaSharp;
 
 namespace Alphadigi_migration.Services;
 
@@ -19,17 +20,21 @@ public class AcessoService
         _alphadigi = alphadigi;
     }
 
-    public async Task<bool> saveVeiculoAcesso(Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp)
+    public async Task<bool> saveVeiculoAcesso(Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp, string? imagem)
     {
         bool estaNoAntiPassback = false;
         if (veiculo.Id != 0)
         {
             estaNoAntiPassback = await verifyPassBack(veiculo, alphadigi, timestamp);
         }
-
         if (estaNoAntiPassback)
         {
             return false;
+        }
+        string caminhoImg = null;
+        if (imagem != null && alphadigi.FotoEvento == true)
+        {
+            caminhoImg = await SaveImage(imagem, veiculo.Placa);
         }
 
         string local = prepareLocalString(alphadigi);
@@ -42,7 +47,8 @@ public class AcessoService
             Unidade = unidade,
             Placa = veiculo.Placa,
             DadosVeiculo = dadosVeiculo,
-            GrupoNome = ""
+            GrupoNome = "",
+            Foto = caminhoImg
         };
         await _acessoRepository.SaveAcesso(acesso);
         return true;
@@ -68,7 +74,7 @@ public class AcessoService
         return recentAccesses != null;
     }
 
-    private string prepareLocalString(Alphadigi alphadigi)
+    public string prepareLocalString(Alphadigi alphadigi)
     {
         if (alphadigi == null)
         {
@@ -79,6 +85,49 @@ public class AcessoService
             string sentido = alphadigi.Sentido ? "ENTRADA" : "SAIDA";
             return $"{alphadigi.Area.Nome} - {alphadigi.Nome} - {sentido}";
         }
+    }
+
+    public async Task<string> SaveImage(string foto64, string placa)
+    {
+        if (string.IsNullOrEmpty(foto64))
+            throw new ArgumentException("String Base64 inválida");
+
+        byte[] imageBytes = Convert.FromBase64String(foto64);
+
+        using var inputStream = new SKMemoryStream(imageBytes);
+        using var original = SKBitmap.Decode(inputStream);
+
+        var data = DateTime.Now;
+
+        // Parâmetros fixos
+        int quality = 75;                       // Aumentado de 20 para 75
+        float scale = 1.0f;                     // Mantém o tamanho original
+
+        int newWidth = (int)(original.Width * scale);
+        int newHeight = (int)(original.Height * scale);
+
+        using var resizedBitmap = original
+            .Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.High);
+
+        using var image = SKImage.FromBitmap(resizedBitmap);
+        using var encoded = image.Encode(SKEncodedImageFormat.Jpeg, quality);
+        byte[] finalImageBytes = encoded.ToArray();
+
+        // Caminho e nome do arquivo
+        var ano = data.Year;
+        var mes = data.Month;
+        string fileName = $"{data:yyyyddMM_HHmmssfff}.jpg";
+        string relativePath = $"FOTOLPR/{ano}/{mes}";
+        string rootPath = $"{relativePath}/{fileName}";
+        string directoryPath = Path.GetFullPath($"../../FOTOVISITA/{relativePath}");
+        string fullPath = Path.Combine(directoryPath, fileName);
+
+        if (!Directory.Exists(directoryPath))
+            Directory.CreateDirectory(directoryPath);
+
+        await File.WriteAllBytesAsync(fullPath, finalImageBytes);
+
+        return rootPath;
     }
 
 }

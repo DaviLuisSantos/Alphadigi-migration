@@ -36,7 +36,7 @@ var parser = new FileIniDataParser();
 IniData data = parser.ReadFile(builder.Configuration.GetConnectionString("ConfigConnection"));
 string host = data["BD"]["host"];
 
-if (host != "localhost")
+if (host != "localhost" &&  host != "Localhost")
 {
     throw new InvalidOperationException("The server can only be started on localhost.");
 }

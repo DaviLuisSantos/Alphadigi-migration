@@ -4,6 +4,7 @@ using Alphadigi_migration.DTO.Alphadigi;
 using Alphadigi_migration.DTO.Veiculo;
 using Alphadigi_migration.DTO.Display;
 using Alphadigi_migration.Interfaces;
+using Alphadigi_migration.DTO.PlacaLida;
 
 namespace Alphadigi_migration.Services;
 
@@ -96,7 +97,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             Log.Cadastrado = veiculoCadastrado;
             await _placaLidaService.UpdatePlacaLida(Log);
 
-            var accessResult = await sendVeiculoAccessProcessor(veiculo, camera, timeStamp, Log);
+            var accessResult = await sendVeiculoAccessProcessor(veiculo, camera, timeStamp, Log, plateReaded.carImage);
             _logger.LogInformation($"Accesso do veículo com a placa {plateReaded.plate} com resultado {accessResult}");
 
             Log.Liberado = accessResult.ShouldReturn;
@@ -155,14 +156,14 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         return true;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> sendVeiculoAccessProcessor(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp, PlacaLida log)
+    public async Task<(bool ShouldReturn, string Acesso)> sendVeiculoAccessProcessor(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp, PlacaLida log, string? imagem)
     {
         (bool shouldReturn, string acesso) = await _veiculoAccessProcessor.ProcessVeiculoAccessAsync(veiculo, alphadigi, timestamp);
 
         if (veiculo.Placa != null)
         {
             await _alphadigiService.UpdateLastPlate(alphadigi, veiculo.Placa, timestamp);
-            await _acessoService.saveVeiculoAcesso(alphadigi, veiculo, timestamp);
+            await _acessoService.saveVeiculoAcesso(alphadigi, veiculo, timestamp, imagem);
             _logger.LogInformation($"Veículo {veiculo.Placa} atualizado no banco de dados.");
         }
 
@@ -180,7 +181,6 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         }
         return await _displayService.RecieveMessageAlphadigi(placaFormatada, acesso, alphadigi);
     }
-
 
     public async Task<ResponsePlateDTO> handleReturn(string placa, string acesso, bool liberado, List<SerialData> messageData)
     {

@@ -28,6 +28,15 @@ namespace Alphadigi_migration.Data
              .WithMany()
              .HasForeignKey(v => v.Unidade)
              .HasPrincipalKey(u => u.Nome);
+
+            modelBuilder.Entity<Camera>()
+           .Property(c => c.FotoEvento)
+           .HasColumnName("FOTO_EVENTO")
+           .HasConversion(
+                v => v.HasValue ? (v.Value ? 1 : 0) : 0,
+                v => v == 1
+            );
+
         }
     }
 }

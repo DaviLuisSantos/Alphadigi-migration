@@ -33,4 +33,5 @@ public class Alphadigi
     public DateTime? UltimaHora { get; set; }
     public int LinhasDisplay { get; set; } = 2;
     public bool Enviado { get; set; } = false;
+    public bool? FotoEvento { get; set; } = false;
 }

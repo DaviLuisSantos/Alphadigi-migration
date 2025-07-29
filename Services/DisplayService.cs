@@ -100,9 +100,8 @@ public class DisplayService
 
     public async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(string placa, string acesso, Alphadigi alphadigi)
     {
-        if (alphadigi.LinhasDisplay == 0)
+        if (alphadigi.LinhasDisplay == 0 && placa == WelcomeMessage)
             return null;
-
         var (displayColor, displayAcesso) = GetDisplayColorAndAcesso(placa, acesso);
         var serialDataList = new List<CreatePackageDisplayDTO>
         {
@@ -112,7 +111,7 @@ public class DisplayService
         var lastMessage = await _mensagemDisplayService.FindLastMensagem(new FindLastMessage(placa, displayAcesso, alphadigi.Id));
         var lastCamMessage = await _mensagemDisplayService.FindLastCamMensagem(alphadigi.Id);
 
-       
+
 
         // Only save the message if needed
         if (ShouldAddAcessoLine(lastMessage, lastCamMessage, placa))

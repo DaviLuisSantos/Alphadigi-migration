@@ -46,7 +46,7 @@ public class UdpBroadcastService
 
                 await socket.SendToAsync(new ArraySegment<byte>(buffer), SocketFlags.None, endPoint);
 
-                _logger.LogInformation($"Broadcast message sent to {broadcastAddress}:{port}");
+                _logger.LogInformation($"//---------------------Broadcast message sent to {broadcastAddress}:{port}\"---------------------//");
             }
         }
         catch (Exception ex)

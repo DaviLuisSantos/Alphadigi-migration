@@ -3,7 +3,9 @@ using Alphadigi_migration.Interfaces;
 using Alphadigi_migration.Models;
 using Alphadigi_migration.Repositories;
 using Alphadigi_migration.Services;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Alphadigi_migration.Extensions;
 
@@ -38,7 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<MensagemDisplayService>();
         services.AddScoped<MensagemDisplayRepository>();
 
-        services.AddAutoMapper(typeof(MappingProfile));
+        services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
         services.AddCors(options =>
         {

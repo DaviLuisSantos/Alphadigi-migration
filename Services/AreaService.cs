@@ -25,24 +25,34 @@ public class AreaService : IAreaService
 
     public async Task<bool> SyncAreas()
     {
+        _logger.LogInformation("SyncAreas chamado");
 
-        _logger.LogInformation("SyncAreas chamado"); //Adicione logging
-        var areas = await _contextFirebird.Area.ToListAsync();
-        foreach (var area in areas)
+        try
         {
-            var areaSqlite = await _contextSqlite.Areas.FindAsync(area.Id);
-            if (areaSqlite == null)
-            {
-                _contextSqlite.Areas.Add(area);
-            }
-            else
-            {
-                areaSqlite.Nome = area.Nome;
-                _contextSqlite.Areas.Update(areaSqlite);
-            }
-        }
-        await _contextSqlite.SaveChangesAsync();
-        return true;
+            var areas = await _contextFirebird.Area.ToListAsync();
 
+            foreach (var area in areas)
+            {
+                var areaSqlite = await _contextSqlite.Areas.FindAsync(area.Id);
+                if (areaSqlite == null)
+                {
+                    _contextSqlite.Areas.Add(area);
+                }
+                else
+                {
+                    areaSqlite.Nome = area.Nome;
+                    _contextSqlite.Areas.Update(areaSqlite);
+                }
+            }
+
+            await _contextSqlite.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao sincronizar áreas");
+            return false;
+        }
     }
+
 }

@@ -29,6 +29,11 @@ namespace Alphadigi_migration.Data
              .HasForeignKey(v => v.Unidade)
              .HasPrincipalKey(u => u.Nome);
 
+            modelBuilder.Entity<Veiculo>()
+                .HasOne(v => v.Rota)
+                .WithMany()
+                .HasForeignKey(v => v.IdRota);
+
             modelBuilder.Entity<Camera>()
            .Property(c => c.FotoEvento)
            .HasColumnName("FOTO_EVENTO")

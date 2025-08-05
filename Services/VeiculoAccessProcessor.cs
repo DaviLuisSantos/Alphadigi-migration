@@ -42,6 +42,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
             bool isVisita = (area.EntradaVisita || area.SaidaVisita) && isVisitante;
             bool isSaidaSempreAbre = area.SaidaSempreAbre && !alphadigi.Sentido;
             bool isControlaVaga = area.ControlaVaga;
+            bool isRotaValida = veiculo.IdRota == null || veiculo.Rota?.CameraId == alphadigi.Id;
 
             if (isVisitante)
             {
@@ -77,7 +78,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
                 {
                     _logger.LogInformation($"Processando entrada.");
                     var vagas = await _unidadeService.GetUnidadeInfo(veiculo.UnidadeNavigation.Id);
-                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro))
+                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro) && isRotaValida)
                     {
                         await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
                         acesso = "CADASTRADO";
@@ -101,9 +102,12 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
                 }
                 else // Entrada
                 {
+                    if (isRotaValida)
+                    {
                     await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
                     acesso = "CADASTRADO";
                     shouldReturn = true;
+                    }
                 }
             }
 
@@ -117,7 +121,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
                 {
                     await sendUpdateLastAccess(alphadigi.Ip, veiculo.Id, timestamp);
                 }
-                
+
                 await _contextFirebird.SaveChangesAsync();
                 _logger.LogInformation($"Informações do veículo {veiculo.Placa} Atualizada.");
             }

@@ -1,18 +1,23 @@
-using Microsoft.EntityFrameworkCore;
+using Alphadigi_migration;
 using Alphadigi_migration.Data;
-using Alphadigi_migration.Services;
-using Alphadigi_migration.Repositories;
+using Alphadigi_migration.Extensions;
+using Alphadigi_migration.Extensions.Options;
 using Alphadigi_migration.Interfaces;
+using Alphadigi_migration.Repositories;
+using Alphadigi_migration.Services;
 using Carter;
 using Carter.ResponseNegotiators.SystemTextJson;
-using Alphadigi_migration;
-using Serilog;
-using Serilog.Filters;
 using IniParser;
 using IniParser.Model;
-using Alphadigi_migration.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<PlateComparisonSettings>(
+    builder.Configuration.GetSection("PlateComparisonSettings")
+);
 
 builder.Services.AddCarter(configurator: c =>
     c.WithResponseNegotiator<SystemTextJsonResponseNegotiator>()
@@ -36,7 +41,7 @@ var parser = new FileIniDataParser();
 IniData data = parser.ReadFile(builder.Configuration.GetConnectionString("ConfigConnection"));
 string host = data["BD"]["host"];
 
-if (host != "localhost" &&  host != "Localhost")
+if (host != "localhost" && host != "Localhost")
 {
     throw new InvalidOperationException("The server can only be started on localhost.");
 }

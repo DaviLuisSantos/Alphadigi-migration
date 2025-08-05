@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Alphadigi_migration.Models;
+namespace Alphadigi_migration.Models;   
 
 [Table("LPR_MT_CAMERAS")]
 public class Camera

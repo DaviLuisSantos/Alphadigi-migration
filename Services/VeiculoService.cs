@@ -1,7 +1,9 @@
 ﻿using Alphadigi_migration.Data;
+using Alphadigi_migration.DTO.Veiculo;
+using Alphadigi_migration.Extensions.Options;
 using Alphadigi_migration.Models;
 using Microsoft.EntityFrameworkCore;
-using Alphadigi_migration.DTO.Veiculo;
+using Microsoft.Extensions.Options;
 
 namespace Alphadigi_migration.Services;
 
@@ -18,11 +20,13 @@ public class VeiculoService : IVeiculoService
 {
     private readonly AppDbContextFirebird _contextFirebird;
     private readonly ILogger<VeiculoService> _logger;
+    private readonly PlateComparisonSettings _plateSettings;
 
-    public VeiculoService(AppDbContextFirebird context, ILogger<VeiculoService> logger)
+    public VeiculoService(AppDbContextFirebird context, ILogger<VeiculoService> logger, IOptions<PlateComparisonSettings> plateSettings)
     {
         _contextFirebird = context;
         _logger = logger;
+        _plateSettings = plateSettings.Value;
     }
 
     public async Task<List<Veiculo>> GetVeiculos()
@@ -52,26 +56,26 @@ public class VeiculoService : IVeiculoService
     public async Task<Veiculo> getByPlate(string plate)
     {
         _logger.LogInformation($"getByPlate chamado com placa: {plate}");
+        int minMatching = _plateSettings.MinMatchingCharacters; // Usa o valor configurado
+
         var resultado = _contextFirebird.Veiculo
             .Include(v => v.UnidadeNavigation)
+            .Include(v => v.Rota)
             .AsEnumerable()
             .Select(v => new
             {
                 v,
-                A = v.Placa
-                    .Take(7)
+                MatchCount = v.Placa?
+                    .Take(7) // Considera apenas os primeiros 7 caracteres
                     .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0)
-                    .Sum()
+                    .Sum() ?? 0
             })
-            .Where(v => v.A >= 6)
-            .OrderByDescending(v => v.A)
+            .Where(v => v.MatchCount >= minMatching) // Filtra pelo mínimo configurado
+            .OrderByDescending(v => v.MatchCount)
             .Select(v => v.v)
             .ToList();
-        if (resultado.Count == 0)
-        {
-            return null;
-        }
-        return resultado.First();
+
+        return resultado.FirstOrDefault();
     }
 
     public async Task<bool> UpdateVagaVeiculo(int id, bool dentro)

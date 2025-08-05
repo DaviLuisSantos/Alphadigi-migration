@@ -46,4 +46,5 @@ public class Veiculo
 
     [Column("LPR_ID_ROTA")]
     public int? IdRota { get; set; }
+    public Rota? Rota { get; set; }
 }

@@ -10,6 +10,7 @@ using Carter.ResponseNegotiators.SystemTextJson;
 using IniParser;
 using IniParser.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Filters;
 
@@ -25,6 +26,7 @@ builder.Services.AddCarter(configurator: c =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -94,6 +96,8 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseMiddleware<RequestTimingMiddleware>();

@@ -1,9 +1,10 @@
-﻿using Alphadigi_migration.DTO.PlacaLida;
-using Carter;
-using Microsoft.Extensions.Logging; // Adicionar using para ILogger
+﻿using Carter;
+using Microsoft.Extensions.Logging; 
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using Alphadigi_migration.Interfaces; // Adicionar using para IResult e StatusCodes
+using Alphadigi_migration.Domain.Interfaces;
+using Alphadigi_migration.Domain.DTOs.PlacaLidas;
+
 
 namespace Alphadigi_migration.Endpoints
 {

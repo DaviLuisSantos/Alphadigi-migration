@@ -1,6 +1,8 @@
-﻿using Alphadigi_migration.DTO.Alphadigi;
+﻿using Alphadigi_migration.Application.Service;
+using Alphadigi_migration.Application.Services;
+using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Factories;
-using Alphadigi_migration.Interfaces;
 using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;

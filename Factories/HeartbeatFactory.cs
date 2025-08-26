@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.DTO.Alphadigi;
+﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using System.Text.Json;
 
 namespace Alphadigi_migration.Factories;

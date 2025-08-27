@@ -1,0 +1,1 @@
+{"heartbeat":{"countid":57214,"timeStamp":{"Timeval":{"sec":1739372881,"usec":0}},"outageTs":"2025-02-05 18:03:53","startTs":"2025-02-05 18:04:44","serialno":"QFX2182310150262"}}

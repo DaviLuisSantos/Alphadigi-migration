@@ -1,5 +1,5 @@
 ﻿using Alphadigi_migration.Domain.DTOs.PlacaLidas;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +13,6 @@ public interface IPlacaLidaRepository
     Task<bool> SavePlacaLidaAsync(PlacaLida placaLida);
     Task<bool> UpdatePlacaLidaAsync(PlacaLida placaLida);
     Task<List<PlacaLida>> GetDatePlateAsync(LogGetDatePlateDTO logPayload);
-    Task<PlacaLida> GetByIdAsync(int id);
+    Task<PlacaLida> GetByIdAsync(Guid id);
 
 }

@@ -1,5 +1,4 @@
-﻿// Alphadigi_migration.Infrastructure/Repositories/AreaRepository.cs
-using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +50,7 @@ public class AreaRepository : IAreaRepository
                 }
                 else
                 {
-                    areaSqlite.Nome = area.Nome;
+                    areaSqlite.AtualizarNome(area.Nome);
                     _contextSqlite.Areas.Update(areaSqlite);
                 }
             }
@@ -72,7 +71,7 @@ public class AreaRepository : IAreaRepository
         await _contextSqlite.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Area area)
+    public async Task UpdateAsync(Domain.EntitiesNew.Area area)
     {
         _contextSqlite.Areas.Update(area);
         await _contextSqlite.SaveChangesAsync();

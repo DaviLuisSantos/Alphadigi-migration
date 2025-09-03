@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using System;
 using System.Collections.Generic;
 using System.Linq;

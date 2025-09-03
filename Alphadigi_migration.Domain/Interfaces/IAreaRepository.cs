@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,9 @@ namespace Alphadigi_migration.Domain.Interfaces;
 
 public interface IAreaRepository
 {
-    Task<Area> GetByIdAsync(int id);
-    Task<List<Area>> GetAllAsync();
+    Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id);
+    Task<List<Domain.EntitiesNew.Area>> GetAllAsync();
     Task<bool> SyncAreasAsync();
-    Task AddAsync(Area area);
-    Task UpdateAsync(Area area);
+    Task AddAsync(Domain.EntitiesNew.Area area);
+    Task UpdateAsync(Domain.EntitiesNew.Area area);
 }

@@ -1,5 +1,6 @@
-﻿using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
+using Alphadigi_migration.Domain.ValueObjects;
 using Alphadigi_migration.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +24,9 @@ public class UnidadeRepository : IUnidadeRepository
         try
         {
             var unidade = await _contextFirebird.Unidade.FindAsync(idUnidade);
-            var vagasTotais = unidade.Vagas;
+            var vagasTotais = unidade.NumeroVagas;
+          
+
 
             var vagasOcupadas = _contextFirebird.Veiculo
                 .AsEnumerable()
@@ -31,10 +34,11 @@ public class UnidadeRepository : IUnidadeRepository
                 .Count();
 
             var retorno = new QueryResult
-            {
-                NumVagas = vagasTotais,
-                VagasOcupadasMoradores = vagasOcupadas
-            };
+            (
+               numVagas: vagasTotais,
+               vagasOcupadasVisitantes: null, 
+               vagasOcupadasMoradores: vagasOcupadas
+            );
 
             return retorno;
         }

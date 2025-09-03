@@ -1,5 +1,5 @@
 ﻿using Alphadigi_migration.Domain.DTOs.PlacaLidas;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 
 namespace Alphadigi_migration.Domain.Interfaces;
 

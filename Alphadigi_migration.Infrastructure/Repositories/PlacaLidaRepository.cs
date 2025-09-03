@@ -1,5 +1,5 @@
 ﻿using Alphadigi_migration.Domain.DTOs.PlacaLidas;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +44,11 @@ public class PlacaLidaRepository : IPlacaLidaRepository
 
         if (!string.IsNullOrEmpty(placa))
         {
-            query = query.Where(p => p.Placa.Contains(placa));
+          
+           // query = query.Where(p => p.Placa.Contains(placa));
+
+            query = query.Where(p => p.Placa.Numero.Contains(placa));
+
         }
 
         query = query.Where(p => p.DataHora.Date == data.Date);

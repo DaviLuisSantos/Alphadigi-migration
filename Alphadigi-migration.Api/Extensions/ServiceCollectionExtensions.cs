@@ -1,9 +1,12 @@
 using Alphadigi_migration.Application.Mapping;
+using Alphadigi_migration.Application.Queries.Veiculo;
 using Alphadigi_migration.Application.Service;
 using Alphadigi_migration.Application.Services;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Factories;
 using Alphadigi_migration.Infrastructure.Repositories;
+using MediatR;
+using System.Reflection;
 
 
 namespace Alphadigi_migration.Extensions;
@@ -83,6 +86,17 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient();
         services.AddOpenApi();
 
+       
+
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.Load("Alphadigi_migration.Application"));
+        });
+
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetVeiculosQuery).Assembly));
+
         return services;
     }
+
+    
 }

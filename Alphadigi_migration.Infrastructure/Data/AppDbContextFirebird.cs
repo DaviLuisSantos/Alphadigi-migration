@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Alphadigi_migration.Models;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 
 namespace Alphadigi_migration.Infrastructure.Data;
 
@@ -39,8 +38,8 @@ public class AppDbContextFirebird : DbContext
        .Property(c => c.FotoEvento)
        .HasColumnName("FOTO_EVENTO")
        .HasConversion(
-            v => v.HasValue ? (v.Value ? 1 : 0) : 0,
-            v => v == 1
+           v => v ? 1 : 0,           
+                v => v == 1
         );
 
     }

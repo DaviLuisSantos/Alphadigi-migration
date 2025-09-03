@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Microsoft.Extensions.DependencyInjection;
 using Alphadigi_migration.Application.Services;
 using Alphadigi_migration.Application.Service;
@@ -20,7 +20,7 @@ public class VisitaAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Processando acesso de visitante para veículo com placa {veiculo?.Placa ?? "Visitante"}.");
         return Task.FromResult((false, "NÃO CADASTRADO"));
@@ -38,7 +38,7 @@ public class SaidaSempreAbreAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
@@ -80,7 +80,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
     }
 
     public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, 
-                                                                            Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+                                                                            Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
@@ -144,7 +144,7 @@ public class NaoControlaVagaAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try

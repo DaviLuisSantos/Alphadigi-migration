@@ -1,5 +1,4 @@
-﻿using Alphadigi_migration.Domain.Entities;
-using Alphadigi_migration.Models;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 
 namespace Alphadigi_migration.Domain.Interfaces;
 

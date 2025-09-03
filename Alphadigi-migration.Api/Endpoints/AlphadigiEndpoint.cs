@@ -3,10 +3,8 @@ using Alphadigi_migration.Application.Services;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Factories;
-using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace Alphadigi_migration;

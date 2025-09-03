@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace Alphadigi_migration.Domain.Interfaces;
 
 public interface IAcessoService
 {
-    Task<bool> SaveVeiculoAcesso(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp, string? imagem);
-    string PrepareLocalString(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi);
+    Task<bool> SaveVeiculoAcesso(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp, string? imagem);
+    string PrepareLocalString(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi);
     Task<string> SaveImage(string foto64, string placa);
 }

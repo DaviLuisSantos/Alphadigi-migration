@@ -1,5 +1,5 @@
 ﻿using Alphadigi_migration.Domain.DTOs.Veiculos;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -26,22 +26,19 @@ public class VeiculoRepository : IVeiculoRepository
         return await _contextFirebird.Veiculo.ToListAsync();
     }
 
-    public async Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSendAsync(int lastId)
+    public async Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSendAsync(Guid lastId)
     {
         _logger.LogInformation($"GetVeiculosSendAsync chamado com lastId: {lastId}");
         return await _contextFirebird.Veiculo
-            .Where(v => v.Id > lastId
-                && v.Placa != null
-                && v.Placa.Trim().Length == 7
-                && !EF.Functions.Like(v.Placa.Trim(), "% %"))
-            .OrderBy(v => v.Id)
-            .Take(50)
-            .Select(v => new VeiculoInfoSendAlphadigi
-            {
-                Id = v.Id,
-                Placa = v.Placa.Trim()
-            })
-            .ToListAsync();
+             .Where(v => v.Id > lastId && v.Placa != null)
+             .OrderBy(v => v.Id)
+             .Take(50)
+             .Select(v => new VeiculoInfoSendAlphadigi
+             {
+                 Id = v.Id,
+                 Placa = v.Placa.Numero 
+             })
+             .ToListAsync();
     }
 
     public async Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters)
@@ -59,7 +56,7 @@ public class VeiculoRepository : IVeiculoRepository
             .Select(v => new
             {
                 Veiculo = v,
-                MatchCount = v.Placa?
+                MatchCount = v.Placa?.Numero?
                     .Take(7)
                     .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0)
                     .Sum() ?? 0
@@ -72,7 +69,7 @@ public class VeiculoRepository : IVeiculoRepository
         return resultado.FirstOrDefault();
     }
 
-    public async Task<bool> UpdateVagaVeiculoAsync(int id, bool dentro)
+    public async Task<bool> UpdateVagaVeiculoAsync(Guid id, bool dentro)
     {
         _logger.LogInformation($"UpdateVagaVeiculoAsync chamado com id: {id} e dentro: {dentro}");
 
@@ -84,8 +81,15 @@ public class VeiculoRepository : IVeiculoRepository
                 _logger.LogWarning($"Veículo com ID {id} não encontrado.");
                 return false;
             }
-
-            veiculo.VeiculoDentro = dentro;
+            if (dentro)
+            {
+                veiculo.EntrarCondominio("Sistema"); 
+            }
+            else
+            {
+                veiculo.SairCondominio("Sistema"); 
+            }
+           
             _contextFirebird.Veiculo.Update(veiculo);
             await _contextFirebird.SaveChangesAsync();
 
@@ -111,9 +115,10 @@ public class VeiculoRepository : IVeiculoRepository
                 _logger.LogWarning($"Veículo com ID {lastAccess.IdVeiculo} não encontrado.");
                 return false;
             }
-
-            veiculo.IpCamUltAcesso = lastAccess.IpCamera;
-            veiculo.DataHoraUltAcesso = lastAccess.TimeAccess;
+        
+            veiculo.RegistrarAcesso(lastAccess.IpCamera, lastAccess.TimeAccess);
+            //veiculo.IpCamUltAcesso = lastAccess.IpCamera;
+            //veiculo.DataHoraUltAcesso = lastAccess.TimeAccess;
             _contextFirebird.Veiculo.Update(veiculo);
             await _contextFirebird.SaveChangesAsync();
 

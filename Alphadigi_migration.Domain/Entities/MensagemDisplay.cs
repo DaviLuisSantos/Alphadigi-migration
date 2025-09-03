@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Alphadigi_migration.Models;
+namespace Alphadigi_migration.Domain.Entities;
 
 public class MensagemDisplay
 {
@@ -13,6 +12,6 @@ public class MensagemDisplay
 
     [ForeignKey("Alphadigi")]
     public int AlphadigiId { get; set; }
-    public Alphadigi_migration.Domain.Entities.Alphadigi Alphadigi { get; set; }
+    public Alphadigi_migration.Domain.EntitiesNew.Alphadigi Alphadigi { get; set; }
     
 }

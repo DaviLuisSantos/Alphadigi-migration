@@ -1,5 +1,4 @@
-﻿// Alphadigi_migration.Infrastructure/Repositories/CondominioRepository.cs
-using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -32,21 +31,21 @@ public class CondominioRepository : ICondominioRepository
 
             if (condominioSqlite == null)
             {
-                Condominio condNew = new Condominio
-                {
-                    Id = condominio.Id,
-                    Nome = condominio.Nome,
-                    Cnpj = condominio.Cnpj,
-                    Fantasia = condominio.Fantasia
-                };
+                var condNew = new Domain.EntitiesNew.Condominio(
+               nome: condominio.Nome,
+               cnpj: condominio.Cnpj,
+               fantasia: condominio.Fantasia
+           );
                 _contextSqlite.Condominio.Add(condNew);
             }
             else
             {
-                condominioSqlite.Nome = condominio.Nome;
-                condominioSqlite.Cnpj = condominio.Cnpj;
-                condominioSqlite.Fantasia = condominio.Fantasia;
-                _contextSqlite.Condominio.Update(condominioSqlite);
+                condominioSqlite.AtualizarInformacoesCompleto(
+                 condominio.Nome,
+                 condominio.Cnpj,
+                 condominio.Fantasia);
+ 
+                 _contextSqlite.Condominio.Update(condominioSqlite);
             }
 
             await _contextSqlite.SaveChangesAsync();

@@ -2,8 +2,6 @@
 using Alphadigi_migration.Domain.Interfaces;
 using System.Text;
 
-
-
 namespace Alphadigi_migration.Domain.Entities;
 
 // Presumindo que o DTO seja algo assim:

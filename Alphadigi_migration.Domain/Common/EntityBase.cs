@@ -1,20 +1,28 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace Alphadigi.Domain.Common;
+﻿using Alphadigi_migration.Domain.Common;
 
 public abstract class EntityBase
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; protected set; }
+    public Guid Id { get; protected set; } = Guid.NewGuid();
 
-    public DateTime CreatedAt { get; protected set; }
-    public DateTime? UpdatedAt { get; protected set; }
-    public bool IsActive { get; protected set; } = true;
+    private List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    // Para comparar entidades por valor (equality)
-    public override bool Equals(object? obj)
+    public void AddDomainEvent(IDomainEvent eventItem)
+    {
+        _domainEvents.Add(eventItem);
+    }
+
+    public void RemoveDomainEvent(IDomainEvent eventItem)
+    {
+        _domainEvents.Remove(eventItem);
+    }
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+
+    public override bool Equals(object obj)
     {
         if (obj is not EntityBase other)
             return false;
@@ -35,34 +43,4 @@ public abstract class EntityBase
     {
         return (GetType().ToString() + Id).GetHashCode();
     }
-
-    public static bool operator ==(EntityBase? a, EntityBase? b)
-    {
-        if (a is null && b is null)
-            return true;
-
-        if (a is null || b is null)
-            return false;
-
-        return a.Equals(b);
-    }
-
-    public static bool operator !=(EntityBase? a, EntityBase? b)
-    {
-        return !(a == b);
-    }
-
-    // Métodos para alterar estado
-    public void SetCreated(DateTime dateTime)
-    {
-        CreatedAt = dateTime;
-    }
-
-    public void SetUpdated(DateTime dateTime)
-    {
-        UpdatedAt = dateTime;
-    }
-
-    public void Activate() => IsActive = true;
-    public void Deactivate() => IsActive = false;
 }

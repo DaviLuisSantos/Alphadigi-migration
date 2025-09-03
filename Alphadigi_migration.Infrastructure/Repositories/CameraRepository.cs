@@ -1,5 +1,4 @@
-﻿// Alphadigi_migration.Infrastructure/Repositories/CameraRepository.cs
-using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Infrastructure.Data;
 
@@ -40,5 +39,5 @@ public class CameraRepository : ICameraRepository
     {
         throw new NotImplementedException();
     }
-    // ... implementar outros métodos
+   
 }

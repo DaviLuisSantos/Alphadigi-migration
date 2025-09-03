@@ -1,9 +1,7 @@
-﻿
-using Alphadigi_migration.Application.Services;
+﻿using Alphadigi_migration.Application.Services;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Service;
@@ -58,20 +56,21 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             }
             if (camera.LinhasDisplay != 0 && plateReaded.modelo == "TOTEM")
             {
-                camera.LinhasDisplay = 0;
+                
+                camera.AtualizarLinhasDisplay(0);
                 camera = await _alphadigiService.Update(camera);
             }
 
             var Log = new PlacaLida
-            {
-                AlphadigiId = camera.Id,
-                Placa = plateReaded.plate,
-                DataHora = timeStamp,
-                AreaId = camera.AreaId,
-                Placa_Img = plateReaded.plateImage,
-                Carro_Img = plateReaded.carImage
+            (
+                alphadigiId: camera.Id,
+                placa: plateReaded.plate,
+                dataHora: timeStamp,
+                areaId: camera.AreaId,
+                placaImg: plateReaded.plateImage,
+                carroImg: plateReaded.carImage
 
-            };
+            );
 
             await _placaLidaService.SavePlacaLida(Log);
 
@@ -81,27 +80,32 @@ public class AlphadigiPlateService : IAlphadigiPlateService
             {
                 veiculoCadastrado = false;
                 veiculo = new Veiculo
-                {
-                    Placa = plateReaded.plate,
-                };
+                (
+                    placa: plateReaded.plate
+                    
+
+                );
             }
             if (veiculo != null && !plateReaded.isCad && veiculoCadastrado)
             {
                 //07/02/2025 - Retirado estava entrando em envio toda hora, atrapalhando a mensagem stand by do display
                 //camera.UltimoId = veiculo.Id - 1;
                 //camera.Estado = "SEND";
-                camera.UltimoId = 0;
+                camera.AtualizarUltimoId(0);
                 await _alphadigiService.Update(camera);
             }
 
-            Log.Cadastrado = veiculoCadastrado;
+           // Log.Cadastrado = veiculoCadastrado;
+            Log.AtualizarCadastro(veiculoCadastrado);
             await _placaLidaService.UpdatePlacaLida(Log);
 
             var accessResult = await sendVeiculoAccessProcessor(veiculo, camera, timeStamp, Log, plateReaded.carImage);
             _logger.LogInformation($"Accesso do veículo com a placa {plateReaded.plate} com resultado {accessResult}");
 
-            Log.Liberado = accessResult.ShouldReturn;
-            Log.Acesso = accessResult.Acesso;
+            //Log.Liberado = accessResult.ShouldReturn;
+
+            // Log.Acesso = accessResult.Acesso;
+            Log.MarcarComoProcessado(accessResult.ShouldReturn, accessResult.Acesso);
 
             await _placaLidaService.UpdatePlacaLida(Log);
 
@@ -122,7 +126,7 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         }
     }
 
-    public async Task<bool> VerifyAntiPassback(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi, DateTime timestamp)
+    public async Task<bool> VerifyAntiPassback(Veiculo veiculo, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, DateTime timestamp)
     {
         Area? Area, ultimaArea;
         DateTime? ultimoAcesso;
@@ -145,8 +149,10 @@ public class AlphadigiPlateService : IAlphadigiPlateService
 
         if (mesmaArea)
         {
-            var tempoAntipassback = Area.TempoAntipassbackTimeSpan.Value;
-            dentroDoPassback = timestamp - ultimoAcesso < tempoAntipassback;
+           // var tempoAntipassback = Area.TempoAntipassbackTimeSpan.Value;
+            TimeSpan? tempoAntipassback = alphadigi.Area.TempoAntipassback;
+            dentroDoPassback = timestamp - ultimoAcesso < tempoAntipassback.Value;
+
             if (dentroDoPassback)
             {
                 return false;
@@ -156,23 +162,25 @@ public class AlphadigiPlateService : IAlphadigiPlateService
         return true;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> sendVeiculoAccessProcessor(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi, DateTime timestamp, PlacaLida log, string? imagem)
+    public async Task<(bool ShouldReturn, string Acesso)> sendVeiculoAccessProcessor(Veiculo veiculo, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, DateTime timestamp, PlacaLida log, string? imagem)
     {
         (bool shouldReturn, string acesso) = await _veiculoAccessProcessor.ProcessVeiculoAccessAsync(veiculo, alphadigi, timestamp);
 
-        if (veiculo.Placa != null)
+        if (veiculo.Placa.Numero != null)
         {
             await _alphadigiService.UpdateLastPlate(alphadigi, veiculo.Placa, timestamp);
             await _acessoService.SaveVeiculoAcesso(alphadigi, veiculo, timestamp, imagem);
             _logger.LogInformation($"Veículo {veiculo.Placa} atualizado no banco de dados.");
         }
 
-        log.Processado = true;
+        //log.Processado = true;
+        log.MarcarComoProcessado(shouldReturn, acesso);
+     
         await _placaLidaService.UpdatePlacaLida(log);
         return (shouldReturn, acesso);
     }
 
-    public async Task<List<SerialData>> sendCreatPackageDisplay(Veiculo veiculo, string acesso, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<List<SerialData>> sendCreatPackageDisplay(Veiculo veiculo, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         string placaFormatada = veiculo.Placa;
         if (!string.IsNullOrEmpty(placaFormatada) && placaFormatada.Length > 3)

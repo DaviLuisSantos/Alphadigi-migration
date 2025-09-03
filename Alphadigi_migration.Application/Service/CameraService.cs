@@ -1,7 +1,4 @@
-﻿
-
-using Alphadigi_migration.Domain.Interfaces;
-
+﻿using Alphadigi_migration.Domain.Interfaces;
 namespace Alphadigi_migration.Application.Service;
 
 public class CameraService

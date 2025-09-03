@@ -1,7 +1,7 @@
 ﻿using Alphadigi_migration.Application.Service;
 using Alphadigi_migration.Domain.DTOs;
 using Alphadigi_migration.Domain.DTOs.Veiculos;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -28,7 +28,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
 
     public async Task<(bool ShouldReturn, string Acesso)> ProcessVeiculoAccessAsync(
         Veiculo veiculo,
-        Alphadigi_migration.Domain.Entities.Alphadigi alphadigi, 
+        Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, 
         DateTime timestamp)
     {
         _logger.LogInformation($"Iniciando ProcessVeiculoAccessAsync");
@@ -37,8 +37,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
 
         try
         {
-            // Sua implementação aqui (sem DbContext)
-            // ... código do método
+            
 
             return (shouldReturn, acesso);
         }

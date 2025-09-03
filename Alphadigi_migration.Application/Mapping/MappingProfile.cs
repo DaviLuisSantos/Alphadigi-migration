@@ -8,7 +8,7 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<CreateAlphadigiDTO, Alphadigi_migration.Domain.Entities.Alphadigi>();
-        CreateMap<UpdateAlphadigiDTO, Alphadigi_migration.Domain.Entities.Alphadigi>();
+        CreateMap<CreateAlphadigiDTO, Alphadigi_migration.Domain.EntitiesNew.Alphadigi>();
+        CreateMap<UpdateAlphadigiDTO, Alphadigi_migration.Domain.EntitiesNew.Alphadigi>();
     }
 }

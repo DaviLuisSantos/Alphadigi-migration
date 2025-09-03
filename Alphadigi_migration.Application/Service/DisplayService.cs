@@ -1,8 +1,6 @@
-﻿
-using Alphadigi_migration.Models;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
 
 
@@ -34,7 +32,7 @@ public class DisplayService
         _mapper = mapper;
     }
 
-    public async Task<List<SerialData>> RecieveMessageAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<List<SerialData>> RecieveMessageAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         var serialDataList = new List<SerialData>();
         var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
@@ -58,7 +56,7 @@ public class DisplayService
         return serialDataList;
     }
 
-    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         var serialDataList = new List<SerialData>();
         var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
@@ -97,7 +95,7 @@ public class DisplayService
         };
     }
 
-    public async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(string placa, string acesso, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         if (alphadigi.LinhasDisplay == 0 && placa == WelcomeMessage)
             return null;
@@ -213,21 +211,25 @@ public class DisplayService
         };
     }
 
-    private static bool ShouldAddAcessoLine(MensagemDisplay lastMessage, MensagemDisplay lastCamMessage, string placa)
+    private static bool ShouldAddAcessoLine(MensagemDisplay lastMessage, 
+                                            MensagemDisplay lastCamMessage, 
+                                            string placa)
     {
         return lastMessage == null ||
-               (lastCamMessage.Id == 0 || (lastCamMessage != null && lastCamMessage.Id != lastMessage.Id && lastCamMessage.Placa != placa));
+               (lastCamMessage.Id == Guid.Empty || 
+               (lastCamMessage != null && lastCamMessage.Id 
+               != lastMessage.Id && lastCamMessage.Placa != placa));
     }
 
-    private async Task SaveMensagemDisplayAsync(string placa, string acesso, int alphadigiId)
+    private async Task SaveMensagemDisplayAsync(string placa, string acesso, Guid alphadigiId)
     {
         var mensagem = new MensagemDisplay
-        {
-            Placa = placa,
-            Mensagem = acesso,
-            DataHora = DateTime.Now,
-            AlphadigiId = alphadigiId
-        };
+        (
+            placa: placa,
+            mensagem: acesso,
+            dataHora: DateTime.Now,
+            alphadigiId: alphadigiId
+        );
         await _mensagemDisplayService.SaveMensagemDisplayAsync(mensagem);
     }
 

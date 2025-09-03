@@ -1,14 +1,12 @@
-﻿using Alphadigi_migration.Domain.Entities;
-using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Models;
-using Alphadigi_migration.Services;
+﻿using Alphadigi_migration.Domain.Interfaces;
+using Alphadigi_migration.Domain.ValueObjects;
 using Microsoft.Extensions.Logging; 
 
 namespace Alphadigi_migration.Application.Service;
 
 public interface IUnidadeService
 {
-    Task<QueryResult> GetUnidadeInfo(int idUnidade);
+    Task<QueryResult> GetUnidadeInfo(Guid idUnidade);
 }
 
 
@@ -26,7 +24,7 @@ public class UnidadeService: IUnidadeService
     }
 
 
-    public async Task<QueryResult> GetUnidadeInfo(int idUnidade)
+    public async Task<QueryResult> GetUnidadeInfo(Guid idUnidade)
     {
         return await _unidadeRepository.GetUnidadeInfoAsync(idUnidade);
     }

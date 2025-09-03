@@ -46,12 +46,12 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         }
     }
 
-    public async Task<object> HandleAlphadigiStage(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<object> HandleAlphadigiStage(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         string stage = alphadigi.Estado ?? "DELETE";
         string newStage = null;
         object response = null;
-        bool Enviado = false;
+        bool enviado = false;
 
         switch (stage)
         {
@@ -63,7 +63,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 else
                 {
                     newStage = "CREATE";
-                    Enviado = false;
+                    enviado = false;
                 }
                 break;
             case "CREATE":
@@ -75,7 +75,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 else
                 {
                     newStage = "SEND";
-                    Enviado = false;
+                    enviado = false;
                 }
                 break;
             case "SEND":
@@ -84,10 +84,10 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 {
                     newStage = "FINAL";
                 }
-                if (Enviado)
+                if (enviado)
                 {
                     newStage = response == null ? "FINAL" : "SEND";
-                    Enviado = false;
+                    enviado = false;
                 }
                 break;
             case "FINAL":
@@ -102,15 +102,18 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
 
         if (newStage != null)
         {
-            alphadigi.Estado = newStage;
+            alphadigi.AtualizarEstado(newStage);
         }
+        if(enviado)
+            alphadigi.MarcarComoEnviado();
+        else 
+            alphadigi.MarcarComoNaoEnviado();
 
-        alphadigi.Enviado = Enviado;
         await _alphadigiService.Update(alphadigi);
         return response;
     }
 
-    public DeleteWhiteListAllDTO HandleDelete(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public DeleteWhiteListAllDTO HandleDelete(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         return new DeleteWhiteListAllDTO
         {
@@ -124,7 +127,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         try
         {
             var alphadigi = await _alphadigiService.GetOrCreate(ip);
-            alphadigi.Enviado = true;
+            alphadigi.MarcarComoEnviado();
             await _alphadigiService.Update(alphadigi);
             return true;
         }
@@ -135,9 +138,9 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         }
     }
 
-    public async Task<AddWhiteListDTO> HandleCreate(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<AddWhiteListDTO> HandleCreate(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
-        int ultimoId = alphadigi.UltimoId ?? 0;
+        Guid ultimoId = alphadigi.UltimoId ?? Guid.Empty;
         var veiculosEnvio = await _veiculoService.GetVeiculosSend(ultimoId);
 
         if (veiculosEnvio.Count == 0)
@@ -145,8 +148,8 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
             return null;
         }
 
-        // Atualiza o UltimoId com o ID do último veículo enviado
-        alphadigi.UltimoId = veiculosEnvio.Max(item => item.Id);
+        Guid novoUltimoId = veiculosEnvio.Max(item => item.Id);
+        alphadigi.AtualizarUltimoId(novoUltimoId);
 
         var envio = new AddWhiteListDTO
         {
@@ -178,7 +181,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         try
         {
             var alphadigi = await _alphadigiService.GetOrCreate(ip);
-            alphadigi.Enviado = true;
+            alphadigi.MarcarComoEnviado();
             await _alphadigiService.Update(alphadigi);
             return true;
         }
@@ -189,7 +192,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         }
     }
 
-    public async Task<ResponseHeathbeatDTO> HandleNormal(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<ResponseHeathbeatDTO> HandleNormal(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         var condominio = await _condominioService.Get();
         var nome = condominio.Nome;
@@ -205,7 +208,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         return retorno;
     }
 
-    public async Task<List<SerialData>> sendDisplay(string Nome, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<List<SerialData>> sendDisplay(string Nome, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         string? linha1 = "BEM VINDO";
         if (!alphadigi.Sentido)

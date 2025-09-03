@@ -1,5 +1,4 @@
-﻿using Alphadigi_migration.Application.DTOs.Veiculo;
-using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Extensions.Options;
 using Microsoft.Extensions.Logging;
@@ -10,9 +9,9 @@ namespace Alphadigi_migration.Application.Services;
 public interface IVeiculoService
 {
     Task<List<Veiculo>> GetVeiculos();
-    Task<List<Domain.DTOs.Veiculos.VeiculoInfoSendAlphadigi>> GetVeiculosSend(int lastId);
+    Task<List<Domain.DTOs.Veiculos.VeiculoInfoSendAlphadigi>> GetVeiculosSend(Guid lastId);
     Task<Veiculo> GetByPlate(string plate);
-    Task<bool> UpdateVagaVeiculo(int id, bool dentro);
+    Task<bool> UpdateVagaVeiculo(Guid id, bool dentro);
     Task<bool> UpdateLastAccess(Domain.DTOs.Veiculos.LastAcessUpdateVeiculoDTO lastAccess);
     string PrepareVeiculoDataString(Veiculo veiculo);
 }
@@ -39,7 +38,7 @@ public class VeiculoService : IVeiculoService
         return await _veiculoRepository.GetVeiculosAsync();
     }
 
-    public async Task<List<Domain.DTOs.Veiculos.VeiculoInfoSendAlphadigi>> GetVeiculosSend(int lastId)
+    public async Task<List<Domain.DTOs.Veiculos.VeiculoInfoSendAlphadigi>> GetVeiculosSend(Guid lastId)
     {
         _logger.LogInformation($"GetVeiculosSend chamado com lastId: {lastId}");
         return await _veiculoRepository.GetVeiculosSendAsync(lastId);
@@ -52,7 +51,7 @@ public class VeiculoService : IVeiculoService
         return await _veiculoRepository.GetByPlateAsync(plate, minMatching);
     }
 
-    public async Task<bool> UpdateVagaVeiculo(int id, bool dentro)
+    public async Task<bool> UpdateVagaVeiculo(Guid id, bool dentro)
     {
         _logger.LogInformation($"UpdateVagaVeiculo chamado com id: {id} e dentro: {dentro}");
         return await _veiculoRepository.UpdateVagaVeiculoAsync(id, dentro);

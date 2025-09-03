@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.Domain.Entities;
+﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using SkiaSharp;
@@ -21,10 +21,13 @@ public class AcessoService : IAcessoService
         _alphadigiService = alphadigiService;
     }
 
-    public async Task<bool> SaveVeiculoAcesso(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi, Veiculo veiculo, DateTime timestamp, string? imagem)
+    public async Task<bool> SaveVeiculoAcesso(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, 
+                                              Veiculo veiculo, 
+                                              DateTime timestamp, 
+                                              string? imagem)
     {
         bool estaNoAntiPassback = false;
-        if (veiculo.Id != 0)
+        if (veiculo.Id != null)
         {
             estaNoAntiPassback = await VerifyPassBack(veiculo, alphadigi, timestamp);
         }
@@ -43,26 +46,26 @@ public class AcessoService : IAcessoService
         string dadosVeiculo = _veiculoService.PrepareVeiculoDataString(veiculo);
         string unidade = veiculo.UnidadeNavigation == null || string.IsNullOrEmpty(veiculo.UnidadeNavigation.Nome) ? "NAO CADASTRADO" : veiculo.UnidadeNavigation.Nome;
 
-        var acesso = new Acesso
-        {
-            Local = local,
-            DataHora = timestamp,
-            Unidade = unidade,
-            Placa = veiculo.Placa,
-            DadosVeiculo = dadosVeiculo,
-            GrupoNome = "",
-            Foto = caminhoImg
-        };
+        var acesso = new Acesso(
+          local: local,
+          dataHora: timestamp,
+          unidade: unidade,
+          placa: veiculo.Placa.Numero,
+          ipCamera: alphadigi.Ip,
+          dadosVeiculo: dadosVeiculo,
+          grupoNome: "",
+          foto: caminhoImg
+         );
 
         await _acessoRepository.SaveAcessoAsync(acesso);
         return true;
     }
 
-    private async Task<bool> VerifyPassBack(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi, DateTime timestamp)
+    private async Task<bool> VerifyPassBack(Veiculo veiculo, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, DateTime timestamp)
     {
-        Alphadigi_migration.Domain.Entities.Alphadigi? camUlt = await _alphadigiService.Get(veiculo.IpCamUltAcesso);
+        Alphadigi_migration.Domain.EntitiesNew.Alphadigi? camUlt = await _alphadigiService.Get(veiculo.IpCamUltAcesso);
 
-        TimeSpan? tempoAntipassback = alphadigi.Area.TempoAntipassbackTimeSpan;
+        TimeSpan? tempoAntipassback = alphadigi.Area.TempoAntipassback;
 
         if (camUlt?.AreaId != alphadigi.AreaId)
         {
@@ -77,7 +80,7 @@ public class AcessoService : IAcessoService
         return recentAccesses != null;
     }
 
-    public string PrepareLocalString(Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public string PrepareLocalString(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         if (alphadigi == null)
         {

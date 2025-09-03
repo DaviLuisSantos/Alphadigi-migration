@@ -1,5 +1,5 @@
 ﻿using Alphadigi_migration.Application.Service;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 

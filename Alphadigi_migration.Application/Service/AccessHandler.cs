@@ -1,9 +1,6 @@
-﻿using Alphadigi_migration.Models;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Domain.Entities;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Microsoft.Extensions.DependencyInjection;
 using Alphadigi_migration.Application.Service;
 
@@ -19,7 +16,8 @@ public class VisitaAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Domain.EntitiesNew.Veiculo veiculo, 
+                                                                      Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Processando acesso de visitante para veículo com placa {veiculo?.Placa ?? "Visitante"}.");
         return Task.FromResult((false, "NÃO CADASTRADO"));
@@ -31,19 +29,21 @@ public class SaidaSempreAbreAccessHandler : IAccessHandler
     private readonly IVeiculoService _veiculoService;
     private readonly ILogger<SaidaSempreAbreAccessHandler> _logger;
 
-    public SaidaSempreAbreAccessHandler(IVeiculoService veiculoService, ILogger<SaidaSempreAbreAccessHandler> logger)
+    public SaidaSempreAbreAccessHandler(IVeiculoService veiculoService, 
+                                        ILogger<SaidaSempreAbreAccessHandler> logger)
     {
         _veiculoService = veiculoService;
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, 
+                                                                           Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
             string acesso = "NÃO CADASTRADO";
-            if (veiculo != null && veiculo.Id != 0)
+            if (veiculo != null && veiculo.Id != null)
             {
                 _logger.LogInformation($"Aprovando saída do veículo cadastrado com ID {veiculo.Id}.");
                 await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
@@ -78,13 +78,13 @@ public class ControlaVagaAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, 
-                                                                            Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Domain.EntitiesNew.Veiculo veiculo, 
+                                                                            Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
-            _logger.LogInformation($"Gerenciando controle de vaga para veículo com ID {veiculo?.Id ?? 0}, Sentido: {alphadigi.Sentido}.");
+            _logger.LogInformation($"Gerenciando controle de vaga para veículo com ID {veiculo?.Id ?? null}, Sentido: {alphadigi.Sentido}.");
             string acesso = "";
             bool abre = true;
 
@@ -116,7 +116,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
                 }
                 else
                 {
-                    _logger.LogWarning($"Não foi possível obter informações da unidade para veículo com ID {veiculo?.Id ?? 0}. Acesso negado");
+                    _logger.LogWarning($"Não foi possível obter informações da unidade para veículo com ID {veiculo?.Id ?? null}. Acesso negado");
                     acesso = "S/VG";
                     abre = false;
                 }
@@ -137,18 +137,20 @@ public class NaoControlaVagaAccessHandler : IAccessHandler
     private readonly IVeiculoService _veiculoService;
     private readonly ILogger<NaoControlaVagaAccessHandler> _logger;
 
-    public NaoControlaVagaAccessHandler(IVeiculoService veiculoService, ILogger<NaoControlaVagaAccessHandler> logger)
+    public NaoControlaVagaAccessHandler(IVeiculoService veiculoService, 
+                                        ILogger<NaoControlaVagaAccessHandler> logger)
     {
         _veiculoService = veiculoService;
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, Alphadigi_migration.Domain.Entities.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Domain.EntitiesNew.Veiculo veiculo, 
+                                                                            Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
-            _logger.LogInformation($"Acesso sem controle de vaga para veículo com ID {veiculo?.Id ?? 0}, Sentido: {alphadigi.Sentido}.");
+            _logger.LogInformation($"Acesso sem controle de vaga para veículo com ID {veiculo?.Id ?? null}, Sentido: {alphadigi.Sentido}.");
 
             string acesso = "CADASTRADO";
             bool abre = true;
@@ -192,7 +194,8 @@ public class AccessHandlerFactory : IAccessHandlerFactory
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<AccessHandlerFactory> _logger;
 
-    public AccessHandlerFactory(IServiceProvider serviceProvider, ILogger<AccessHandlerFactory> logger)
+    public AccessHandlerFactory(IServiceProvider serviceProvider, 
+                               ILogger<AccessHandlerFactory> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;

@@ -1,7 +1,6 @@
 ﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Models;
-
 namespace Alphadigi_migration.Application.Service;
 
 public class MensagemDisplayService : IMensagemDisplayService
@@ -17,9 +16,9 @@ public class MensagemDisplayService : IMensagemDisplayService
     }
     public async Task<MensagemDisplay> FindLastMensagemAsync(FindLastMessage termo)
     {
-        return await _mensagemDisplayRepository.FindLastMensagemAsync(termo);
+        return await _mensagemDisplayRepository.FindLastMensagemAsync(termo.Mensagem, termo.Placa, termo.AlphadigiId);
     }
-    public async Task<MensagemDisplay> FindLastCamMensagemAsync(int alphadigiId)
+    public async Task<MensagemDisplay> FindLastCamMensagemAsync(Guid alphadigiId)
     {
         return await _mensagemDisplayRepository.FindLastCamMensagemAsync(alphadigiId);
     }

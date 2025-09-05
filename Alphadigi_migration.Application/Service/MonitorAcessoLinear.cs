@@ -1,5 +1,4 @@
-﻿using Alphadigi_migration.Application.Services;
-using Alphadigi_migration.Domain.DTOs.MonitorAcessoLinear;
+﻿using Alphadigi_migration.Domain.DTOs.MonitorAcessoLinear;
 using Alphadigi_migration.Domain.DTOs.Veiculos;
 using Alphadigi_migration.Domain.Interfaces;
 

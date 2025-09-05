@@ -5,14 +5,14 @@ namespace Alphadigi_migration.Domain.Events
     public class MensagemDisplayCriadaEvent : DomainEvent
     {
         public override string EventType => "MensagemDisplayCriada";
-        public override Guid AggregateId => MensagemId;
+        public override int AggregateId => MensagemId;
 
-        public Guid MensagemId { get; }
+        public int MensagemId { get; }
         public string Placa { get; }
         public string Mensagem { get; }
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
 
-        public MensagemDisplayCriadaEvent(Guid mensagemId, string placa, string mensagem, Guid alphadigiId)
+        public MensagemDisplayCriadaEvent(int mensagemId, string placa, string mensagem, int alphadigiId)
         {
             MensagemId = mensagemId;
             Placa = placa;
@@ -24,13 +24,13 @@ namespace Alphadigi_migration.Domain.Events
     public class MensagemDisplayAtualizadaEvent : DomainEvent
     {
         public override string EventType => "MensagemDisplayAtualizada";
-        public override Guid AggregateId => MensagemId;
+        public override int AggregateId => MensagemId;
 
-        public Guid MensagemId { get; }
+        public int MensagemId { get; }
         public string Placa { get; }
         public string NovaMensagem { get; }
 
-        public MensagemDisplayAtualizadaEvent(Guid mensagemId, string placa, string novaMensagem)
+        public MensagemDisplayAtualizadaEvent(int mensagemId, string placa, string novaMensagem)
         {
             MensagemId = mensagemId;
             Placa = placa;
@@ -41,13 +41,13 @@ namespace Alphadigi_migration.Domain.Events
     public class MensagemDisplayExibidaEvent : DomainEvent
     {
         public override string EventType => "MensagemDisplayExibida";
-        public override Guid AggregateId => MensagemId;
+        public override int AggregateId => MensagemId;
 
-        public Guid MensagemId { get; }
+        public int MensagemId { get; }
         public string Placa { get; }
         public string Mensagem { get; }
 
-        public MensagemDisplayExibidaEvent(Guid mensagemId, string placa, string mensagem)
+        public MensagemDisplayExibidaEvent(int mensagemId, string placa, string mensagem)
         {
             MensagemId = mensagemId;
             Placa = placa;
@@ -58,13 +58,13 @@ namespace Alphadigi_migration.Domain.Events
     public class MensagemDisplayPrioridadeAlteradaEvent : DomainEvent
     {
         public override string EventType => "MensagemDisplayPrioridadeAlterada";
-        public override Guid AggregateId => MensagemId;
+        public override int AggregateId => MensagemId;
 
-        public Guid MensagemId { get; }
+        public int MensagemId { get; }
         public string Placa { get; }
         public int NovaPrioridade { get; }
 
-        public MensagemDisplayPrioridadeAlteradaEvent(Guid mensagemId, string placa, int novaPrioridade)
+        public MensagemDisplayPrioridadeAlteradaEvent(int mensagemId, string placa, int novaPrioridade)
         {
             MensagemId = mensagemId;
             Placa = placa;
@@ -75,13 +75,13 @@ namespace Alphadigi_migration.Domain.Events
     public class MensagemDisplayReagendadaEvent : DomainEvent
     {
         public override string EventType => "MensagemDisplayReagendada";
-        public override Guid AggregateId => MensagemId;
+        public override int AggregateId => MensagemId;
 
-        public Guid MensagemId { get; }
+        public int MensagemId { get; }
         public string Placa { get; }
         public DateTime NovaDataHora { get; }
 
-        public MensagemDisplayReagendadaEvent(Guid mensagemId, string placa, DateTime novaDataHora)
+        public MensagemDisplayReagendadaEvent(int mensagemId, string placa, DateTime novaDataHora)
         {
             MensagemId = mensagemId;
             Placa = placa;

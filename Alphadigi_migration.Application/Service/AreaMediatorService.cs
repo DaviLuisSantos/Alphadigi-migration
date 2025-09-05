@@ -2,12 +2,12 @@
 using Alphadigi_migration.Application.Queries.Area;
 using MediatR;
 
-namespace Alphadigi_migration.Application.Services
+namespace Alphadigi_migration.Application.Service
 {
     public interface IAreaMediatorService
     {
-        Task<Domain.EntitiesNew.Area> GetByIdAsync(int id);
         Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id);
+       // Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id);
         Task<bool> SyncAreasAsync();
     }
 
@@ -20,11 +20,11 @@ namespace Alphadigi_migration.Application.Services
             _mediator = mediator;
         }
 
-        public Task<Domain.EntitiesNew.Area> GetByIdAsync(int id) =>
-            _mediator.Send(new GetAreaByIdQuery { Id = id });
-
         public Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id) =>
-            _mediator.Send(new GetAreaByIdGuidQuery { Id = id });
+            _mediator.Send(new GetAreaByIdQuery { id = id });
+
+        //public Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id) =>
+        //    _mediator.Send(new GetAreaByIdGuidQuery { Id = id });
 
         public Task<bool> SyncAreasAsync() =>
             _mediator.Send(new SyncAreasCommand());

@@ -1,7 +1,6 @@
 ﻿using Alphadigi_migration.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using Alphadigi_migration.Application.Services;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
 
 
@@ -213,8 +212,8 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         string? linha1 = "BEM VINDO";
         if (!alphadigi.Sentido)
             linha1 = "ATE LOGO";
-        var pacote = await _displayService.RecieveMessageAlphadigi(linha1, Nome, alphadigi);
-        return pacote;
+       // var pacote = await _displayService.RecieveMessageAlphadigi(linha1, Nome, alphadigi);
+        return null;
     }
 
   

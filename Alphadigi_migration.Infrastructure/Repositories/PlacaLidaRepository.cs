@@ -61,7 +61,7 @@ public class PlacaLidaRepository : IPlacaLidaRepository
             .ToListAsync();
     }
 
-    public async Task<PlacaLida> GetByIdAsync(int id)
+    public async Task<PlacaLida> GetByIdAsync(Guid id)
     {
         return await _contextSqlite.PlacaLida.FindAsync(id);
     }

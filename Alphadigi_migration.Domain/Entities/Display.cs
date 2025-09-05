@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
+﻿using Alphadigi_migration.Domain.DTOs.Display;
 using Alphadigi_migration.Domain.Interfaces;
 using System.Text;
 

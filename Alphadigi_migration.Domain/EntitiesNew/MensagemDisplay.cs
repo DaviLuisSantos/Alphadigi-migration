@@ -11,7 +11,7 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         public PlacaVeiculo Placa { get; private set; }
         public string Mensagem { get; private set; }
         public DateTime DataHora { get; private set; }
-        public Guid AlphadigiId { get; private set; }
+        public int AlphadigiId { get; private set; }
 
         public Alphadigi Alphadigi { get; private set; }
         public DateTime DataCriacao { get; private set; }
@@ -25,7 +25,7 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         public MensagemDisplay(
             string placa,
             string mensagem,
-            Guid alphadigiId,
+            int alphadigiId,
             DateTime dataHora,
             int prioridade = 1)
         {

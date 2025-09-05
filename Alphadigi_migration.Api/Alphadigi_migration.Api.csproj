@@ -41,10 +41,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    
-    <ProjectReference Include="..\..\Alphadigi_migration.Application\Alphadigi_migration.Application.csproj" />
-
-	  
+    <ProjectReference Include="..\Alphadigi_migration.Application\Alphadigi_migration.Application.csproj" />
+    <ProjectReference Include="..\Alphadigi_migration.Infrastructure\Alphadigi_migration.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

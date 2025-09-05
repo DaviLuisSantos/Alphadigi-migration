@@ -1,12 +1,12 @@
 ﻿using Carter;
-using Microsoft.Extensions.Logging; 
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Domain.DTOs.PlacaLidas;
 
 
-namespace Alphadigi_migration.Endpoints
+namespace Alphadigi_migration.Api.Endpoints
 {
     public class LogEndpoint : CarterModule
     {

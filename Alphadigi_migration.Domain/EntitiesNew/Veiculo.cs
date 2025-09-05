@@ -1,14 +1,12 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 
+[Table("VEICULOSMORADORES")]
 public class Veiculo : EntityBase, IAggregateRoot
 {
     // Propriedades

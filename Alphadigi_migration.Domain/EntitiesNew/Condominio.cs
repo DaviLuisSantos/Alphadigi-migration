@@ -1,10 +1,11 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
-
-    public class Condominio : EntityBase, IAggregateRoot
+[Table("DADOS_CLIENTE")]
+public class Condominio : EntityBase, IAggregateRoot
     {
         // Propriedades
         public string Nome { get; private set; }

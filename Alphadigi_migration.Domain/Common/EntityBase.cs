@@ -1,8 +1,10 @@
 ﻿using Alphadigi_migration.Domain.Common;
+using System.ComponentModel.DataAnnotations;
 
 public abstract class EntityBase
 {
-    public Guid Id { get; protected set; } = Guid.NewGuid();
+    [Key]
+    public int Id { get; protected set; }
 
     private List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
@@ -33,7 +35,7 @@ public abstract class EntityBase
         if (GetType() != other.GetType())
             return false;
 
-        if (Id == Guid.Empty || other.Id == Guid.Empty)
+        if (Id == 0 || other.Id == 0)
             return false;
 
         return Id == other.Id;

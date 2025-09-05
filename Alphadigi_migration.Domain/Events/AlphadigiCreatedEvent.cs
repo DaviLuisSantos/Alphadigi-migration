@@ -7,14 +7,14 @@ namespace Alphadigi_migration.Domain.Events
     {
         public override string EventType => "AlphadigiCreated";
 
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
         public string Nome { get; }
         public string Ip { get; }
         public int AreaId { get; }
 
         public override Guid AggregateId => throw new NotImplementedException();
 
-        public AlphadigiCreatedEvent(Guid alphadigiId, string nome, string ip, int areaId)
+        public AlphadigiCreatedEvent(int alphadigiId, string nome, string ip, int areaId)
         {
             AlphadigiId = alphadigiId;
             Nome = nome;
@@ -27,12 +27,12 @@ namespace Alphadigi_migration.Domain.Events
     {
         public override string EventType => "AlphadigiUpdated";
 
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
         public string Descricao { get; }
 
         public override Guid AggregateId => throw new NotImplementedException();
 
-        public AlphadigiUpdatedEvent(Guid alphadigiId, string descricao)
+        public AlphadigiUpdatedEvent(int alphadigiId, string descricao)
         {
             AlphadigiId = alphadigiId;
             Descricao = descricao;

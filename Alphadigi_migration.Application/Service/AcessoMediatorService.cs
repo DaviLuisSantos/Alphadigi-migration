@@ -3,7 +3,7 @@ using Alphadigi_migration.Application.Commands.Acesso;
 using Alphadigi_migration.Application.Queries.Acesso;
 using MediatR;
 
-namespace Alphadigi_migration.Application.Services
+namespace Alphadigi_migration.Application.Service
 {
     public interface IAcessoMediatorService
     {

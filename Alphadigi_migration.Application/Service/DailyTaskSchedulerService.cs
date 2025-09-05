@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Alphadigi_migration.Services;
+namespace Alphadigi_migration.Application.Service;
 
 public class DailyTaskSchedulerService
 {

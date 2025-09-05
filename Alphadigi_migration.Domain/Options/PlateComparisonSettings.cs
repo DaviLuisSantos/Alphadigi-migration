@@ -1,4 +1,4 @@
-﻿namespace Alphadigi_migration.Extensions.Options;
+﻿namespace Alphadigi_migration.Domain.Options;
 
 public class PlateComparisonSettings
 {

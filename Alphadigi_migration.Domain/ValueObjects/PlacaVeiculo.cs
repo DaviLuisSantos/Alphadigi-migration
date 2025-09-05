@@ -4,6 +4,7 @@
     {
         public string Numero { get; }
 
+        private PlacaVeiculo() { }
         public PlacaVeiculo(string numero)
         {
             if (string.IsNullOrWhiteSpace(numero))
@@ -18,7 +19,10 @@
 
             Numero = numero.ToUpper().Replace(" ", "").Replace("-", "");
         }
-
+        public PlacaVeiculo(PlacaVeiculo original)
+        {
+            Numero = original.Numero;
+        }
         private bool IsValidPlacaFormat(string placa)
         {
             // Formato Mercosul: AAA0A00

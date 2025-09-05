@@ -168,24 +168,24 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    public async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(string ip)
+    public async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(Guid id)
     {
         try
         {
             var cameraSqlite = await _contextSqlite.Alphadigi
-                .Where(c => c.Ip == ip)
+                .Where(c => c.Id == id)
                 .Include(a => a.Area)
                 .FirstOrDefaultAsync();
             if (cameraSqlite == null)
             {
-                _logger.LogWarning($"Camera não encontrada no SQLite para o IP: {ip}");
+                _logger.LogWarning($"Camera não encontrada no SQLite para o IP: {id}");
                 throw new Exception("Camera não encontrada");
             }
             return cameraSqlite;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Erro ao obter camera para o IP: {ip}");
+            _logger.LogError(ex, $"Erro ao obter camera para o IP: {id}");
             throw;
         }
     }

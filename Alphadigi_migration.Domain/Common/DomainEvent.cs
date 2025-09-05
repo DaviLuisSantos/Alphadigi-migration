@@ -3,10 +3,10 @@
 
 public abstract class DomainEvent : IDomainEvent
 {
-    public Guid EventId { get; } = Guid.NewGuid();
+    public int EventId { get; } 
     public DateTime OccurredOn { get; } = DateTime.UtcNow;
     public abstract string EventType { get; }
-    public abstract Guid AggregateId { get; }
+    public abstract int AggregateId { get; }
 
     protected DomainEvent()
     {

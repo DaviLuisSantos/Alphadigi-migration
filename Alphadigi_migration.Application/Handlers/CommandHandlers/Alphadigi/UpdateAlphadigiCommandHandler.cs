@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Alphadigi;
 
-public class UpdateAlphadigiCommandHandler : IRequestHandler<UpdateAlphadigiCommand, Domain.EntitiesNew.Alphadigi>
+public class UpdateAlphadigiCommandHandler : IRequestHandler<UpdateAlphadigiCommand, bool>
 {
     private readonly IAlphadigiRepository _repository;
     private readonly ILogger<UpdateAlphadigiCommandHandler> _logger;
@@ -24,7 +24,7 @@ public class UpdateAlphadigiCommandHandler : IRequestHandler<UpdateAlphadigiComm
 
  
 
-    public async Task<Domain.EntitiesNew.Alphadigi> Handle(UpdateAlphadigiCommand request, 
+    public async Task<bool> Handle(UpdateAlphadigiCommand request, 
                                                            CancellationToken cancellationToken)
     {
         try

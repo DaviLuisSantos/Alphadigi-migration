@@ -2,7 +2,7 @@
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.DTOs.PlacaLidas;
 
-namespace Alphadigi_migration.Application.Services;
+namespace Alphadigi_migration.Application.Service;
 
 public class PlacaLidaService : IPlacaLidaService
 {

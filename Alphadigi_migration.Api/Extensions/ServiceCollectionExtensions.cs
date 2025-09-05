@@ -1,15 +1,14 @@
+using Alphadigi_migration.Api.Factories;
 using Alphadigi_migration.Application.Mapping;
 using Alphadigi_migration.Application.Queries.Veiculo;
 using Alphadigi_migration.Application.Service;
-using Alphadigi_migration.Application.Services;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Factories;
 using Alphadigi_migration.Infrastructure.Repositories;
 using MediatR;
 using System.Reflection;
 
 
-namespace Alphadigi_migration.Extensions;
+namespace Alphadigi_migration.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -23,13 +22,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IVeiculoService, VeiculoService>();
         services.AddScoped<IAreaService, AreaService>();
         services.AddScoped<IAlphadigiHearthBeatService, AlphadigiHearthBeatService>();
-        services.AddScoped<IAlphadigiPlateService, AlphadigiPlateService>();
+       // services.AddScoped<IAlphadigiPlateService, AlphadigiPlateService>();
 
         services.AddScoped<IUnidadeService, UnidadeService>();
 
         services.AddScoped<IMonitorAcessoLinear, MonitorAcessoLinear>();
 
-        services.AddScoped<Application.Service.UdpBroadcastService>();
+        services.AddScoped<UdpBroadcastService>();
 
        
         services.AddScoped<IMensagemDisplayRepository, MensagemDisplayRepository>();
@@ -46,7 +45,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IUnidadeRepository, UnidadeRepository>();
 
-        services.AddScoped<Application.Services.IAccessHandlerFactory, Application.Services.AccessHandlerFactory>();
+        services.AddScoped<IAccessHandlerFactory, AccessHandlerFactory>();
     
         services.AddScoped<IPlacaLidaService, PlacaLidaService>();
 
@@ -56,9 +55,19 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAcessoRepository, AcessoRepository>();
         services.AddScoped<ICondominioRepository, CondominioRepository>();
         services.AddScoped<IAlphadigiRepository, AlphadigiRepository>();
-      
 
 
+        services.AddTransient<IDisplayProtocolService, DisplayProtocolService>();
+
+        services.AddScoped<ICameraRepository, CameraRepository>();
+        services.AddScoped<IAcessoRepository, AcessoRepository>();
+        services.AddScoped<IAlphadigiRepository, AlphadigiRepository>();
+        services.AddScoped<IAreaRepository, AreaRepository>();
+        services.AddScoped<ICondominioRepository, CondominioRepository>();
+        services.AddScoped<IMensagemDisplayRepository, MensagemDisplayRepository>();
+        services.AddScoped<IPlacaLidaRepository, PlacaLidaRepository>();
+        services.AddScoped<IUnidadeRepository, UnidadeRepository>();
+        services.AddScoped<IVeiculoRepository, VeiculoRepository>();
 
         services.AddScoped<AcessoService>();
         services.AddScoped<DisplayService>();

@@ -1,9 +1,10 @@
 ﻿
 
 using Alphadigi_migration.Domain.Common;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
-
+[Table("LPR_MT_ROTAS_CAM")]
 public class Rota : EntityBase, IAggregateRoot
 {
     public int RotaId { get; private set; }

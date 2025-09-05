@@ -11,7 +11,7 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         public string CarroImg { get; private set; }
         public string PlacaImg { get; private set; }
         public bool Liberado { get; private set; }
-        public Guid AlphadigiId { get; private set; }
+        public int AlphadigiId { get; private set; }
         public int AreaId { get; private set; }
         public Area Area { get; private set; }
         public Alphadigi Alphadigi { get; private set; }
@@ -28,7 +28,7 @@ namespace Alphadigi_migration.Domain.EntitiesNew
 
         public PlacaLida(
             string placa,
-            Guid alphadigiId,
+            int alphadigiId,
             int areaId,
             DateTime dataHora,
             string carroImg = null,

@@ -1,10 +1,10 @@
 ﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Extensions.Options;
+using Alphadigi_migration.Domain.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Alphadigi_migration.Application.Services;
+namespace Alphadigi_migration.Application.Service;
 
 public interface IVeiculoService
 {

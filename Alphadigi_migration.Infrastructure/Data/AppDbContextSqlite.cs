@@ -44,5 +44,34 @@ public class AppDbContextSqlite : DbContext
             .WithMany()
             .HasForeignKey(a => a.AlphadigiId);
 
+        modelBuilder.Entity<Condominio>(entity =>
+        {
+            entity.OwnsOne(e => e.Cnpj, cnpj =>
+            {
+                cnpj.Property(c => c.Numero)
+                .HasColumnName("Cnpj")
+                .HasMaxLength(14);
+            });
+        });
+
+        modelBuilder.Entity<PlacaLida>(entity =>
+        {
+            entity.OwnsOne(e => e.Placa, placa =>
+            {
+                placa.Property(p => p.Numero)
+                .HasColumnName("Placa")
+                .HasMaxLength(10);
+            });
+        });
+
+        modelBuilder.Entity<MensagemDisplay>(entity =>
+        {
+            entity.OwnsOne(e => e.Placa, placa =>
+            {
+                placa.Property(p => p.Numero)
+                .HasColumnName("Placa")
+                .HasMaxLength(10);
+            });
+        });
     }
 }

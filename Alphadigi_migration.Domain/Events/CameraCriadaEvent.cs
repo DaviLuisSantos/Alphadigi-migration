@@ -5,14 +5,14 @@ namespace Alphadigi_migration.Domain.Events
     public class CameraCriadaEvent : DomainEvent
     {
         public override string EventType => "CameraCriada";
-        public override Guid AggregateId => CameraId;
+        public override int AggregateId => CameraId;
 
-        public Guid CameraId { get; }
+        public int CameraId { get; }
         public string Nome { get; }
         public string Ip { get; }
-        public Guid AreaId { get; }
+        public int AreaId { get; }
 
-        public CameraCriadaEvent(Guid cameraId, string nome, string ip, Guid areaId)
+        public CameraCriadaEvent(int cameraId, string nome, string ip, int areaId)
         {
             CameraId = cameraId;
             Nome = nome;
@@ -24,13 +24,13 @@ namespace Alphadigi_migration.Domain.Events
     public class CameraAtualizadaEvent : DomainEvent
     {
         public override string EventType => "CameraAtualizada";
-        public override Guid AggregateId => CameraId;
+        public override int AggregateId => CameraId;
 
-        public Guid CameraId { get; }
+        public  int CameraId { get; }
         public string Nome { get; }
         public string Descricao { get; }
 
-        public CameraAtualizadaEvent(Guid cameraId, string nome, string descricao)
+        public CameraAtualizadaEvent(int cameraId, string nome, string descricao)
         {
             CameraId = cameraId;
             Nome = nome;
@@ -41,13 +41,13 @@ namespace Alphadigi_migration.Domain.Events
     public class CameraAreaAtualizadaEvent : DomainEvent
     {
         public override string EventType => "CameraAreaAtualizada";
-        public override Guid AggregateId => CameraId;
+        public override int AggregateId => CameraId;
 
-        public Guid CameraId { get; }
+        public int CameraId { get; }
         public string Nome { get; }
-        public Guid NovaAreaId { get; }
+        public int NovaAreaId { get; }
 
-        public CameraAreaAtualizadaEvent(Guid cameraId, string nome, Guid novaAreaId)
+        public CameraAreaAtualizadaEvent(int cameraId, string nome, int novaAreaId)
         {
             CameraId = cameraId;
             Nome = nome;
@@ -58,14 +58,14 @@ namespace Alphadigi_migration.Domain.Events
     public class CameraAreaAssociadaEvent : DomainEvent
     {
         public override string EventType => "CameraAreaAssociada";
-        public override Guid AggregateId => CameraId;
+        public override int AggregateId => CameraId;
 
-        public Guid CameraId { get; }
+        public int CameraId { get; }
         public string NomeCamera { get; }
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string NomeArea { get; }
 
-        public CameraAreaAssociadaEvent(Guid cameraId, string nomeCamera, Guid areaId, string nomeArea)
+        public CameraAreaAssociadaEvent(int cameraId, string nomeCamera, int areaId, string nomeArea)
         {
             CameraId = cameraId;
             NomeCamera = nomeCamera;
@@ -77,13 +77,13 @@ namespace Alphadigi_migration.Domain.Events
     public class CameraFotoEventoConfiguradaEvent : DomainEvent
     {
         public override string EventType => "CameraFotoEventoConfigurada";
-        public override Guid AggregateId => CameraId;
+        public override int AggregateId => CameraId;
 
-        public Guid CameraId { get; }
+        public int CameraId { get; }
         public string Nome { get; }
         public bool Habilitada { get; }
 
-        public CameraFotoEventoConfiguradaEvent(Guid cameraId, string nome, bool habilitada)
+        public CameraFotoEventoConfiguradaEvent(int cameraId, string nome, bool habilitada)
         {
             CameraId = cameraId;
             Nome = nome;
@@ -94,12 +94,12 @@ namespace Alphadigi_migration.Domain.Events
     public class CameraAtivadaEvent : DomainEvent
     {
         public override string EventType => "CameraAtivada";
-        public override Guid AggregateId => CameraId;
+        public override int AggregateId => CameraId;
 
-        public Guid CameraId { get; }
+        public int CameraId { get; }
         public string Nome { get; }
 
-        public CameraAtivadaEvent(Guid cameraId, string nome)
+        public CameraAtivadaEvent(int cameraId, string nome)
         {
             CameraId = cameraId;
             Nome = nome;
@@ -109,13 +109,13 @@ namespace Alphadigi_migration.Domain.Events
     public class CameraDesativadaEvent : DomainEvent
     {
         public override string EventType => "CameraDesativada";
-        public override Guid AggregateId => CameraId;
+        public override int AggregateId => CameraId;
 
-        public Guid CameraId { get; }
+        public int CameraId { get; }
         public string Nome { get; }
         public string Motivo { get; }
 
-        public CameraDesativadaEvent(Guid cameraId, string nome, string motivo)
+        public CameraDesativadaEvent(int cameraId, string nome, string motivo)
         {
             CameraId = cameraId;
             Nome = nome;

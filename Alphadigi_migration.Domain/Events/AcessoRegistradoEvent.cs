@@ -5,14 +5,14 @@ namespace Alphadigi_migration.Domain.Events
     public class AcessoRegistradoEvent : DomainEvent
     {
         public override string EventType => "AcessoRegistrado";
-        public override Guid AggregateId => AcessoId;
+        public override int AggregateId => AcessoId;
 
-        public Guid AcessoId { get; }
+        public int AcessoId { get; }
         public string Placa { get; }
         public string Local { get; }
         public bool AcessoPermitido { get; }
 
-        public AcessoRegistradoEvent(Guid acessoId, string placa, string local, bool acessoPermitido)
+        public AcessoRegistradoEvent(int acessoId, string placa, string local, bool acessoPermitido)
         {
             AcessoId = acessoId;
             Placa = placa;
@@ -24,14 +24,14 @@ namespace Alphadigi_migration.Domain.Events
     public class AcessoPermitidoEvent : DomainEvent
     {
         public override string EventType => "AcessoPermitido";
-        public override Guid AggregateId => AcessoId;
+        public override int AggregateId => AcessoId;
 
-        public Guid AcessoId { get; }
+        public int AcessoId { get; }
         public string Placa { get; }
         public string Local { get; }
         public string Motivo { get; }
 
-        public AcessoPermitidoEvent(Guid acessoId, string placa, string local, string motivo)
+        public AcessoPermitidoEvent(int acessoId, string placa, string local, string motivo)
         {
             AcessoId = acessoId;
             Placa = placa;
@@ -43,14 +43,14 @@ namespace Alphadigi_migration.Domain.Events
     public class AcessoNegadoEvent : DomainEvent
     {
         public override string EventType => "AcessoNegado";
-        public override Guid AggregateId => AcessoId;
+        public override int AggregateId => AcessoId;
 
-        public Guid AcessoId { get; }
+        public int AcessoId { get; }
         public string Placa { get; }
         public string Local { get; }
         public string Motivo { get; }
 
-        public AcessoNegadoEvent(Guid acessoId, string placa, string local, string motivo)
+        public AcessoNegadoEvent(int acessoId, string placa, string local, string motivo)
         {
             AcessoId = acessoId;
             Placa = placa;
@@ -62,13 +62,13 @@ namespace Alphadigi_migration.Domain.Events
     public class AcessoFotoAtualizadaEvent : DomainEvent
     {
         public override string EventType => "AcessoFotoAtualizada";
-        public override Guid AggregateId => AcessoId;
+        public override int AggregateId => AcessoId;
 
-        public Guid AcessoId { get; }
+        public int AcessoId { get; }
         public string Placa { get; }
         public string FotoUrl { get; }
 
-        public AcessoFotoAtualizadaEvent(Guid acessoId, string placa, string fotoUrl)
+        public AcessoFotoAtualizadaEvent(int acessoId, string placa, string fotoUrl)
         {
             AcessoId = acessoId;
             Placa = placa;
@@ -79,13 +79,13 @@ namespace Alphadigi_migration.Domain.Events
     public class AcessoDadosVeiculoAtualizadosEvent : DomainEvent
     {
         public override string EventType => "AcessoDadosVeiculoAtualizados";
-        public override Guid AggregateId => AcessoId;
+        public override int AggregateId => AcessoId;
 
-        public Guid AcessoId { get; }
+        public int AcessoId { get; }
         public string Placa { get; }
         public string DadosVeiculo { get; }
 
-        public AcessoDadosVeiculoAtualizadosEvent(Guid acessoId, string placa, string dadosVeiculo)
+        public AcessoDadosVeiculoAtualizadosEvent(int acessoId, string placa, string dadosVeiculo)
         {
             AcessoId = acessoId;
             Placa = placa;

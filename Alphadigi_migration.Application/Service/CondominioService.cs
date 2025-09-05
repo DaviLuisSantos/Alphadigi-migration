@@ -2,7 +2,7 @@
 using Alphadigi_migration.Domain.EntitiesNew;
 using Microsoft.Extensions.Logging;
 
-namespace Alphadigi_migration.Application.Services;
+namespace Alphadigi_migration.Application.Service;
 
 public class CondominioService
 {

@@ -3,14 +3,14 @@
 public class AlphadigiAreaAtualizadaEvent : DomainEvent
 {
     public override string EventType => "AlphadigiAreaAtualizada";
-    public override Guid AggregateId => AlphadigiId;
+    public override int AggregateId => AlphadigiId;
 
-    public Guid AlphadigiId { get; }
+    public int AlphadigiId { get; }
     public string NomeAlphadigi { get; }
     public int AreaId { get; }
     public string NomeArea { get; }
 
-    public AlphadigiAreaAtualizadaEvent(Guid alphadigiId, 
+    public AlphadigiAreaAtualizadaEvent(int alphadigiId, 
                                         string nomeAlphadigi, 
                                       
                                         string nomeArea)

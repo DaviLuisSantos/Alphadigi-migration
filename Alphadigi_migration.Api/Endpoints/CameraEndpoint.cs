@@ -1,13 +1,10 @@
 ﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Models;
-using Alphadigi_migration.Services;
 using Carter;
 using Carter.OpenApi;
-using System.Text.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
-namespace Alphadigi_migration;
+namespace Alphadigi_migration.Api.Endpoints;
 
 public class CameraEndpoint : CarterModule
 {

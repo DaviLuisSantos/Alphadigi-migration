@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
-using Alphadigi_migration.Domain.Interfaces;
+﻿using Alphadigi_migration.Application.Adapters;
+using Alphadigi_migration.Application.Commands.Acesso;
 using Alphadigi_migration.Domain.EntitiesNew;
+using Alphadigi_migration.Domain.Interfaces;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Alphadigi_migration.Application.Service;
+using Microsoft.Extensions.Logging;
 
-namespace Alphadigi_migration.Application.Services;
+namespace Alphadigi_migration.Application.Service;
 
 
 public class VisitaAccessHandler : IAccessHandler
@@ -16,8 +18,8 @@ public class VisitaAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Domain.EntitiesNew.Veiculo veiculo, 
-                                                                      Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
+    public Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo,
+                                                                      Alphadigi alphadigi)
     {
         _logger.LogInformation($"Processando acesso de visitante para veículo com placa {veiculo?.Placa ?? "Visitante"}.");
         return Task.FromResult((false, "NÃO CADASTRADO"));
@@ -36,14 +38,14 @@ public class SaidaSempreAbreAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo, 
-                                                                           Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo,
+                                                                           Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
             string acesso = "NÃO CADASTRADO";
-            if (veiculo != null && veiculo.Id != null)
+            if (veiculo != null && veiculo.Id != Guid.Empty)
             {
                 _logger.LogInformation($"Aprovando saída do veículo cadastrado com ID {veiculo.Id}.");
                 await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
@@ -78,8 +80,8 @@ public class ControlaVagaAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Domain.EntitiesNew.Veiculo veiculo, 
-                                                                            Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo,
+                                                                            Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
@@ -144,8 +146,8 @@ public class NaoControlaVagaAccessHandler : IAccessHandler
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Domain.EntitiesNew.Veiculo veiculo, 
-                                                                            Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
+    public async Task<(bool ShouldReturn, string Acesso)> HandleAccessAsync(Veiculo veiculo,
+                                                                            Alphadigi alphadigi)
     {
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
@@ -186,52 +188,95 @@ public class NaoControlaVagaAccessHandler : IAccessHandler
 
 public interface IAccessHandlerFactory
 {
-    IAccessHandler GetAccessHandler(Area area);
+    IRequestHandler<HandleAccessCommand, (bool ShouldReturn, string Acesso)> GetAccessHandler(Domain.EntitiesNew.Area area);
 }
 
 public class AccessHandlerFactory : IAccessHandlerFactory
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<AccessHandlerFactory> _logger;
+    private readonly ILogger<AccessHandlerMediatorAdapter> _logger;
 
-    public AccessHandlerFactory(IServiceProvider serviceProvider, 
-                               ILogger<AccessHandlerFactory> logger)
+    public AccessHandlerFactory(IServiceProvider serviceProvider,
+                               ILogger<AccessHandlerMediatorAdapter> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
-    public IAccessHandler GetAccessHandler(Area area)
+    //public IAccessHandler GetAccessHandler(Area area)
+    //{
+    //    _logger.LogInformation($"Iniciando GetAccessHandler");
+    //    try
+    //    {
+    //        if (area == null)
+    //        {
+    //            _logger.LogWarning($"Área nula! Retornando VisitaAccessHandler");
+    //            return _serviceProvider.GetRequiredService<VisitaAccessHandler>();
+    //        }
+    //        if (area.EntradaVisita || area.SaidaVisita)
+    //        {
+    //            _logger.LogInformation($"Retornando VisitaAccessHandler");
+    //            return _serviceProvider.GetRequiredService<VisitaAccessHandler>();
+    //        }
+    //        if (area.SaidaSempreAbre)
+    //        {
+    //            _logger.LogInformation($"Retornando SaidaSempreAbreAccessHandler");
+    //            return _serviceProvider.GetRequiredService<SaidaSempreAbreAccessHandler>();
+    //        }
+    //        if (area.ControlaVaga)
+    //        {
+    //            _logger.LogInformation($"Retornando ControlaVagaAccessHandler");
+    //            return _serviceProvider.GetRequiredService<ControlaVagaAccessHandler>();
+    //        }
+    //        _logger.LogInformation($"Retornando NaoControlaVagaAccessHandler");
+    //        return _serviceProvider.GetRequiredService<NaoControlaVagaAccessHandler>();
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        _logger.LogError(e, $"Erro em  GetAccessHandler.");
+    //        throw;
+    //    }
+    //}
+
+    public IRequestHandler<HandleAccessCommand, (bool ShouldReturn, string Acesso)> GetAccessHandler(Area area)
     {
-        _logger.LogInformation($"Iniciando GetAccessHandler");
+        _logger.LogInformation("Iniciando GetAccessHandler");
         try
         {
+            IAccessHandler handler;
+
             if (area == null)
             {
-                _logger.LogWarning($"Área nula! Retornando VisitaAccessHandler");
-                return _serviceProvider.GetRequiredService<VisitaAccessHandler>();
+                _logger.LogWarning("Área nula! Retornando VisitaAccessHandler");
+                handler = _serviceProvider.GetRequiredService<VisitaAccessHandler>();
             }
-            if (area.EntradaVisita || area.SaidaVisita)
+            else if (area.EntradaVisita || area.SaidaVisita)
             {
-                _logger.LogInformation($"Retornando VisitaAccessHandler");
-                return _serviceProvider.GetRequiredService<VisitaAccessHandler>();
+                _logger.LogInformation("Retornando VisitaAccessHandler");
+                handler = _serviceProvider.GetRequiredService<VisitaAccessHandler>();
             }
-            if (area.SaidaSempreAbre)
+            else if (area.SaidaSempreAbre)
             {
-                _logger.LogInformation($"Retornando SaidaSempreAbreAccessHandler");
-                return _serviceProvider.GetRequiredService<SaidaSempreAbreAccessHandler>();
+                _logger.LogInformation("Retornando SaidaSempreAbreAccessHandler");
+                handler = _serviceProvider.GetRequiredService<SaidaSempreAbreAccessHandler>();
             }
-            if (area.ControlaVaga)
+            else if (area.ControlaVaga)
             {
-                _logger.LogInformation($"Retornando ControlaVagaAccessHandler");
-                return _serviceProvider.GetRequiredService<ControlaVagaAccessHandler>();
+                _logger.LogInformation("Retornando ControlaVagaAccessHandler");
+                handler = _serviceProvider.GetRequiredService<ControlaVagaAccessHandler>();
             }
-            _logger.LogInformation($"Retornando NaoControlaVagaAccessHandler");
-            return _serviceProvider.GetRequiredService<NaoControlaVagaAccessHandler>();
+            else
+            {
+                _logger.LogInformation("Retornando NaoControlaVagaAccessHandler");
+                handler = _serviceProvider.GetRequiredService<NaoControlaVagaAccessHandler>();
+            }
+
+            // Retorna o adaptador que envolve o handler
+            return new AccessHandlerMediatorAdapter(handler, _logger);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, $"Erro em  GetAccessHandler.");
+            _logger.LogError(e, "Erro em GetAccessHandler");
             throw;
         }
     }

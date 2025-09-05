@@ -6,7 +6,7 @@ namespace Alphadigi_migration.Domain.Events;
 
 public class AlphadigiEstadoAtualizadoEvent : DomainEvent
 {
-    public Guid AlphadigiId { get; }
+    public int AlphadigiId { get; }
     public string NovoEstado { get; }
     public string EstadoAnterior { get; }
     public DateTime DataAtualizacao { get; }
@@ -15,7 +15,7 @@ public class AlphadigiEstadoAtualizadoEvent : DomainEvent
 
     public override Guid AggregateId => throw new NotImplementedException();
 
-    public AlphadigiEstadoAtualizadoEvent(Guid alphadigiId, string novoEstado, string estadoAnterior = null)
+    public AlphadigiEstadoAtualizadoEvent(int alphadigiId, string novoEstado, string estadoAnterior = null)
     {
         AlphadigiId = alphadigiId;
         NovoEstado = novoEstado;

@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
+﻿using Alphadigi_migration.Domain.DTOs.Display;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 namespace Alphadigi_migration.Application.Service;

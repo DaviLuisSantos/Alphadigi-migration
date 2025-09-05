@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Alphadigi_migration
+namespace Alphadigi_migration.Api
 {
     public class RequestTimingMiddleware
     {

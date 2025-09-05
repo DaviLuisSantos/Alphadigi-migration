@@ -1,11 +1,7 @@
-﻿using Alphadigi_migration.Models;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Microsoft.Extensions.DependencyInjection;
-using Alphadigi_migration.Application.Services;
 using Alphadigi_migration.Application.Service;
 
 namespace Alphadigi_migration.Infrastructure.Services;
@@ -44,7 +40,7 @@ public class SaidaSempreAbreAccessHandler : IAccessHandler
         try
         {
             string acesso = "NÃO CADASTRADO";
-            if (veiculo != null && veiculo.Id != 0)
+            if (veiculo != null && veiculo.Id != Guid.Empty)
             {
                 _logger.LogInformation($"Aprovando saída do veículo cadastrado com ID {veiculo.Id}.");
                 await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
@@ -85,7 +81,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
-            _logger.LogInformation($"Gerenciando controle de vaga para veículo com ID {veiculo?.Id ?? 0}, Sentido: {alphadigi.Sentido}.");
+            _logger.LogInformation($"Gerenciando controle de vaga para veículo com ID {veiculo?.Id ?? Guid.Empty}, Sentido: {alphadigi.Sentido}.");
             string acesso = "";
             bool abre = true;
 
@@ -117,7 +113,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
                 }
                 else
                 {
-                    _logger.LogWarning($"Não foi possível obter informações da unidade para veículo com ID {veiculo?.Id ?? 0}. Acesso negado");
+                    _logger.LogWarning($"Não foi possível obter informações da unidade para veículo com ID {veiculo?.Id ?? Guid.Empty}. Acesso negado");
                     acesso = "S/VG";
                     abre = false;
                 }
@@ -149,7 +145,7 @@ public class NaoControlaVagaAccessHandler : IAccessHandler
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
-            _logger.LogInformation($"Acesso sem controle de vaga para veículo com ID {veiculo?.Id ?? 0}, Sentido: {alphadigi.Sentido}.");
+            _logger.LogInformation($"Acesso sem controle de vaga para veículo com ID {veiculo?.Id ?? Guid.Empty}, Sentido: {alphadigi.Sentido}.");
 
             string acesso = "CADASTRADO";
             bool abre = true;

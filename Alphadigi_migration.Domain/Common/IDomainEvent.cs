@@ -10,5 +10,5 @@ namespace Alphadigi_migration.Domain.Common;
 public interface IDomainEvent : INotification
 {
     DateTime OccurredOn { get; }
-    Guid EventId { get; }
+    int EventId { get; }
 }

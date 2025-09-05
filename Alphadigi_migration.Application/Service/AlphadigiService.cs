@@ -23,7 +23,7 @@ public class AlphadigiService : IAlphadigiService
     public Task<bool> Update(UpdateAlphadigiDTO alphadigi) => _repository.Update(alphadigi);
     public Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Update(Alphadigi_migration.Domain.EntitiesNew.Alphadigi camera) => _repository.Update(camera);
 
-    public Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(string ip) => _repository.Get(ip);
+    public Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(Guid id) => _repository.Get(id);
 
     public Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> GetOrCreate(string ip) => _repository.GetOrCreate(ip);
 

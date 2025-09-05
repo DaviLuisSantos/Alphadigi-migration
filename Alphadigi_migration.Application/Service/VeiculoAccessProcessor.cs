@@ -1,11 +1,10 @@
-﻿using Alphadigi_migration.Application.Service;
-using Alphadigi_migration.Domain.DTOs;
+﻿using Alphadigi_migration.Domain.DTOs;
 using Alphadigi_migration.Domain.DTOs.Veiculos;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Alphadigi_migration.Application.Services;
+namespace Alphadigi_migration.Application.Service;
 
 public class VeiculoAccessProcessor : IVeiculoAccessProcessor
 {
@@ -28,7 +27,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
 
     public async Task<(bool ShouldReturn, string Acesso)> ProcessVeiculoAccessAsync(
         Veiculo veiculo,
-        Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, 
+        Alphadigi alphadigi, 
         DateTime timestamp)
     {
         _logger.LogInformation($"Iniciando ProcessVeiculoAccessAsync");
@@ -60,7 +59,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
         return await _monitorAcessoLinear.DadosVeiculo(monitorAcesso);
     }
 
-    private async Task<bool> SendUpdateLastAccess(string ipCamera, int idVeiculo, DateTime timestamp)
+    private async Task<bool> SendUpdateLastAccess(string ipCamera, Guid idVeiculo, DateTime timestamp)
     {
         var lastAccess = new LastAcessUpdateVeiculoDTO
         {

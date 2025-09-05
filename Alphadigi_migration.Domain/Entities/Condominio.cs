@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.Entities;
 
-[Table("DADOS_CLIENTE")]
+[Table("DADOS_CLIENTE")] 
 public class Condominio
 {
     [Key]

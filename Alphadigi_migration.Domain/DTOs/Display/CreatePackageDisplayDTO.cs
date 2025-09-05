@@ -1,6 +1,6 @@
 ﻿using Alphadigi_migration.Domain.Interfaces;
 
-namespace Alphadigi_migration.Domain.DTOs.Alphadigi;
+namespace Alphadigi_migration.Domain.DTOs.Display;
 
 public class CreatePackageDisplayDTO 
 {

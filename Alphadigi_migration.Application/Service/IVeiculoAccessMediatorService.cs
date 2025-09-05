@@ -1,7 +1,7 @@
 ﻿using Alphadigi_migration.Application.Commands.Veiculo;
 using MediatR;
 
-namespace Alphadigi_migration.Application.Services
+namespace Alphadigi_migration.Application.Service
 {
     public interface IVeiculoAccessMediatorService
     {

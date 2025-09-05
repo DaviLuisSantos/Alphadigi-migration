@@ -19,7 +19,7 @@ public interface ICameraRepository
         Task<Domain.EntitiesNew.Camera> GetByIdAsync(Guid id);
         Task<Domain.EntitiesNew.Camera> GetByIpAsync(string ip);
         Task<List<Domain.EntitiesNew.Camera>> GetAllAsync();
-        Task<List<Domain.EntitiesNew.Camera>> GetByAreaIdAsync(int areaId);
+        Task<List<Domain.EntitiesNew.Camera>> GetByAreaIdAsync(Guid areaId);
 
    
     

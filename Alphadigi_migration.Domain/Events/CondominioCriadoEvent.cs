@@ -5,13 +5,13 @@ namespace Alphadigi_migration.Domain.Events
     public class CondominioCriadoEvent : DomainEvent
     {
         public override string EventType => "CondominioCriado";
-        public override Guid AggregateId => CondominioId;
+        public override int AggregateId => CondominioId;
 
-        public Guid CondominioId { get; }
+        public int CondominioId { get; }
         public string Nome { get; }
         public string Cnpj { get; }
 
-        public CondominioCriadoEvent(Guid condominioId, string nome, string cnpj)
+        public CondominioCriadoEvent(int condominioId, string nome, string cnpj)
         {
             CondominioId = condominioId;
             Nome = nome;
@@ -22,12 +22,12 @@ namespace Alphadigi_migration.Domain.Events
     public class CondominioAtualizadoEvent : DomainEvent
     {
         public override string EventType => "CondominioAtualizado";
-        public override Guid AggregateId => CondominioId;
+        public override int AggregateId => CondominioId;
 
-        public Guid CondominioId { get; }
+        public int CondominioId { get; }
         public string Nome { get; }
 
-        public CondominioAtualizadoEvent(Guid condominioId, string nome)
+        public CondominioAtualizadoEvent(int condominioId, string nome)
         {
             CondominioId = condominioId;
             Nome = nome;
@@ -37,13 +37,13 @@ namespace Alphadigi_migration.Domain.Events
     public class CondominioCnpjAtualizadoEvent : DomainEvent
     {
         public override string EventType => "CondominioCnpjAtualizado";
-        public override Guid AggregateId => CondominioId;
+        public override int AggregateId => CondominioId;
 
-        public Guid CondominioId { get; }
+        public int CondominioId { get; }
         public string Nome { get; }
         public string Cnpj { get; }
 
-        public CondominioCnpjAtualizadoEvent(Guid condominioId, string nome, string cnpj)
+        public CondominioCnpjAtualizadoEvent(int condominioId, string nome, string cnpj)
         {
             CondominioId = condominioId;
             Nome = nome;
@@ -54,12 +54,12 @@ namespace Alphadigi_migration.Domain.Events
     public class CondominioAtivadoEvent : DomainEvent
     {
         public override string EventType => "CondominioAtivado";
-        public override Guid AggregateId => CondominioId;
+        public override int AggregateId => CondominioId;
 
-        public Guid CondominioId { get; }
+        public int CondominioId { get; }
         public string Nome { get; }
 
-        public CondominioAtivadoEvent(Guid condominioId, string nome)
+        public CondominioAtivadoEvent(int condominioId, string nome)
         {
             CondominioId = condominioId;
             Nome = nome;
@@ -69,13 +69,13 @@ namespace Alphadigi_migration.Domain.Events
     public class CondominioDesativadoEvent : DomainEvent
     {
         public override string EventType => "CondominioDesativado";
-        public override Guid AggregateId => CondominioId;
+        public override int AggregateId => CondominioId;
 
-        public Guid CondominioId { get; }
+        public int CondominioId { get; }
         public string Nome { get; }
         public string Motivo { get; }
 
-        public CondominioDesativadoEvent(Guid condominioId, string nome, string motivo)
+        public CondominioDesativadoEvent(int condominioId, string nome, string motivo)
         {
             CondominioId = condominioId;
             Nome = nome;

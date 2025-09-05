@@ -22,7 +22,7 @@ public class AreaRepository : IAreaRepository
         _logger = logger;
     }
 
-    public async Task<Area> GetByIdAsync(int id)
+    public async Task<Area> GetByIdAsync(Guid id)
     {
         _logger.LogInformation("GetByIdAsync chamado para área: {Id}", id);
         return await _contextFirebird.Area.FindAsync(id);

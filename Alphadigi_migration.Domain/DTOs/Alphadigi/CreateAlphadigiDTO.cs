@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Alphadigi_migration.Domain.Interfaces;
 
 namespace Alphadigi_migration.Domain.DTOs.Alphadigi;
@@ -13,7 +12,7 @@ public class CreateAlphadigiDTO : ICreateAlphadigiDTO
     [Required]
     [StringLength(100)]
     public string Nome { get; set; }
-    public int AreaId { get; set; }
+    public Guid AreaId { get; set; }
     public bool Sentido { get; set; }
     public bool Enviado { get; set; } = false;
 

@@ -1,7 +1,7 @@
 ﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using System.Text.Json;
 
-namespace Alphadigi_migration.Factories;
+namespace Alphadigi_migration.Api.Factories;
 
 public interface IHeartbeatFactory
 {

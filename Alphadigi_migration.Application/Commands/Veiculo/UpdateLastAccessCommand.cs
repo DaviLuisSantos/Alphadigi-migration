@@ -9,7 +9,7 @@ namespace Alphadigi_migration.Application.Commands.Veiculo;
 
 public class UpdateLastAccessCommand : IRequest<bool>
 {
-    public int IdVeiculo { get; set; }
+    public Guid IdVeiculo { get; set; }
     public string IpCamera { get; set; }
     public DateTime DataHoraAcesso { get; set; }
 }

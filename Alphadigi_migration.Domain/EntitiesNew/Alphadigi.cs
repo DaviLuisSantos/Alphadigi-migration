@@ -1,9 +1,11 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Events;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 
+[Table("LPR_MT_ACESSO")]
 public class Alphadigi : EntityBase, IAggregateRoot
 {
     // Propriedades
@@ -14,7 +16,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
 
     public bool Sentido { get; private set; }
     public string Estado { get; private set; }
-    public Guid? UltimoId { get; private set; }
+    public int? UltimoId { get; private set; }
     public string UltimaPlaca { get; private set; }
     public DateTime? UltimaHora { get; private set; }
     public int LinhasDisplay { get; private set; }
@@ -88,9 +90,9 @@ public class Alphadigi : EntityBase, IAggregateRoot
         UltimaHora = timestamp;
         
     }
-    public void AtualizarUltimoId(Guid? novoUltimoId)
+    public void AtualizarUltimoId(int? novoUltimoId)
     {
-        if (novoUltimoId == Guid.Empty )
+        if (novoUltimoId <= 0 )
             throw new Exception("Último ID não pode ser negativo");
 
         UltimoId = novoUltimoId;

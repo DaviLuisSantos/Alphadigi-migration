@@ -3,7 +3,7 @@ using Alphadigi_migration.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using SkiaSharp;
 
-namespace Alphadigi_migration.Application.Services;
+namespace Alphadigi_migration.Application.Service;
 
 public class AcessoService : IAcessoService 
 {
@@ -21,7 +21,7 @@ public class AcessoService : IAcessoService
         _alphadigiService = alphadigiService;
     }
 
-    public async Task<bool> SaveVeiculoAcesso(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, 
+    public async Task<bool> SaveVeiculoAcesso(Alphadigi alphadigi, 
                                               Veiculo veiculo, 
                                               DateTime timestamp, 
                                               string? imagem)
@@ -61,9 +61,9 @@ public class AcessoService : IAcessoService
         return true;
     }
 
-    private async Task<bool> VerifyPassBack(Veiculo veiculo, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi, DateTime timestamp)
+    private async Task<bool> VerifyPassBack(Veiculo veiculo, Alphadigi alphadigi, DateTime timestamp)
     {
-        Alphadigi_migration.Domain.EntitiesNew.Alphadigi? camUlt = await _alphadigiService.Get(veiculo.IpCamUltAcesso);
+        Alphadigi? camUlt = await _alphadigiService.GetOrCreate(veiculo.IpCamUltAcesso);
 
         TimeSpan? tempoAntipassback = alphadigi.Area.TempoAntipassback;
 
@@ -72,7 +72,7 @@ public class AcessoService : IAcessoService
             return false;
         }
 
-        tempoAntipassback = (tempoAntipassback == null || tempoAntipassback == TimeSpan.Zero) ? TimeSpan.FromSeconds(10) : tempoAntipassback;
+        tempoAntipassback = tempoAntipassback == null || tempoAntipassback == TimeSpan.Zero ? TimeSpan.FromSeconds(10) : tempoAntipassback;
         var timeLimit = timestamp - tempoAntipassback;
 
         var recentAccesses = await _acessoRepository.VerifyAntiPassbackAsync(veiculo.Placa, timeLimit);
@@ -80,7 +80,7 @@ public class AcessoService : IAcessoService
         return recentAccesses != null;
     }
 
-    public string PrepareLocalString(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
+    public string PrepareLocalString(Alphadigi alphadigi)
     {
         if (alphadigi == null)
         {

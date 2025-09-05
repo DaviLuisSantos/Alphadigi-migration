@@ -22,7 +22,7 @@ public class GetAreaByIdQueryHandler : IRequestHandler<GetAreaByIdQuery, Domain.
     public async Task<Domain.EntitiesNew.Area> Handle(GetAreaByIdQuery request, 
                                                 CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Buscando área por ID: {Id}", request.Id);
-        return await _repository.GetByIdAsync(request.Id);
+        _logger.LogInformation("Buscando área por ID: {Id}", request.id);
+        return await _repository.GetByIdAsync(request.id);
     }
 }

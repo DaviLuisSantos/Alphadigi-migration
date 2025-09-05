@@ -36,7 +36,8 @@ public class HandleCreateQueryHandler : IRequestHandler<HandleCreateQuery, Domai
         }
 
         // Atualizar o UltimoId com o ID do último veículo enviado
-        alphadigi.UltimoId = veiculosEnvio.Max(item => item.Id);
+        alphadigi.AtualizarUltimoId(veiculosEnvio.Max(item => item.Id));
+
 
         var envio = new Domain.DTOs.Alphadigi.AddWhiteListDTO
         {

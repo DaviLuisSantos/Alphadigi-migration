@@ -1,9 +1,11 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 
+[Table("LPR_MT_AREAS")]
 public class Area : EntityBase, IAggregateRoot
 {
     // Propriedades

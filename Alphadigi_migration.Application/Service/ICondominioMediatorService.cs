@@ -2,7 +2,7 @@
 using Alphadigi_migration.Application.Queries.Condominio;
 using MediatR;
 
-namespace Alphadigi_migration.Application.Services
+namespace Alphadigi_migration.Application.Service
 {
     public interface ICondominioMediatorService
     {

@@ -1,4 +1,6 @@
-﻿namespace Carter.ResponseNegotiators.SystemTextJson;
+﻿using Carter;
+
+namespace Alphadigi_migration.Api;
 
 using System;
 using System.Text.Json;
@@ -17,7 +19,7 @@ public class SystemTextJsonResponseNegotiator : IResponseNegotiator
 
     public SystemTextJsonResponseNegotiator()
     {
-        this.jsonOptions = new JsonSerializerOptions
+        jsonOptions = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -32,6 +34,6 @@ public class SystemTextJsonResponseNegotiator : IResponseNegotiator
     public Task Handle<T>(HttpRequest req, HttpResponse res, T model, CancellationToken cancellationToken)
     {
         res.ContentType = "application/json; charset=utf-8";
-        return res.WriteAsync(JsonSerializer.Serialize(model, this.jsonOptions), cancellationToken);
+        return res.WriteAsync(JsonSerializer.Serialize(model, jsonOptions), cancellationToken);
     }
 }

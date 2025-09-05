@@ -4,6 +4,8 @@ public record Cnpj
 {
     public string Numero { get; }
 
+    private Cnpj() { }
+
     public Cnpj(string numero)
     {
         if (string.IsNullOrWhiteSpace(numero))
@@ -15,6 +17,10 @@ public record Cnpj
             throw new ArgumentException("CNPJ inválido");
 
         Numero = cnpjLimpo;
+    }
+    public Cnpj(Cnpj original)
+    {
+        Numero = original.Numero;
     }
 
     private string LimparCnpj(string cnpj)

@@ -1,12 +1,10 @@
-using Alphadigi_migration;
-using Alphadigi_migration.Application.Services;
+using Alphadigi_migration.Api;
+using Alphadigi_migration.Api.Extensions;
+using Alphadigi_migration.Application.Service;
 using Alphadigi_migration.Domain.Interfaces;
-using Alphadigi_migration.Extensions;
-using Alphadigi_migration.Extensions.Options;
+using Alphadigi_migration.Domain.Options;
 using Alphadigi_migration.Infrastructure.Data;
-using Alphadigi_migration.Services;
 using Carter;
-using Carter.ResponseNegotiators.SystemTextJson;
 using IniParser;
 using IniParser.Model;
 using Microsoft.EntityFrameworkCore;

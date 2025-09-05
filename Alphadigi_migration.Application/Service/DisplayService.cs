@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.DTOs.Display;
 
 
 namespace Alphadigi_migration.Application.Service;
@@ -32,68 +33,68 @@ public class DisplayService
         _mapper = mapper;
     }
 
-    public async Task<List<SerialData>> RecieveMessageAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
-    {
-        var serialDataList = new List<SerialData>();
-        var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
+    //public async Task<List<SerialData>> RecieveMessageAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
+    //{
+    //    var serialDataList = new List<SerialData>();
+    //    var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
 
-        if (packageDisplayList != null)
-        {
-            var package = PrepareMessage(packageDisplayList);
-            serialDataList.Add(CreateSerialData(package));
-        }
+    //    if (packageDisplayList != null)
+    //    {
+    //        var package = PrepareMessage(packageDisplayList);
+    //        serialDataList.Add(CreateSerialData(package));
+    //    }
 
-        if (acesso == Cadastrado)
-        {
-            serialDataList.Add(new SerialData
-            {
-                serialChannel = 0,
-                data = SinalSerialData,
-                dataLen = SinalSerialDataLen
-            });
-        }
+    //    if (acesso == Cadastrado)
+    //    {
+    //        serialDataList.Add(new SerialData
+    //        {
+    //            serialChannel = 0,
+    //            data = SinalSerialData,
+    //            dataLen = SinalSerialDataLen
+    //        });
+    //    }
 
-        return serialDataList;
-    }
+    //    return serialDataList;
+    //}
 
-    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
-    {
-        var serialDataList = new List<SerialData>();
-        var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
+    //public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
+    //{
+    //    var serialDataList = new List<SerialData>();
+    //    var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
 
-        if (packageDisplayList != null)
-        {
-            var package = PrepareMessage(packageDisplayList);
-            serialDataList.Add(CreateSerialData(package));
-        }
+    //    if (packageDisplayList != null)
+    //    {
+    //        var package = PrepareMessage(packageDisplayList);
+    //        serialDataList.Add(CreateSerialData(package));
+    //    }
 
-        var syncPackage = SyncDateDisplay();
-        serialDataList.Add(CreateSerialData(syncPackage));
+    //    var syncPackage = SyncDateDisplay();
+    //    serialDataList.Add(CreateSerialData(syncPackage));
 
-        return serialDataList;
-    }
+    //    return serialDataList;
+    //}
 
-    public ReturnDataDisplayDTO PrepareMessage(List<CreatePackageDisplayDTO> packageDisplayList)
-    {
-        var package = Display.CreateMultiLinePackage(packageDisplayList);
-        LogPackage(package);
-        return new ReturnDataDisplayDTO
-        {
-            Message = Convert.ToBase64String(package),
-            Size = package.Length
-        };
-    }
+    //public ReturnDataDisplayDTO PrepareMessage(List<CreatePackageDisplayDTO> packageDisplayList)
+    //{
+    //    var package = Display.CreateMultiLinePackage(packageDisplayList);
+    //    LogPackage(package);
+    //    return new ReturnDataDisplayDTO
+    //    {
+    //        Message = Convert.ToBase64String(package),
+    //        Size = package.Length
+    //    };
+    //}
 
-    public ReturnDataDisplayDTO SyncDateDisplay()
-    {
-        var package = Display.CreateTimeSyncPackage();
-        LogPackage(package);
-        return new ReturnDataDisplayDTO
-        {
-            Message = Convert.ToBase64String(package),
-            Size = package.Length
-        };
-    }
+    //public ReturnDataDisplayDTO SyncDateDisplay()
+    //{
+    //    var package = Display.CreateTimeSyncPackage();
+    //    LogPackage(package);
+    //    return new ReturnDataDisplayDTO
+    //    {
+    //        Message = Convert.ToBase64String(package),
+    //        Size = package.Length
+    //    };
+    //}
 
     public async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(string placa, string acesso, Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {

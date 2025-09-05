@@ -20,7 +20,7 @@ public class CameraRepository : ICameraRepository
         throw new NotImplementedException();
     }
 
-    public Task DeleteAsync(int id)
+    public Task DeleteAsync(Guid id)
     {
         throw new NotImplementedException();
     }
@@ -30,7 +30,17 @@ public class CameraRepository : ICameraRepository
         throw new NotImplementedException();
     }
 
-    public async Task<Camera> GetByIdAsync(int id)
+    public Task<List<Camera>> GetByAreaIdAsync(Guid areaId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<Camera> GetByIdAsync(Guid id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Camera> GetByIpAsync(string ip)
     {
         throw new NotImplementedException();
     }
@@ -39,5 +49,19 @@ public class CameraRepository : ICameraRepository
     {
         throw new NotImplementedException();
     }
-   
+
+    Task<Guid> ICameraRepository.AddAsync(Camera camera)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<bool> ICameraRepository.DeleteAsync(Guid id)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<bool> ICameraRepository.UpdateAsync(Camera camera)
+    {
+        throw new NotImplementedException();
+    }
 }

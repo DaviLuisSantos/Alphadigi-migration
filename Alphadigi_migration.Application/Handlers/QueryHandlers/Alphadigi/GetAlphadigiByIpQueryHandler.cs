@@ -24,7 +24,7 @@ public class GetAlphadigiByIpQueryHandler : IRequestHandler<GetAlphadigiByIpQuer
     {
         try
         {
-            return await _repository.Get(request.Ip);
+            return await _repository.GetOrCreate(request.Ip);
         }
         catch (Exception ex)
         {

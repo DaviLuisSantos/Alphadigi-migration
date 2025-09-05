@@ -1,4 +1,4 @@
-﻿namespace Alphadigi_migration.Domain.DTOs.Alphadigi;
+﻿namespace Alphadigi_migration.Domain.DTOs.Display;
 
 public class ReturnDataDisplayDTO
 {

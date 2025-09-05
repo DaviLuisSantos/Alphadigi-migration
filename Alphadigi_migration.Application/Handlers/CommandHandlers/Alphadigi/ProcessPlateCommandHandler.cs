@@ -41,7 +41,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             // Atualizar configuração do display se necessário
             if (camera.LinhasDisplay != 0 && request.Modelo == "TOTEM")
             {
-                camera.AtualizarUltimoId(0);
+                camera.AtualizarUltimoId(Guid.Empty);
                 await _mediator.Send(new UpdateAlphadigiEntityCommand { Alphadigi = camera });
             }
 
@@ -76,7 +76,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             // Atualizar estado da câmera se necessário
             if (veiculo != null && !request.IsCad && veiculoCadastrado)
             {
-                camera.AtualizarUltimoId(0);
+                camera.AtualizarUltimoId(Guid.Empty);
                 await _mediator.Send(new UpdateAlphadigiEntityCommand { Alphadigi = camera });
             }
 

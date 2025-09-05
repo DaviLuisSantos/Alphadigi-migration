@@ -19,7 +19,7 @@ public class UnidadeRepository : IUnidadeRepository
         _logger = logger;
     }
 
-    public async Task<QueryResult> GetUnidadeInfoAsync(int idUnidade)
+    public async Task<QueryResult> GetUnidadeInfoAsync(Guid idUnidade)
     {
         try
         {
@@ -49,7 +49,7 @@ public class UnidadeRepository : IUnidadeRepository
         }
     }
 
-    public async Task<Unidade> GetByIdAsync(int id)
+    public async Task<Unidade> GetByIdAsync(Guid id)
     {
         return await _contextFirebird.Unidade.FindAsync(id);
     }

@@ -9,5 +9,5 @@ namespace Alphadigi_migration.Application.Queries.Area;
 
 public class GetAreaByIdQuery : IRequest<Domain.EntitiesNew.Area>
 {
-    public int Id { get; set; }
+    public Guid id { get; set; }
 }

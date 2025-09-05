@@ -34,6 +34,37 @@ public class AppDbContextFirebird : DbContext
             .WithMany()
             .HasForeignKey(v => v.IdRota);
 
+        modelBuilder.Entity<Veiculo>(entity =>
+        {
+            entity.OwnsOne(v => v.Placa, placa =>
+            {
+                placa.Property(p => p.Numero)
+                .HasColumnName("Placa")
+                .HasMaxLength(10)
+                .IsRequired();
+            });
+        });
+
+        modelBuilder.Entity<Acesso>(entity =>
+        {
+            entity.OwnsOne(a => a.Placa, placa =>
+            {
+                placa.Property(p => p.Numero)
+                .HasColumnName("Placa")
+                .HasMaxLength(10)
+                .IsRequired();
+            });
+        });
+        modelBuilder.Entity<Condominio>(entity =>
+        {
+            entity.OwnsOne(e => e.Cnpj, cnpj =>
+            {
+                cnpj.Property(c => c.Numero)
+                .HasColumnName("Cnpj")
+                .HasMaxLength(14);
+            });
+        });
+
         modelBuilder.Entity<Camera>()
        .Property(c => c.FotoEvento)
        .HasColumnName("FOTO_EVENTO")

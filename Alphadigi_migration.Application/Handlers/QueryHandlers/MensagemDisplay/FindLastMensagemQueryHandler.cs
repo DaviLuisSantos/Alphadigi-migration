@@ -21,24 +21,26 @@ public class FindLastMensagemQueryHandler : IRequestHandler<FindLastMensagemQuer
 
     public async Task<Domain.EntitiesNew.MensagemDisplay> Handle(FindLastMensagemQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Buscando última mensagem com termo: {Termo}", request.Termo);
+        _logger.LogInformation("Buscando última mensagem para Alphadigi: {AlphadigiId}", request.AlphadigiId);
 
         // Converter para o DTO antigo se necessário
-        var termo = new Domain.DTOs.Display.FindLastMessage
+
+        var mensagem = await _repository.FindLastMensagemAsync(
+                 request.Placa,
+                 request.Mensagem,
+                 request.AlphadigiId);
+
+        if (mensagem == null)
         {
-            Search = request.Termo
-        };
-
-        var mensagemAntiga = await _repository.FindLastMensagemAsync(termo);
-
-        if (mensagemAntiga == null)
+              _logger.LogInformation("Nenhuma mensagem encontrada para os critérios informados");
             return null;
 
+        }
         // Converter para nova entidade
         return new Domain.EntitiesNew.MensagemDisplay(
-            mensagemAntiga.Placa,
-            mensagemAntiga.Mensagem,
-            Guid.Parse(mensagemAntiga.AlphadigiId.ToString()), // Converter int para Guid
-            mensagemAntiga.DataHora);
+            mensagem.Placa,
+            mensagem.Mensagem,
+           mensagem.AlphadigiId,// Converter int para Guid
+            mensagem.DataHora);
     }
 }

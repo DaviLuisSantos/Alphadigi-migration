@@ -12,7 +12,7 @@ public class CreatePlacaLidaCommand : IRequest<Domain.EntitiesNew.PlacaLida>
     public Guid AlphadigiId { get; set; }
     public string Placa { get; set; }
     public DateTime DataHora { get; set; }
-    public int AreaId { get; set; }
+    public Guid AreaId { get; set; }
     public string PlacaImg { get; set; }
     public string CarroImg { get; set; }
 

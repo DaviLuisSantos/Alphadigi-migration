@@ -1,18 +1,17 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 
-
+[Table("UNIDADE")]
 public class Unidade : EntityBase, IAggregateRoot
 {
     public int NumeroVagas { get; private set; }
     public string Nome { get; private set; }
+
+    public bool Ativa { get; set; }
 
     // Navegação para o condomínio (se existir)
     public virtual Condominio Condominio { get; private set; }
@@ -46,6 +45,10 @@ public class Unidade : EntityBase, IAggregateRoot
        // AddDomainEvent(new UnidadeVagasAlteradasEvent(Id, Nome, NumeroVagas));
     }
 
+    public bool EstaAtiva()
+    {
+        return Ativa == true; // retorna false se Ativa for null ou false
+    }
     public void AlterarNome(string novoNome)
     {
         if (string.IsNullOrWhiteSpace(novoNome))

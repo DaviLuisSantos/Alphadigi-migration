@@ -1,5 +1,5 @@
 ﻿// Domain/Common/IRepository.cs
-namespace Alphadigi.Domain.Common;
+namespace Alphadigi_migration.Domain.Common;
 
 public interface IRepository<T> where T : EntityBase
 {

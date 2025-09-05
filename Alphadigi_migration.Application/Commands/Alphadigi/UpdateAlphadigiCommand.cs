@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Alphadigi_migration.Application.Commands.Alphadigi;
 
-public class UpdateAlphadigiCommand : IRequest<Alphadigi_migration.Domain.EntitiesNew.Alphadigi>
+public class UpdateAlphadigiCommand : IRequest<bool>
 {
     public int Id { get; set; }
     public string Ip { get; set; }

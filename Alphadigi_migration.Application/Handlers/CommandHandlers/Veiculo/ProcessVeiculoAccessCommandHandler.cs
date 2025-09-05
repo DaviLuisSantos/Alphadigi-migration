@@ -57,7 +57,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 }
 
                 // 3. Verificar se unidade está ativa
-                if (!unidade.Ativa)
+                if (!unidade.EstaAtiva())
                 {
                     _logger.LogInformation($"Unidade {veiculoExistente.Unidade} inativa. Acesso NEGADO.");
                     return (false, "ACESSO NEGADO - UNIDADE INATIVA");

@@ -5,13 +5,13 @@ namespace Alphadigi_migration.Domain.Events
     public class VeiculoCriadoEvent : DomainEvent
     {
         public override string EventType => "VeiculoCriado";
-        public override Guid AggregateId => VeiculoId;
+        public override int AggregateId => VeiculoId;
 
-        public Guid VeiculoId { get; }
+        public int VeiculoId { get; }
         public string Placa { get; }
         public string Unidade { get; }
 
-        public VeiculoCriadoEvent(Guid veiculoId, string placa, string unidade)
+        public VeiculoCriadoEvent(int veiculoId, string placa, string unidade)
         {
             VeiculoId = veiculoId;
             Placa = placa;
@@ -22,12 +22,12 @@ namespace Alphadigi_migration.Domain.Events
     public class VeiculoAtualizadoEvent : DomainEvent
     {
         public override string EventType => "VeiculoAtualizado";
-        public override Guid AggregateId => VeiculoId;
+        public override int AggregateId => VeiculoId;
 
-        public Guid VeiculoId { get; }
+        public int VeiculoId { get; }
         public string Placa { get; }
 
-        public VeiculoAtualizadoEvent(Guid veiculoId, string placa)
+        public VeiculoAtualizadoEvent(int veiculoId, string placa)
         {
             VeiculoId = veiculoId;
             Placa = placa;
@@ -37,14 +37,14 @@ namespace Alphadigi_migration.Domain.Events
     public class VeiculoAcessoRegistradoEvent : DomainEvent
     {
         public override string EventType => "VeiculoAcessoRegistrado";
-        public override Guid AggregateId => VeiculoId;
+        public override int AggregateId => VeiculoId;
 
-        public Guid VeiculoId { get; }
+        public int VeiculoId { get; }
         public string Placa { get; }
         public string IpCamera { get; }
         public DateTime DataHoraAcesso { get; }
 
-        public VeiculoAcessoRegistradoEvent(Guid veiculoId, string placa, string ipCamera, DateTime dataHoraAcesso)
+        public VeiculoAcessoRegistradoEvent(int veiculoId, string placa, string ipCamera, DateTime dataHoraAcesso)
         {
             VeiculoId = veiculoId;
             Placa = placa;
@@ -56,13 +56,13 @@ namespace Alphadigi_migration.Domain.Events
     public class VeiculoEntrouEvent : DomainEvent
     {
         public override string EventType => "VeiculoEntrou";
-        public override Guid AggregateId => VeiculoId;
+        public override int AggregateId => VeiculoId;
 
-        public Guid VeiculoId { get; }
+        public int VeiculoId { get; }
         public string Placa { get; }
         public string IpCamera { get; }
 
-        public VeiculoEntrouEvent(Guid veiculoId, string placa, string ipCamera)
+        public VeiculoEntrouEvent(int veiculoId, string placa, string ipCamera)
         {
             VeiculoId = veiculoId;
             Placa = placa;
@@ -73,13 +73,13 @@ namespace Alphadigi_migration.Domain.Events
     public class VeiculoSaiuEvent : DomainEvent
     {
         public override string EventType => "VeiculoSaiu";
-        public override Guid AggregateId => VeiculoId;
+        public override int AggregateId => VeiculoId;
 
-        public Guid VeiculoId { get; }
+        public int VeiculoId { get; }
         public string Placa { get; }
         public string IpCamera { get; }
 
-        public VeiculoSaiuEvent(Guid veiculoId, string placa, string ipCamera)
+        public VeiculoSaiuEvent(int veiculoId, string placa, string ipCamera)
         {
             VeiculoId = veiculoId;
             Placa = placa;
@@ -90,13 +90,13 @@ namespace Alphadigi_migration.Domain.Events
     public class VeiculoRotaAtualizadaEvent : DomainEvent
     {
         public override string EventType => "VeiculoRotaAtualizada";
-        public override Guid AggregateId => VeiculoId;
+        public override int AggregateId => VeiculoId;
 
-        public Guid VeiculoId { get; }
+        public int VeiculoId { get; }
         public string Placa { get; }
         public int? IdRota { get; }
 
-        public VeiculoRotaAtualizadaEvent(Guid veiculoId, string placa, int? idRota)
+        public VeiculoRotaAtualizadaEvent(int veiculoId, string placa, int? idRota)
         {
             VeiculoId = veiculoId;
             Placa = placa;

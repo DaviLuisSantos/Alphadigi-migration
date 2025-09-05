@@ -1,6 +1,6 @@
 ﻿using Alphadigi_migration.Application.Commands.Acesso;
 using Alphadigi_migration.Application.Queries.Area;
-using Alphadigi_migration.Application.Services;
+using Alphadigi_migration.Application.Service;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -30,9 +30,9 @@ public class ProcessAccessCommandHandler : IRequestHandler<HandleAccessCommand, 
         try
         {
             // Se não tem área definida, buscar da câmera
-            if (request.Area == null && request.Alphadigi?.AreaId > 0)
+            if (request.Area == null && request.Alphadigi?.AreaId !=  Guid.Empty)
             {
-                var areaQuery = new GetAreaByIdQuery { Id = request.Alphadigi.AreaId };
+                var areaQuery = new GetAreaByIdQuery { id = request.Alphadigi.AreaId };
                 request.Area = await _mediator.Send(areaQuery, cancellationToken);
             }
 

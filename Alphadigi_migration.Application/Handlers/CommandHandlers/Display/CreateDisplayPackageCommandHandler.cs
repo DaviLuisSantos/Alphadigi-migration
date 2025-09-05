@@ -1,6 +1,7 @@
 ﻿using Alphadigi_migration.Application.Commands.Display;
 using Alphadigi_migration.Application.Service;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.DTOs.Display;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Domain.ValueObjects;
 using AutoMapper;
@@ -35,7 +36,7 @@ public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayP
     public async Task<List<SerialData>> Handle(CreateDisplayPackageCommand request, 
                                                CancellationToken cancellationToken)
     {
-        var alphadigi = await _alphadigiRepository.GetOrCreate(request.AlphadigiId);
+        var alphadigi = await _alphadigiRepository.Get(request.AlphadigiId);
         if (alphadigi == null)
             throw new Exception($"Alphadigi com ID {request.AlphadigiId} não encontrado");
 

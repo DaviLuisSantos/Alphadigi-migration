@@ -5,12 +5,12 @@ namespace Alphadigi_migration.Domain.Events
     public class AreaCriadaEvent : DomainEvent
     {
         public override string EventType => "AreaCriada";
-        public override Guid AggregateId => AreaId;
+        public override int AggregateId => AreaId;
 
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string Nome { get; }
 
-        public AreaCriadaEvent(Guid areaId, string nome)
+        public AreaCriadaEvent(int areaId, string nome)
         {
             AreaId = areaId;
             Nome = nome;
@@ -20,12 +20,12 @@ namespace Alphadigi_migration.Domain.Events
     public class AreaAtualizadaEvent : DomainEvent
     {
         public override string EventType => "AreaAtualizada";
-        public override Guid AggregateId => AreaId;
+        public override int AggregateId => AreaId;
 
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string Nome { get; }
 
-        public AreaAtualizadaEvent(Guid areaId, string nome)
+        public AreaAtualizadaEvent(int areaId, string nome)
         {
             AreaId = areaId;
             Nome = nome;
@@ -35,12 +35,12 @@ namespace Alphadigi_migration.Domain.Events
     public class AreaControleVagaAtivadoEvent : DomainEvent
     {
         public override string EventType => "AreaControleVagaAtivado";
-        public override Guid AggregateId => AreaId;
+        public override int AggregateId => AreaId;
 
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string Nome { get; }
 
-        public AreaControleVagaAtivadoEvent(Guid areaId, string nome)
+        public AreaControleVagaAtivadoEvent(int areaId, string nome)
         {
             AreaId = areaId;
             Nome = nome;
@@ -50,12 +50,12 @@ namespace Alphadigi_migration.Domain.Events
     public class AreaControleVagaDesativadoEvent : DomainEvent
     {
         public override string EventType => "AreaControleVagaDesativado";
-        public override Guid AggregateId => AreaId;
+        public override int AggregateId => AreaId;
 
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string Nome { get; }
 
-        public AreaControleVagaDesativadoEvent(Guid areaId, string nome)
+        public AreaControleVagaDesativadoEvent(int areaId, string nome)
         {
             AreaId = areaId;
             Nome = nome;
@@ -65,13 +65,13 @@ namespace Alphadigi_migration.Domain.Events
     public class AreaTempoAntipassbackConfiguradoEvent : DomainEvent
     {
         public override string EventType => "AreaTempoAntipassbackConfigurado";
-        public override Guid AggregateId => AreaId;
+        public override int AggregateId => AreaId;
 
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string Nome { get; }
         public TimeSpan TempoAntipassback { get; }
 
-        public AreaTempoAntipassbackConfiguradoEvent(Guid areaId, string nome, TimeSpan tempoAntipassback)
+        public AreaTempoAntipassbackConfiguradoEvent(int areaId, string nome, TimeSpan tempoAntipassback)
         {
             AreaId = areaId;
             Nome = nome;
@@ -82,12 +82,12 @@ namespace Alphadigi_migration.Domain.Events
     public class AreaTempoAntipassbackRemovidoEvent : DomainEvent
     {
         public override string EventType => "AreaTempoAntipassbackRemovido";
-        public override Guid AggregateId => AreaId;
+        public override int AggregateId => AreaId;
 
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string Nome { get; }
 
-        public AreaTempoAntipassbackRemovidoEvent(Guid areaId, string nome)
+        public AreaTempoAntipassbackRemovidoEvent(int areaId, string nome)
         {
             AreaId = areaId;
             Nome = nome;
@@ -97,14 +97,14 @@ namespace Alphadigi_migration.Domain.Events
     public class AreaAcessoVisitantesConfiguradoEvent : DomainEvent
     {
         public override string EventType => "AreaAcessoVisitantesConfigurado";
-        public override Guid AggregateId => AreaId;
+        public override int AggregateId => AreaId;
 
-        public Guid AreaId { get; }
+        public int AreaId { get; }
         public string Nome { get; }
         public bool EntradaHabilitada { get; }
         public bool SaidaHabilitada { get; }
 
-        public AreaAcessoVisitantesConfiguradoEvent(Guid areaId, string nome, bool entradaHabilitada, bool saidaHabilitada)
+        public AreaAcessoVisitantesConfiguradoEvent(int areaId, string nome, bool entradaHabilitada, bool saidaHabilitada)
         {
             AreaId = areaId;
             Nome = nome;

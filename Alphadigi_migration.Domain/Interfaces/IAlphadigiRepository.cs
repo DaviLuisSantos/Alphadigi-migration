@@ -9,10 +9,10 @@ namespace Alphadigi_migration.Domain.Interfaces;
 
 public interface IAlphadigiRepository
 {
-    Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> GetOrCreate(Guid ip);
+    Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> GetOrCreate(string ip);
     Task<bool> UpdateLastPlate(Alphadigi_migration.Domain.EntitiesNew.Alphadigi camera, string plate, DateTime timestamp);
     Task<bool> SyncAlphadigi();
-    Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(string ip);
+    Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(Guid ip);
     Task<List<Alphadigi_migration.Domain.EntitiesNew.Alphadigi>> GetAll();
     Task<bool> Update(UpdateAlphadigiDTO camera);
     Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Update(Alphadigi_migration.Domain.EntitiesNew.Alphadigi camera);

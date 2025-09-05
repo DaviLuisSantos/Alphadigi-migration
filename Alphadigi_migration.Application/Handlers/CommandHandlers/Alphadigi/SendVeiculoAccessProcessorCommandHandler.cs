@@ -3,11 +3,7 @@ using Alphadigi_migration.Application.Commands.Alphadigi;
 using Alphadigi_migration.Application.Commands.Veiculo;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Alphadigi;
 public class SendVeiculoAccessProcessorCommandHandler : IRequestHandler<SendVeiculoAccessProcessorCommand, 
@@ -42,7 +38,7 @@ public class SendVeiculoAccessProcessorCommandHandler : IRequestHandler<SendVeic
             var (shouldReturn, acesso) = await _mediator.Send(accessCommand, cancellationToken);
 
             // 2. Atualizar último acesso no banco
-            if (request.Veiculo.Id > 0) // Verifica se é um veículo persistido
+            if (request.Veiculo.Id != Guid.Empty) // Verifica se é um veículo persistido
             {
                 var updateAccessCommand = new UpdateLastAccessCommand
                 {

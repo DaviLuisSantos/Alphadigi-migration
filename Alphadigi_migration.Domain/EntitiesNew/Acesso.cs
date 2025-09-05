@@ -1,10 +1,12 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 
+[Table("LPR_MT_ACESSO")]
 public class Acesso : EntityBase, IAggregateRoot
 {
     // Propriedades

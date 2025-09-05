@@ -1,6 +1,5 @@
 ﻿
 
-using Alphadigi.Domain.Common;
 using Alphadigi_migration.Application.Queries.Condominio;
 using Alphadigi_migration.Domain.Interfaces;
 using MediatR;

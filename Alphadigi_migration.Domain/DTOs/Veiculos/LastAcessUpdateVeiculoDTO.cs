@@ -8,7 +8,7 @@ namespace Alphadigi_migration.Domain.DTOs.Veiculos;
 
 public class LastAcessUpdateVeiculoDTO
 {
-    public int IdVeiculo { get; set; }
+    public Guid IdVeiculo { get; set; }
     public string IpCamera { get; set; }
     public DateTime TimeAccess { get; set; }
 }

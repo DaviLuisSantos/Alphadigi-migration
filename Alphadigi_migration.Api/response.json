@@ -1,12 +1,12 @@
 {
-  "Response_AlarmInfoPlate": {
-    "info": "no",
-    "serialData": [
-      {
-        "serialChannel": 0,
-        "data": "AGT//245AAIAAAAKAP//AAAITFRJLTE2MjYNAQAACgAA/wAACExJQkVSQURPAHGiAAAAAAAAAAAAAAAAAAAAAAAA",
-        "dataLen": 66
-      }
-    ]
-  }
+  "Placa": "SGR6569",
+  "Liberado": true,
+  "Acesso": "LIBERADO - ENTRADA",
+  "MensagemDisplay": [
+    {
+      "serialChannel": 1,
+      "data": "SGR6569",
+      "dataLen": 7
+    }
+  ]
 }

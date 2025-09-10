@@ -6,5 +6,5 @@ namespace Alphadigi_migration.Application.Commands.Camera;
 
 public class AtivarCameraCommand : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 }

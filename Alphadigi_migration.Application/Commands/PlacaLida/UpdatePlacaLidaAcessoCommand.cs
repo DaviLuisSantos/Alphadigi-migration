@@ -9,7 +9,7 @@ namespace Alphadigi_migration.Application.Commands.PlacaLida;
 
 public class UpdatePlacaLidaAcessoCommand : IRequest
 {
-    public Guid PlacaLidaId { get; set; }
+    public int PlacaLidaId { get; set; }
     public bool Liberado { get; set; }
     public string Acesso { get; set; }
 

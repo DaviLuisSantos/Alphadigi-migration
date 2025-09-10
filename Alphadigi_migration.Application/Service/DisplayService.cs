@@ -217,12 +217,12 @@ public class DisplayService
                                             string placa)
     {
         return lastMessage == null ||
-               (lastCamMessage.Id == Guid.Empty || 
+               (lastCamMessage.Id == 0|| 
                (lastCamMessage != null && lastCamMessage.Id 
                != lastMessage.Id && lastCamMessage.Placa != placa));
     }
 
-    private async Task SaveMensagemDisplayAsync(string placa, string acesso, Guid alphadigiId)
+    private async Task SaveMensagemDisplayAsync(string placa, string acesso, int alphadigiId)
     {
         var mensagem = new MensagemDisplay
         (

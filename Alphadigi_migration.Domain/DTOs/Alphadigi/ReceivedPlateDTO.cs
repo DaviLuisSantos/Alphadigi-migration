@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Alphadigi_migration.Domain.ValueObjects;
+using System;
 
 namespace Alphadigi_migration.Domain.DTOs.Alphadigi;
 

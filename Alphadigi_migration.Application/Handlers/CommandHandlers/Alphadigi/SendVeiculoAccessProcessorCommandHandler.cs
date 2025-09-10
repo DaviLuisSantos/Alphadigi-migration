@@ -38,7 +38,7 @@ public class SendVeiculoAccessProcessorCommandHandler : IRequestHandler<SendVeic
             var (shouldReturn, acesso) = await _mediator.Send(accessCommand, cancellationToken);
 
             // 2. Atualizar último acesso no banco
-            if (request.Veiculo.Id != Guid.Empty) // Verifica se é um veículo persistido
+            if (request.Veiculo.Id != 0) // Verifica se é um veículo persistido
             {
                 var updateAccessCommand = new UpdateLastAccessCommand
                 {

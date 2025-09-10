@@ -21,27 +21,28 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
         _logger = logger;
     }
 
-    public async Task<object> Handle(ProcessPlateCommand request, 
-                                     CancellationToken cancellationToken)
+    public async Task<object> Handle(ProcessPlateCommand request, CancellationToken cancellationToken)
     {
         try
         {
+            _logger.LogInformation("Plate value: '{Plate}'", request.Plate);
+            _logger.LogInformation("Plate is null: {IsNull}", request.Plate == null);
             DateTime timeStamp = DateTime.Now;
-            _logger.LogInformation($"Placa recebida: {request.Plate} Camera: {request.Ip}");
+            _logger.LogInformation("Placa recebida: {Plate} Camera: {Ip}", request.Plate, request.Ip);
 
             // Buscar ou criar câmera
             var camera = await _mediator.Send(new GetOrCreateAlphadigiQuery { Ip = request.Ip });
 
             if (camera == null)
             {
-                _logger.LogError($"Câmera não encontrada para o IP {request.Ip}.");
+                _logger.LogError("Câmera não encontrada para o IP {Ip}.", request.Ip);
                 throw new Exception("Camera não encontrada");
             }
 
             // Atualizar configuração do display se necessário
             if (camera.LinhasDisplay != 0 && request.Modelo == "TOTEM")
             {
-                camera.AtualizarUltimoId(Guid.Empty);
+                camera.AtualizarUltimoId(0);
                 await _mediator.Send(new UpdateAlphadigiEntityCommand { Alphadigi = camera });
             }
 
@@ -58,39 +59,28 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             var log = await _mediator.Send(logCommand);
 
             // Verificar veículo
-            var veiculoQuery = new GetVeiculoByPlateQuery { Plate = request.Plate };
-            var veiculo = await _mediator.Send(veiculoQuery);
+            var veiculoQuery = new GetVeiculoByPlateQuery { Plate = request.Plate, 
+                                                            MinMatchingCharacters = 7 };
 
-            bool veiculoCadastrado = veiculo != null;
+
+            var veiculoExistente = await _mediator.Send(veiculoQuery, cancellationToken);
+
+            bool veiculoCadastrado = veiculoExistente != null;
             if (!veiculoCadastrado)
             {
-                veiculo = new Domain.EntitiesNew.Veiculo(
-                  placa: request.Plate,
-                  unidade: "TEMPORARIA", 
-                   marca: "NAO_CADASTRADO", 
-                    modelo: "NAO_CADASTRADO", 
-                  cor: "NAO_CADASTRADO" 
-    );
+                veiculoExistente = new Domain.EntitiesNew.Veiculo(
+                    placa: request.Plate,
+                    unidade: "TEMPORARIA",
+                    marca: "NAO_CADASTRADO",
+                    modelo: "NAO_CADASTRADO",
+                    cor: "NAO_CADASTRADO"
+                );
             }
-
-            // Atualizar estado da câmera se necessário
-            if (veiculo != null && !request.IsCad && veiculoCadastrado)
-            {
-                camera.AtualizarUltimoId(Guid.Empty);
-                await _mediator.Send(new UpdateAlphadigiEntityCommand { Alphadigi = camera });
-            }
-
-            // Atualizar placa lida com informação de cadastro
-            await _mediator.Send(new UpdatePlacaLidaCadastroCommand
-            {
-                PlacaLidaId = log.Id,
-                Cadastrado = veiculoCadastrado
-            });
 
             // Processar acesso do veículo
             var accessCommand = new SendVeiculoAccessProcessorCommand
             {
-                Veiculo = veiculo,
+                Veiculo = veiculoExistente,
                 Alphadigi = camera,
                 Timestamp = timeStamp,
                 Log = log,
@@ -98,7 +88,8 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             };
             var accessResult = await _mediator.Send(accessCommand);
 
-            _logger.LogInformation($"Acesso do veículo com a placa {request.Plate} com resultado {accessResult.ShouldReturn}");
+            _logger.LogInformation("Acesso do veículo com a placa {Plate} com resultado {ShouldReturn}",
+                request.Plate, accessResult.ShouldReturn);
 
             // Atualizar placa lida com resultado do acesso
             await _mediator.Send(new UpdatePlacaLidaAcessoCommand
@@ -111,17 +102,18 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             // Criar pacote para display
             var displayQuery = new SendCreatePackageDisplayQuery
             {
-                Veiculo = veiculo,
+                Veiculo = veiculoExistente,
                 Acesso = accessResult.Acesso,
                 Alphadigi = camera
             };
             var messageDisplay = await _mediator.Send(displayQuery);
 
+            // CORREÇÃO: Remover o loop infinito e retornar objeto apropriado
             if (log.Processado)
             {
                 var returnQuery = new HandleReturnQuery
                 {
-                    Placa = veiculo.Placa,
+                    Placa = veiculoExistente.Placa,
                     Acesso = accessResult.Acesso,
                     Liberado = accessResult.ShouldReturn,
                     MessageData = messageDisplay
@@ -129,11 +121,18 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 return await _mediator.Send(returnQuery);
             }
 
-            return await Handle(request, cancellationToken);
+            // Retornar resultado do processamento
+            return new
+            {
+                Placa = request.Plate,
+                Liberado = accessResult.ShouldReturn,
+                Acesso = accessResult.Acesso,
+                MensagemDisplay = messageDisplay
+            };
         }
         catch (Exception e)
         {
-            _logger.LogError(e, $"Erro em ProcessPlate.");
+            _logger.LogError(e, "Erro em ProcessPlate.");
             throw;
         }
     }

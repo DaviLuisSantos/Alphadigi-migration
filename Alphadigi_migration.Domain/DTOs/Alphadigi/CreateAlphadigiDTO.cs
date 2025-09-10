@@ -12,7 +12,7 @@ public class CreateAlphadigiDTO : ICreateAlphadigiDTO
     [Required]
     [StringLength(100)]
     public string Nome { get; set; }
-    public Guid AreaId { get; set; }
+    public int AreaId { get; set; }
     public bool Sentido { get; set; }
     public bool Enviado { get; set; } = false;
 

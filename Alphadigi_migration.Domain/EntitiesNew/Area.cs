@@ -1,5 +1,6 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
@@ -9,15 +10,42 @@ namespace Alphadigi_migration.Domain.EntitiesNew;
 public class Area : EntityBase, IAggregateRoot
 {
     // Propriedades
+    [Key]
+    [Column("ID")]
+    public override int Id { get; protected set; }
+
+    [Column("DESCRICAO")]
     public string Nome { get; private set; }
+
+    [Column("CONTROLA_VAGA")]
     public bool ControlaVaga { get; private set; }
+
+    [Column("EXIBE_NAO_CAD")]
     public bool ExibeNaoCadastrado { get; private set; }
+
+    [Column("ENTRADA_VISITA")]
     public bool EntradaVisita { get; private set; }
+
+    [Column("SAIDA_VISITA")]
     public bool SaidaVisita { get; private set; }
+
+    [Column("SAIDA_SEMPRE_ABRE")]
     public bool SaidaSempreAbre { get; private set; }
+    
+    [Column("EXIBE_NAO_CAD_SO_ENTRADA")]
+
     public bool ExibeNaoCadastradoSoEntrada { get; private set; }
-    public TimeSpan? TempoAntipassback { get; private set; }
+
+    [Column("TEMPO_ANTIPASSBACK")]
+    public string? TempoAntipassback { get; set; }
+
+    [NotMapped]
+    public TimeSpan? TempoAntipassbackTimeSpan { get; private set; }
+
+    [NotMapped]
     public DateTime DataCriacao { get; private set; }
+
+    [NotMapped]
     public DateTime? DataAtualizacao { get; private set; }
 
     // Construtores
@@ -31,7 +59,7 @@ public class Area : EntityBase, IAggregateRoot
         bool saidaVisita = false,
         bool saidaSempreAbre = false,
         bool exibeNaoCadastradoSoEntrada = false,
-        TimeSpan? tempoAntipassback = null)
+        string? tempoAntipassback = null)
     {
         ValidarNome(nome);
 
@@ -50,7 +78,7 @@ public class Area : EntityBase, IAggregateRoot
 
     // Métodos de Domínio
 
-    public Guid ObterId() => Id;
+    public int ObterId() => Id;
     public void AtualizarInformacoes(
         string nome,
         bool controlaVaga,
@@ -59,7 +87,7 @@ public class Area : EntityBase, IAggregateRoot
         bool saidaVisita,
         bool saidaSempreAbre,
         bool exibeNaoCadastradoSoEntrada,
-        TimeSpan? tempoAntipassback)
+        string? tempoAntipassback)
     {
         ValidarNome(nome);
 
@@ -105,9 +133,9 @@ public class Area : EntityBase, IAggregateRoot
         AddDomainEvent(new AreaControleVagaDesativadoEvent(Id, Nome));
     }
 
-    public void ConfigurarTempoAntipassback(TimeSpan tempoAntipassback)
+    public void ConfigurarTempoAntipassback(string tempoAntipassback)
     {
-        if (tempoAntipassback <= TimeSpan.Zero)
+        if (tempoAntipassback == "")
             throw new Exception("Tempo de antipassback deve ser maior que zero");
 
         TempoAntipassback = tempoAntipassback;
@@ -147,7 +175,7 @@ public class Area : EntityBase, IAggregateRoot
     // Métodos de consulta
     public bool PermiteAcessoVisitantesEntrada() => EntradaVisita;
     public bool PermiteAcessoVisitantesSaida() => SaidaVisita;
-    public bool TemControleAntipassback() => TempoAntipassback.HasValue;
+    public string TemControleAntipassback() => TempoAntipassback;
     public bool DeveExibirNaoCadastrados() => ExibeNaoCadastrado;
     public bool SaidaSempreLiberada() => SaidaSempreAbre;
 

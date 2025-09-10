@@ -9,5 +9,5 @@ namespace Alphadigi_migration.Application.Queries.Veiculo;
 
 public class GetUnidadeByIdQuery : IRequest<Domain.EntitiesNew.Unidade>
 {
-    public string UnidadeId { get; set; }
+    public int UnidadeId { get; set; }
 }

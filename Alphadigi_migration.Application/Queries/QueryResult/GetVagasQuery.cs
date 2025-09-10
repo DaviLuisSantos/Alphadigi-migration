@@ -9,7 +9,9 @@ namespace Alphadigi_migration.Application.Queries.QueryResult
         public int? AreaId { get; set; }
         public DateTime? DataReferencia { get; set; }
 
-        public GetVagasQuery(int? condominioId = null, int? areaId = null, DateTime? dataReferencia = null)
+        public GetVagasQuery(int? condominioId = null, 
+                             int? areaId = null, 
+                             DateTime? dataReferencia = null)
         {
             CondominioId = condominioId;
             AreaId = areaId;

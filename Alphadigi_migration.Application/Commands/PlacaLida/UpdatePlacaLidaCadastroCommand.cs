@@ -9,6 +9,6 @@ namespace Alphadigi_migration.Application.Commands.PlacaLida;
 
 public class UpdatePlacaLidaCadastroCommand : IRequest
 {
-    public Guid PlacaLidaId { get; set; }
+    public int PlacaLidaId { get; set; }
     public bool Cadastrado { get; set; }
 }

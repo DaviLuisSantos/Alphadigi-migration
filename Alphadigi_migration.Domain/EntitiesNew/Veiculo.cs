@@ -1,6 +1,7 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
@@ -9,22 +10,41 @@ namespace Alphadigi_migration.Domain.EntitiesNew;
 [Table("VEICULOSMORADORES")]
 public class Veiculo : EntityBase, IAggregateRoot
 {
+    [Key]
+    [Column("IDVEICULOMORADOR")]
+    public override int Id { get; protected set; }
     // Propriedades
+    [Column("UNIDADE")]
     public string Unidade { get; private set; }
+
+    [Column("PLACA")]
     public PlacaVeiculo Placa { get; private set; }
+
+    [ForeignKey("Unidade")]
     public Unidade UnidadeNavigation{ get; private set; }
     public Rota Rota { get; private set; }
 
-
+    [Column("MARCA")]
     public string Marca { get; private set; }
+
+    [Column("MODELO")]
     public string Modelo { get; private set; }
+
+    [Column("COR")]
     public string Cor { get; private set; }
-    public bool VeiculoDentro { get; private set; }
+
+    [Column("VEICULO_DENTRO")]
+    public int? VeiculoDentro { get; private set; }
+
+    [Column("MT_IP_CAM_ULT_ACESSO")]
     public string IpCamUltAcesso { get; private set; }
+
+    [Column("MT_DATAHORA_UTL_ACESSO")]
     public DateTime? DataHoraUltAcesso { get; private set; }
+
+    [Column("LPR_ID_ROTA")]
     public int? IdRota { get; private set; }
-    public DateTime DataCriacao { get; private set; }
-    public DateTime? DataAtualizacao { get; private set; }
+  
 
     // Construtores
     protected Veiculo() { } // Para ORM
@@ -41,8 +61,8 @@ public class Veiculo : EntityBase, IAggregateRoot
         Marca = marca;
         Modelo = modelo;
         Cor = cor;
-        VeiculoDentro = false;
-        DataCriacao = DateTime.UtcNow;
+        VeiculoDentro = null;
+       
 
         AddDomainEvent(new VeiculoCriadoEvent(Id, Placa.Numero, Unidade));
     }
@@ -62,7 +82,7 @@ public class Veiculo : EntityBase, IAggregateRoot
         Modelo = modelo;
         Cor = cor;
         Unidade = unidade;
-        DataAtualizacao = DateTime.UtcNow;
+   
 
         AddDomainEvent(new VeiculoAtualizadoEvent(Id, Placa.Numero));
     }
@@ -75,7 +95,7 @@ public class Veiculo : EntityBase, IAggregateRoot
 
         IpCamUltAcesso = ipCamera;
         DataHoraUltAcesso = dataHoraAcesso;
-        DataAtualizacao = DateTime.UtcNow;
+     
 
         AddDomainEvent(new VeiculoAcessoRegistradoEvent(Id, Placa.Numero, ipCamera, dataHoraAcesso));
     }
@@ -84,10 +104,10 @@ public class Veiculo : EntityBase, IAggregateRoot
     {
         ValidarIpCamera(ipCamera);
 
-        VeiculoDentro = true;
+        VeiculoDentro = null;
         IpCamUltAcesso = ipCamera;
         DataHoraUltAcesso = DateTime.UtcNow;
-        DataAtualizacao = DateTime.UtcNow;
+       
 
         AddDomainEvent(new VeiculoEntrouEvent(Id, Placa.Numero, ipCamera));
     }
@@ -96,18 +116,17 @@ public class Veiculo : EntityBase, IAggregateRoot
     {
         ValidarIpCamera(ipCamera);
 
-        VeiculoDentro = false;
+        VeiculoDentro = null;
         IpCamUltAcesso = ipCamera;
         DataHoraUltAcesso = DateTime.UtcNow;
-        DataAtualizacao = DateTime.UtcNow;
-
+       
         AddDomainEvent(new VeiculoSaiuEvent(Id, Placa.Numero, ipCamera));
     }
 
     public void AtualizarRota(int? idRota)
     {
         IdRota = idRota;
-        DataAtualizacao = DateTime.UtcNow;
+      
 
         AddDomainEvent(new VeiculoRotaAtualizadaEvent(Id, Placa.Numero, idRota));
     }
@@ -157,7 +176,12 @@ public class Veiculo : EntityBase, IAggregateRoot
         if (string.IsNullOrWhiteSpace(ipCamera))
             throw new Exception("IP da câmera não pode ser vazio");
 
+        // 2. Se for "Sistema" (case insensitive), APENAS RETORNA - não modifica!
+        if (ipCamera.Equals("Sistema", StringComparison.OrdinalIgnoreCase))
+            return; // ← Apenas sai da função, o valor continua "Sistema"
+
+        // 3. Se não for "Sistema", valida como IP real
         if (!System.Net.IPAddress.TryParse(ipCamera, out _))
-            throw new Exception("Formato de IP inválido");
+            throw new Exception($"Formato de IP inválido: '{ipCamera}'");
     }
 }

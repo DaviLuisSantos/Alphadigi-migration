@@ -12,7 +12,7 @@ namespace Alphadigi_migration.Domain.Events
         public string Ip { get; }
         public int AreaId { get; }
 
-        public override Guid AggregateId => throw new NotImplementedException();
+        public override int AggregateId => throw new NotImplementedException();
 
         public AlphadigiCreatedEvent(int alphadigiId, string nome, string ip, int areaId)
         {
@@ -30,7 +30,7 @@ namespace Alphadigi_migration.Domain.Events
         public int AlphadigiId { get; }
         public string Descricao { get; }
 
-        public override Guid AggregateId => throw new NotImplementedException();
+        public override int AggregateId => throw new NotImplementedException();
 
         public AlphadigiUpdatedEvent(int alphadigiId, string descricao)
         {
@@ -43,12 +43,12 @@ namespace Alphadigi_migration.Domain.Events
     {
         public override string EventType => "AlphadigiAtivado";
 
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
         public string Nome { get; }
 
-        public override Guid AggregateId => throw new NotImplementedException();
+        public override int AggregateId => throw new NotImplementedException();
 
-        public AlphadigiAtivadoEvent(Guid alphadigiId, string nome)
+        public AlphadigiAtivadoEvent(int alphadigiId, string nome)
         {
             AlphadigiId = alphadigiId;
             Nome = nome;
@@ -59,13 +59,13 @@ namespace Alphadigi_migration.Domain.Events
     {
         public override string EventType => "AlphadigiDesativado";
 
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
         public string Nome { get; }
         public string Motivo { get; }
 
-        public override Guid AggregateId => throw new NotImplementedException();
+        public override int AggregateId => throw new NotImplementedException();
 
-        public AlphadigiDesativadoEvent(Guid alphadigiId, string nome, string motivo)
+        public AlphadigiDesativadoEvent(int alphadigiId, string nome, string motivo)
         {
             AlphadigiId = alphadigiId;
             Nome = nome;
@@ -77,13 +77,13 @@ namespace Alphadigi_migration.Domain.Events
     {
         public override string EventType => "PlacaProcessada";
 
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
         public string Placa { get; }
         public int UltimoId { get; }
 
-        public override Guid AggregateId => throw new NotImplementedException();
+        public override int AggregateId => throw new NotImplementedException();
 
-        public PlacaProcessadaEvent(Guid alphadigiId, string placa, int ultimoId)
+        public PlacaProcessadaEvent(int alphadigiId, string placa, int ultimoId)
         {
             AlphadigiId = alphadigiId;
             Placa = placa;
@@ -95,12 +95,12 @@ namespace Alphadigi_migration.Domain.Events
     {
         public override string EventType => "DisplayConfigurado";
 
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
         public int LinhasDisplay { get; }
 
-        public override Guid AggregateId => throw new NotImplementedException();
+        public override int AggregateId => throw new NotImplementedException();
 
-        public DisplayConfiguradoEvent(Guid alphadigiId, int linhasDisplay)
+        public DisplayConfiguradoEvent(int alphadigiId, int linhasDisplay)
         {
             AlphadigiId = alphadigiId;
             LinhasDisplay = linhasDisplay;
@@ -111,12 +111,12 @@ namespace Alphadigi_migration.Domain.Events
     {
         public override string EventType => "FotoEventoConfigurado";
 
-        public Guid AlphadigiId { get; }
+        public int AlphadigiId { get; }
         public bool Habilitado { get; }
 
-        public override Guid AggregateId => throw new NotImplementedException();
+        public override int AggregateId => throw new NotImplementedException();
 
-        public FotoEventoConfiguradoEvent(Guid alphadigiId, bool habilitado)
+        public FotoEventoConfiguradoEvent(int alphadigiId, bool habilitado)
         {
             AlphadigiId = alphadigiId;
             Habilitado = habilitado;

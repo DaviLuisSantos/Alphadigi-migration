@@ -9,17 +9,14 @@ namespace Alphadigi_migration.Domain.Interfaces;
 
 public interface ICameraRepository
 {
-   
-  
-   
         
-        Task<Guid> AddAsync(Domain.EntitiesNew.Camera camera);
+        Task<bool> AddAsync(Domain.EntitiesNew.Camera camera);
         Task<bool> UpdateAsync(Domain.EntitiesNew.Camera camera);
-        Task<bool> DeleteAsync(Guid id);
-        Task<Domain.EntitiesNew.Camera> GetByIdAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
+        Task<Domain.EntitiesNew.Camera> GetByIdAsync(int id);
         Task<Domain.EntitiesNew.Camera> GetByIpAsync(string ip);
         Task<List<Domain.EntitiesNew.Camera>> GetAllAsync();
-        Task<List<Domain.EntitiesNew.Camera>> GetByAreaIdAsync(Guid areaId);
+        Task<List<Domain.EntitiesNew.Camera>> GetByAreaIdAsync(int areaId);
 
    
     

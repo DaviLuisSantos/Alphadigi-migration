@@ -1,5 +1,6 @@
 ﻿using Alphadigi_migration.Application.Queries.Alphadigi;
 using Alphadigi_migration.Application.Queries.Display;
+using Alphadigi_migration.Application.Queries.Veiculo;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -22,12 +23,18 @@ public class SendCreatePackageDisplayQueryHandler : IRequestHandler<SendCreatePa
     public async Task<List<Domain.DTOs.Alphadigi.SerialData>> Handle(SendCreatePackageDisplayQuery request, 
                                                                      CancellationToken cancellationToken)
     {
-        string placaFormatada = request.Veiculo.Placa;
-        if (!string.IsNullOrEmpty(placaFormatada) && placaFormatada.Length > 3)
-        {
-            placaFormatada = placaFormatada.Insert(3, "-");
-        }
 
+
+        string placaFormatada = request.Veiculo.Placa;
+      
+
+        // 2. Buscar informações completas do veículo (modelo, cor, etc.)
+        var veiculoDataQuery = new PrepareVeiculoDataStringQuery { Veiculo = request.Veiculo };
+        var dadosCompletos = await _mediator.Send(veiculoDataQuery, cancellationToken);
+
+        _logger.LogInformation("Dados completos do veículo: {Dados}", dadosCompletos);
+
+        var mensagemDisplay = $"{placaFormatada} | {dadosCompletos} | {request.Acesso}";
         var displayQuery = new RecieveMessageAlphadigiQuery
         {
             Linha1 = placaFormatada,

@@ -5,9 +5,9 @@ namespace Alphadigi_migration.Application.Commands.Camera;
 
 public class DeleteCameraCommand : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public DeleteCameraCommand(Guid id)
+    public DeleteCameraCommand(int id)
     {
         Id = id;
     }

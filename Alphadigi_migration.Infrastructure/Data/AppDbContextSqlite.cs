@@ -1,4 +1,5 @@
 ﻿using Alphadigi_migration.Domain.EntitiesNew;
+using Alphadigi_migration.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Alphadigi_migration.Infrastructure.Data;
@@ -49,19 +50,32 @@ public class AppDbContextSqlite : DbContext
             entity.OwnsOne(e => e.Cnpj, cnpj =>
             {
                 cnpj.Property(c => c.Numero)
-                .HasColumnName("Cnpj")
+                .HasColumnName("CNPJ")
                 .HasMaxLength(14);
             });
         });
 
+        //modelBuilder.Entity<PlacaLida>(entity =>
+        //{
+        //    entity.OwnsOne(e => e.Placa, placa =>
+        //    {
+
+        //        placa.Property(p => p.Numero)
+        //        .HasColumnName("PLACA")
+        //        .IsRequired()
+        //        .HasMaxLength(10);
+
+        //    });
+        //});
+
         modelBuilder.Entity<PlacaLida>(entity =>
         {
-            entity.OwnsOne(e => e.Placa, placa =>
-            {
-                placa.Property(p => p.Numero)
-                .HasColumnName("Placa")
+            entity.Property(e => e.Placa)
+                .HasColumnName("PLACA")
+                .IsRequired()
                 .HasMaxLength(10);
-            });
+
+            entity.Ignore(e => e.Placa); // Ignorar a propriedade do domínio
         });
 
         modelBuilder.Entity<MensagemDisplay>(entity =>
@@ -69,9 +83,10 @@ public class AppDbContextSqlite : DbContext
             entity.OwnsOne(e => e.Placa, placa =>
             {
                 placa.Property(p => p.Numero)
-                .HasColumnName("Placa")
+                .HasColumnName("PLACA")
                 .HasMaxLength(10);
             });
         });
+
     }
 }

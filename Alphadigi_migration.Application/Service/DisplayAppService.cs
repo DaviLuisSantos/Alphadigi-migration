@@ -24,13 +24,17 @@ public class DisplayAppService
         _logger = logger;
     }
 
-    public async Task<List<SerialData>> RecieveMessageAlphadigi(string placa, string acesso, Guid alphadigiId)
+    public async Task<List<SerialData>> RecieveMessageAlphadigi(string placa, 
+                                                                string acesso, 
+                                                                int alphadigiId)
     {
         var command = new CreateDisplayPackageCommand(placa, acesso, alphadigiId);
         return await _mediator.Send(command);
     }
 
-    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(string placa, string acesso, Guid alphadigiId)
+    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(string placa, 
+                                                                          string acesso, 
+                                                                          int alphadigiId)
     {
         var command = new CreateHeartbeatDisplayPackageCommand(placa, acesso, alphadigiId);
         return await _mediator.Send(command);

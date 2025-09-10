@@ -6,7 +6,7 @@ namespace Alphadigi_migration.Application.Service
 {
     public interface IAreaMediatorService
     {
-        Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id);
+        Task<Domain.EntitiesNew.Area> GetByIdAsync(int id);
        // Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id);
         Task<bool> SyncAreasAsync();
     }
@@ -20,7 +20,7 @@ namespace Alphadigi_migration.Application.Service
             _mediator = mediator;
         }
 
-        public Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id) =>
+        public Task<Domain.EntitiesNew.Area> GetByIdAsync(int id) =>
             _mediator.Send(new GetAreaByIdQuery { id = id });
 
         //public Task<Domain.EntitiesNew.Area> GetByIdAsync(Guid id) =>

@@ -11,7 +11,8 @@ using Microsoft.Extensions.Logging;
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Display;
 
 
-public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayPackageCommand, List<SerialData>>
+public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayPackageCommand, 
+                                                                  List<SerialData>>
 {
     private readonly IMensagemDisplayRepository _mensagemDisplayRepository;
     private readonly IAlphadigiRepository _alphadigiRepository;
@@ -36,7 +37,7 @@ public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayP
     public async Task<List<SerialData>> Handle(CreateDisplayPackageCommand request, 
                                                CancellationToken cancellationToken)
     {
-        var alphadigi = await _alphadigiRepository.Get(request.AlphadigiId);
+        var alphadigi = await _alphadigiRepository.GetById(request.AlphadigiId);
         if (alphadigi == null)
             throw new Exception($"Alphadigi com ID {request.AlphadigiId} não encontrado");
 
@@ -185,7 +186,7 @@ public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayP
                (lastCamMessage?.Id == null || (lastCamMessage != null && lastCamMessage.Id != lastMessage.Id && lastCamMessage.Placa != placa));
     }
 
-    private async Task SaveMensagemDisplayAsync(string placa, string acesso, Guid alphadigiId)
+    private async Task SaveMensagemDisplayAsync(string placa, string acesso, int alphadigiId)
     {
         var mensagem = new Domain.EntitiesNew.MensagemDisplay
         (

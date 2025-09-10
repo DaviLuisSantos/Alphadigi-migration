@@ -12,7 +12,7 @@ public class AlphadigiDadosAtualizadosEvent : DomainEvent
 
     public override string EventType => throw new NotImplementedException();
 
-    public override Guid AggregateId => throw new NotImplementedException();
+    public override int AggregateId => throw new NotImplementedException();
 
     public AlphadigiDadosAtualizadosEvent(int alphadigiId, int novaAreaId, bool novoSentido)
     {

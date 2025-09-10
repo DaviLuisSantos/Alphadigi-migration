@@ -4,5 +4,5 @@ namespace Alphadigi_migration.Application.Queries.Camera;
 
 public class GetCamerasByAreaQuery : IRequest<List<Domain.EntitiesNew.Camera>>
 {
-    public Guid AreaId { get; set; }
+    public int AreaId { get; set; }
 }

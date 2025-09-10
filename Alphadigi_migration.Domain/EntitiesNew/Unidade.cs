@@ -1,5 +1,6 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
@@ -8,14 +9,21 @@ namespace Alphadigi_migration.Domain.EntitiesNew;
 [Table("UNIDADE")]
 public class Unidade : EntityBase, IAggregateRoot
 {
+    [Key]
+    [Column("IDUNIDADE")]
+    public override int Id { get; protected set; }
+
+    [Column("NUMVAGAS")]
     public int NumeroVagas { get; private set; }
+
+    [Column("UNIDADE")]
     public string Nome { get; private set; }
 
-    public bool Ativa { get; set; }
+   
 
     // Navegação para o condomínio (se existir)
-    public virtual Condominio Condominio { get; private set; }
-    public int? CondominioId { get; private set; }
+    //public virtual Condominio Condominio { get; private set; }
+    //public int? CondominioId { get; private set; }
 
     // Construtor protegido para ORM
     protected Unidade() { }
@@ -27,7 +35,7 @@ public class Unidade : EntityBase, IAggregateRoot
 
         Nome = nome;
         NumeroVagas = numeroVagas;
-        CondominioId = condominioId;
+       // CondominioId = condominioId;
 
         AddDomainEvent(new UnidadeCriadaEvent(Id, Nome, NumeroVagas));
     }
@@ -45,10 +53,10 @@ public class Unidade : EntityBase, IAggregateRoot
        // AddDomainEvent(new UnidadeVagasAlteradasEvent(Id, Nome, NumeroVagas));
     }
 
-    public bool EstaAtiva()
-    {
-        return Ativa == true; // retorna false se Ativa for null ou false
-    }
+    //public bool EstaAtiva()
+    //{
+    //    return Ativa == true; // retorna false se Ativa for null ou false
+    //}
     public void AlterarNome(string novoNome)
     {
         if (string.IsNullOrWhiteSpace(novoNome))
@@ -69,13 +77,13 @@ public class Unidade : EntityBase, IAggregateRoot
         if (condominioId <= 0)
             throw new Exception("ID do condomínio deve ser maior que zero");
 
-        CondominioId = condominioId;
+      //  CondominioId = condominioId;
       //  AddDomainEvent(new UnidadeCondominioAlteradoEvent(Id, CondominioId.Value));
     }
 
     public void RemoverDoCondominio()
     {
-        CondominioId = null;
+       // CondominioId = null;
       //  AddDomainEvent(new UnidadeCondominioRemovidoEvent(Id));
     }
 

@@ -69,9 +69,9 @@ namespace Alphadigi_migration.Domain.Events
 
         public int AreaId { get; }
         public string Nome { get; }
-        public TimeSpan TempoAntipassback { get; }
+        public string TempoAntipassback { get; }
 
-        public AreaTempoAntipassbackConfiguradoEvent(int areaId, string nome, TimeSpan tempoAntipassback)
+        public AreaTempoAntipassbackConfiguradoEvent(int areaId, string nome, string tempoAntipassback)
         {
             AreaId = areaId;
             Nome = nome;

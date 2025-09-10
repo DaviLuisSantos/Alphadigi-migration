@@ -50,7 +50,8 @@ public class UpdatePlacaLidaCommandHandler : IRequestHandler<UpdatePlacaLidaComm
                 placaLida.PlacaImg,
                 placaLida.Real,
                 placaLida.Cadastrado,
-                false,
+                placaLida.Processado,
+                placaLida.Liberado,
                 null);
         }
 

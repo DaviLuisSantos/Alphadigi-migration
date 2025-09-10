@@ -40,7 +40,7 @@ public class SaidaSempreAbreAccessHandler : IAccessHandler
         try
         {
             string acesso = "NÃO CADASTRADO";
-            if (veiculo != null && veiculo.Id != Guid.Empty)
+            if (veiculo != null && veiculo.Id != null)
             {
                 _logger.LogInformation($"Aprovando saída do veículo cadastrado com ID {veiculo.Id}.");
                 await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
@@ -81,7 +81,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
-            _logger.LogInformation($"Gerenciando controle de vaga para veículo com ID {veiculo?.Id ?? Guid.Empty}, Sentido: {alphadigi.Sentido}.");
+            _logger.LogInformation($"Gerenciando controle de vaga para veículo com ID {veiculo?.Id ?? null}, Sentido: {alphadigi.Sentido}.");
             string acesso = "";
             bool abre = true;
 
@@ -99,7 +99,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
                 if (veiculo != null && veiculo.UnidadeNavigation != null)
                 {
                     var vagas = await _unidadeService.GetUnidadeInfo(veiculo.UnidadeNavigation.Id);
-                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro))
+                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro == 0))
                     {
                         await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
                         _logger.LogInformation($"Concedendo acesso e ocupando vaga para veículo com ID {veiculo.Id}.");
@@ -113,7 +113,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
                 }
                 else
                 {
-                    _logger.LogWarning($"Não foi possível obter informações da unidade para veículo com ID {veiculo?.Id ?? Guid.Empty}. Acesso negado");
+                    _logger.LogWarning($"Não foi possível obter informações da unidade para veículo com ID {veiculo?.Id ?? null}. Acesso negado");
                     acesso = "S/VG";
                     abre = false;
                 }
@@ -134,7 +134,8 @@ public class NaoControlaVagaAccessHandler : IAccessHandler
     private readonly IVeiculoService _veiculoService;
     private readonly ILogger<NaoControlaVagaAccessHandler> _logger;
 
-    public NaoControlaVagaAccessHandler(IVeiculoService veiculoService, ILogger<NaoControlaVagaAccessHandler> logger)
+    public NaoControlaVagaAccessHandler(IVeiculoService veiculoService, 
+                                        ILogger<NaoControlaVagaAccessHandler> logger)
     {
         _veiculoService = veiculoService;
         _logger = logger;
@@ -145,7 +146,7 @@ public class NaoControlaVagaAccessHandler : IAccessHandler
         _logger.LogInformation($"Iniciando HandleAccessAsync");
         try
         {
-            _logger.LogInformation($"Acesso sem controle de vaga para veículo com ID {veiculo?.Id ?? Guid.Empty}, Sentido: {alphadigi.Sentido}.");
+            _logger.LogInformation($"Acesso sem controle de vaga para veículo com ID {veiculo?.Id ?? null}, Sentido: {alphadigi.Sentido}.");
 
             string acesso = "CADASTRADO";
             bool abre = true;

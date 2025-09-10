@@ -1,6 +1,4 @@
-﻿
-
-using Alphadigi_migration.Application.Queries.PlacaLida;
+﻿using Alphadigi_migration.Application.Queries.PlacaLida;
 using Alphadigi_migration.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;

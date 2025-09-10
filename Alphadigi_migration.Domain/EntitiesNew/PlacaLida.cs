@@ -1,17 +1,30 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.EntitiesNew
 {
     public class PlacaLida : EntityBase, IAggregateRoot
     {
-        
-        public PlacaVeiculo Placa { get; private set; }
-        public string CarroImg { get; private set; }
-        public string PlacaImg { get; private set; }
+        [Column("PLACA")]
+        private string PlacaNumero { get; set; }
+
+        // Propriedade para domínio (não mapeada)
+        [NotMapped]
+        public PlacaVeiculo Placa
+        {
+            get => new PlacaVeiculo(PlacaNumero);
+            set => PlacaNumero = value?.Numero;
+        }
+        public string? CarroImg { get; private set; }
+        public string? PlacaImg { get; private set; }
         public bool Liberado { get; private set; }
+
+        [ForeignKey("Alphadigi")]
         public int AlphadigiId { get; private set; }
+
+        [ForeignKey("Area")]
         public int AreaId { get; private set; }
         public Area Area { get; private set; }
         public Alphadigi Alphadigi { get; private set; }
@@ -19,7 +32,7 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         public bool Real { get; private set; }
         public bool Cadastrado { get; private set; }
         public bool Processado { get; private set; }
-        public string Acesso { get; private set; }
+        public string? Acesso { get; private set; }
         public DateTime DataCriacao { get; private set; }
         public DateTime? DataAtualizacao { get; private set; }
 
@@ -36,12 +49,14 @@ namespace Alphadigi_migration.Domain.EntitiesNew
             bool real = true,
             bool cadastrado = false,
             bool processado = false,
+            bool liberado = false,
             string acesso = null)
         {
-            ValidarPlaca(placa);
+            //ValidarPlaca(placa);
+            PlacaNumero = placa;
             ValidarImagens(carroImg, placaImg);
 
-            Placa = new PlacaVeiculo(placa);
+            //Placa = new PlacaVeiculo(placa);
             AlphadigiId = alphadigiId;
             AreaId = areaId;
             DataHora = dataHora;
@@ -76,6 +91,14 @@ namespace Alphadigi_migration.Domain.EntitiesNew
             AddDomainEvent(new PlacaLidaCadastroAtualizadoEvent(Id, Placa.Numero, cadastrado));
         }
 
+        public void AtualizarAcesso(bool liberado, string acesso)
+        {
+            Liberado = liberado;
+            Acesso = acesso;
+            DataAtualizacao = DateTime.UtcNow;
+           // AddDomainEvent(new PlacaLidaAcessoAtualizadoEvent(Id, Placa.Numero, liberado, acesso));
+        }
+
         public void AtualizarImagens(string carroImg, string placaImg)
         {
             ValidarImagens(carroImg, placaImg);
@@ -96,11 +119,11 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         }
 
         // Métodos de Validação
-        private void ValidarPlaca(string placa)
-        {
-            if (string.IsNullOrWhiteSpace(placa))
-                throw new Exception("Placa não pode ser vazia");
-        }
+        //private void ValidarPlaca(string placa)
+        //{
+        //    if (string.IsNullOrWhiteSpace(placa))
+        //        throw new Exception("Placa não pode ser vazia");
+        //}
 
         private void ValidarImagens(string carroImg, string placaImg)
         {

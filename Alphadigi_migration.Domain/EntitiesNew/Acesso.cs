@@ -1,25 +1,43 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 
 [Table("LPR_MT_ACESSO")]
+
 public class Acesso : EntityBase, IAggregateRoot
 {
-    // Propriedades
+    [Key]
+    [Column("ID")]
+    public override int Id { get; protected set; }
+
+    [Column("LOCAL")]
     public string Local { get; private set; }
+
+    [Column("DATA_HORA")]
     public DateTime DataHora { get; private set; }
+
+    [Column("UNIDADE")]
     public string Unidade { get; private set; }
+
+    [Column("PLACA_LPR")]
     public PlacaVeiculo Placa { get; private set; }
+
+    [Column("DADOS_VEICULO")]
     public string DadosVeiculo { get; private set; }
+
+    [Column("GRUPO_NOME")]
     public string GrupoNome { get; private set; }
+
+    [Column("FOTO")]
     public string Foto { get; private set; }
-    public bool AcessoPermitido { get; private set; }
-    public string Motivo { get; private set; }
-    public string IpCamera { get; private set; }
+    //public bool AcessoPermitido { get; private set; }
+    //public string Motivo { get; private set; }
+    //public string IpCamera { get; private set; }
 
     // Construtores
     protected Acesso() { } // Para ORM
@@ -50,34 +68,34 @@ public class Acesso : EntityBase, IAggregateRoot
         DadosVeiculo = dadosVeiculo;
         GrupoNome = grupoNome;
         Foto = foto;
-        AcessoPermitido = acessoPermitido;
-        Motivo = motivo;
-        IpCamera = ipCamera;
-        DataHora = dataHora;
+        //AcessoPermitido = acessoPermitido;
+        //Motivo = motivo;
+        //IpCamera = ipCamera;
+        //DataHora = dataHora;
 
-        AddDomainEvent(new AcessoRegistradoEvent(Id, Placa.Numero, Local, AcessoPermitido));
+        AddDomainEvent(new AcessoRegistradoEvent(Id, Placa.Numero, Local));
     }
 
     // Métodos de Domínio
-    public void PermitirAcesso(string motivo = "Liberado pelo sistema")
-    {
-        if (AcessoPermitido) return;
+    //public void PermitirAcesso(string motivo = "Liberado pelo sistema")
+    //{
+    //    if (AcessoPermitido) return;
 
-        AcessoPermitido = true;
-        Motivo = motivo;
+    //    AcessoPermitido = true;
+    //    Motivo = motivo;
 
-        AddDomainEvent(new AcessoPermitidoEvent(Id, Placa.Numero, Local, motivo));
-    }
+    //    AddDomainEvent(new AcessoPermitidoEvent(Id, Placa.Numero, Local, motivo));
+    //}
 
-    public void NegarAcesso(string motivo)
-    {
-        if (!AcessoPermitido && !string.IsNullOrEmpty(Motivo)) return;
+    //public void NegarAcesso(string motivo)
+    //{
+    //    if (!AcessoPermitido && !string.IsNullOrEmpty(Motivo)) return;
 
-        AcessoPermitido = false;
-        Motivo = motivo ?? "Acesso negado";
+    //    AcessoPermitido = false;
+    //    Motivo = motivo ?? "Acesso negado";
 
-        AddDomainEvent(new AcessoNegadoEvent(Id, Placa.Numero, Local, motivo));
-    }
+    //    AddDomainEvent(new AcessoNegadoEvent(Id, Placa.Numero, Local, motivo));
+    //}
 
     public void AtualizarFoto(string fotoUrl)
     {
@@ -152,6 +170,6 @@ public class Acesso : EntityBase, IAggregateRoot
 
     public override string ToString()
     {
-        return $"{DataHora:dd/MM/yyyy HH:mm} - {Placa} - {Local} - {(AcessoPermitido ? "LIBERADO" : "NEGADO")}";
+        return $"{DataHora:dd/MM/yyyy HH:mm} - {Placa} - {Local} ";
     }
 }

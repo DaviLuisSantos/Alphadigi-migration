@@ -8,7 +8,8 @@ using System.Text.Json;
 
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Alphadigi;
 
-public class HandleCreateQueryHandler : IRequestHandler<HandleCreateQuery, Domain.DTOs.Alphadigi.AddWhiteListDTO>
+public class HandleCreateQueryHandler : IRequestHandler<HandleCreateQuery, 
+                                                        Domain.DTOs.Alphadigi.AddWhiteListDTO>
 {
     private readonly IMediator _mediator;
     private readonly ILogger<HandleCreateQueryHandler> _logger;
@@ -24,7 +25,7 @@ public class HandleCreateQueryHandler : IRequestHandler<HandleCreateQuery, Domai
     public async Task<Domain.DTOs.Alphadigi.AddWhiteListDTO> Handle(HandleCreateQuery request, CancellationToken cancellationToken)
     {
         var alphadigi = request.Alphadigi;
-        Guid ultimoId = alphadigi.UltimoId ?? Guid.Empty;
+        int ultimoId = alphadigi.UltimoId ?? 0;
 
         // Buscar veículos usando query
         var veiculosQuery = new GetVeiculosSendQuery { UltimoId = ultimoId };
@@ -34,9 +35,10 @@ public class HandleCreateQueryHandler : IRequestHandler<HandleCreateQuery, Domai
         {
             return null;
         }
+        int novoUltimoId = veiculosEnvio.Max(item => item.Id);
 
         // Atualizar o UltimoId com o ID do último veículo enviado
-        alphadigi.AtualizarUltimoId(veiculosEnvio.Max(item => item.Id));
+        alphadigi.AtualizarUltimoId(novoUltimoId);
 
 
         var envio = new Domain.DTOs.Alphadigi.AddWhiteListDTO

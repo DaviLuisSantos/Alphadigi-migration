@@ -21,7 +21,9 @@ public class MensagemDisplayRepository :IMensagemDisplayRepository
         return true;
     }
 
-    public async Task<MensagemDisplay> FindLastMensagemAsync(string placa, string mensagem, Guid alphadigiId)
+    public async Task<MensagemDisplay> FindLastMensagemAsync(string placa, 
+                                                             string mensagem, 
+                                                             int alphadigiId)
     {
         try
         {
@@ -44,7 +46,7 @@ public class MensagemDisplayRepository :IMensagemDisplayRepository
         }
     }
 
-    public async Task<MensagemDisplay> FindLastCamMensagemAsync(Guid alphadigiId)
+    public async Task<MensagemDisplay> FindLastCamMensagemAsync(int alphadigiId)
     {
         try
         {

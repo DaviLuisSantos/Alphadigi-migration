@@ -38,7 +38,7 @@ public class VerifyAntiPassbackCommandHandler : IRequestHandler<VerifyAntiPassba
             _logger.LogInformation("Iniciando verificação antipassback para: {Placa}", veiculo.Placa);
 
             // Se veículo não tem ID, não tem antipassback
-            if (veiculo.Id == Guid.Empty)
+            if (veiculo.Id == null)
             {
                 _logger.LogInformation("Veículo sem ID válido: {Placa} - antipassback ignorado", veiculo.Placa);
                 return true; 
@@ -70,7 +70,10 @@ public class VerifyAntiPassbackCommandHandler : IRequestHandler<VerifyAntiPassba
             }
 
             // Determinar tempo de antipassback
-            var tempoAntipassback = alphadigi.Area?.TempoAntipassback ?? TimeSpan.FromSeconds(10);
+            var tempoAntipassback = TimeSpan.TryParse(alphadigi.Area?.TempoAntipassback, out var parsed)
+      ? parsed
+      : TimeSpan.FromSeconds(10);
+
             var timeLimit = timestamp - tempoAntipassback;
 
             // Verificar acessos recentes

@@ -18,7 +18,7 @@ public class MensagemDisplayService : IMensagemDisplayService
     {
         return await _mensagemDisplayRepository.FindLastMensagemAsync(termo.Mensagem, termo.Placa, termo.AlphadigiId);
     }
-    public async Task<MensagemDisplay> FindLastCamMensagemAsync(Guid alphadigiId)
+    public async Task<MensagemDisplay> FindLastCamMensagemAsync(int alphadigiId)
     {
         return await _mensagemDisplayRepository.FindLastCamMensagemAsync(alphadigiId);
     }

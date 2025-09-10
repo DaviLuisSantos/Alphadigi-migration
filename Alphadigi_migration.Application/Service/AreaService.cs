@@ -19,7 +19,7 @@ namespace Alphadigi_migration.Application.Service;
             _logger = logger;
         }
 
-        public async Task<Area> GetById(Guid id)
+        public async Task<Area> GetById(int id)
         {
             _logger.LogInformation("GetById chamado para área: {Id}", id);
             return await _areaRepository.GetByIdAsync(id);

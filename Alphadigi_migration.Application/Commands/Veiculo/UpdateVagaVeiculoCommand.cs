@@ -9,7 +9,9 @@ namespace Alphadigi_migration.Application.Commands.Veiculo;
 
 public class UpdateVagaVeiculoCommand : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public bool Dentro { get; set; }
+
+
    
 }

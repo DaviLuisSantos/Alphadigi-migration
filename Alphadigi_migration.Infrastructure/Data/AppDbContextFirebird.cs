@@ -39,7 +39,7 @@ public class AppDbContextFirebird : DbContext
             entity.OwnsOne(v => v.Placa, placa =>
             {
                 placa.Property(p => p.Numero)
-                .HasColumnName("Placa")
+                .HasColumnName("PLACA")
                 .HasMaxLength(10)
                 .IsRequired();
             });
@@ -50,7 +50,7 @@ public class AppDbContextFirebird : DbContext
             entity.OwnsOne(a => a.Placa, placa =>
             {
                 placa.Property(p => p.Numero)
-                .HasColumnName("Placa")
+                .HasColumnName("PLACA_LPR")
                 .HasMaxLength(10)
                 .IsRequired();
             });
@@ -60,18 +60,18 @@ public class AppDbContextFirebird : DbContext
             entity.OwnsOne(e => e.Cnpj, cnpj =>
             {
                 cnpj.Property(c => c.Numero)
-                .HasColumnName("Cnpj")
+                .HasColumnName("CNPJ")
                 .HasMaxLength(14);
             });
         });
 
         modelBuilder.Entity<Camera>()
-       .Property(c => c.FotoEvento)
-       .HasColumnName("FOTO_EVENTO")
-       .HasConversion(
-           v => v ? 1 : 0,           
-                v => v == 1
-        );
+      .Property(c => c.FotoEvento)
+      .HasColumnName("FOTO_EVENTO")
+      .HasConversion(
+          v => v.HasValue ? (v.Value ? 1 : 0) : (int?)null, // bool? -> int?
+          v => v.HasValue ? (v.Value == 1) : (bool?)null     // int? -> bool?
+      ).HasDefaultValue(false);
 
     }
 }

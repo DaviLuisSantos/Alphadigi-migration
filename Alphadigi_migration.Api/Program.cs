@@ -13,7 +13,7 @@ using Serilog.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddControllers();
 
 
 builder.Services.Configure<PlateComparisonSettings>(
@@ -104,6 +104,7 @@ app.UseMiddleware<RequestTimingMiddleware>();
 
 app.UseCors("AllowAllOrigins");
 
-app.MapCarter();
+//app.MapCarter();
+app.MapControllers();
 
 app.Run();

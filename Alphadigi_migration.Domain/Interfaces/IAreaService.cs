@@ -4,6 +4,6 @@ namespace Alphadigi_migration.Domain.Interfaces;
 
 public interface IAreaService
 {
-    Task<Area> GetById(Guid id);
+    Task<Area> GetById(int id);
     Task<bool> SyncAreas();
 }

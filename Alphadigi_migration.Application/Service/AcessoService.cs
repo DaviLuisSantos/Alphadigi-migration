@@ -65,15 +65,21 @@ public class AcessoService : IAcessoService
     {
         Alphadigi? camUlt = await _alphadigiService.GetOrCreate(veiculo.IpCamUltAcesso);
 
-        TimeSpan? tempoAntipassback = alphadigi.Area.TempoAntipassback;
+        string? tempoAntipassback = alphadigi.Area.TempoAntipassback;
 
         if (camUlt?.AreaId != alphadigi.AreaId)
         {
             return false;
         }
 
-        tempoAntipassback = tempoAntipassback == null || tempoAntipassback == TimeSpan.Zero ? TimeSpan.FromSeconds(10) : tempoAntipassback;
-        var timeLimit = timestamp - tempoAntipassback;
+        tempoAntipassback = string.IsNullOrWhiteSpace(tempoAntipassback)
+     ? TimeSpan.FromSeconds(10).ToString()   // converte TimeSpan → string
+     : tempoAntipassback;
+        var parsed = TimeSpan.TryParse(tempoAntipassback, out var tempoSpan)
+    ? tempoSpan
+    : TimeSpan.FromSeconds(10);
+
+        var timeLimit = timestamp - parsed;
 
         var recentAccesses = await _acessoRepository.VerifyAntiPassbackAsync(veiculo.Placa, timeLimit);
 

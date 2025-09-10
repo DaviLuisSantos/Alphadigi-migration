@@ -10,14 +10,14 @@ namespace Alphadigi_migration.Domain.Events
         public int AcessoId { get; }
         public string Placa { get; }
         public string Local { get; }
-        public bool AcessoPermitido { get; }
+       // public bool AcessoPermitido { get; }
 
-        public AcessoRegistradoEvent(int acessoId, string placa, string local, bool acessoPermitido)
+        public AcessoRegistradoEvent(int acessoId, string placa, string local)
         {
             AcessoId = acessoId;
             Placa = placa;
             Local = local;
-            AcessoPermitido = acessoPermitido;
+           // AcessoPermitido = acessoPermitido;
         }
     }
 

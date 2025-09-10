@@ -11,7 +11,7 @@ public class CreateAlphadigiCommand : IRequest<Alphadigi_migration.Domain.Entiti
 {
     public string Ip { get; set; }
     public string Nome { get; set; }
-    public Guid AreaId { get; set; }
+    public int AreaId { get; set; }
     public bool Sentido { get; set; }
     public string Estado { get; set; }
     public int LinhasDisplay { get; set; } = 2;

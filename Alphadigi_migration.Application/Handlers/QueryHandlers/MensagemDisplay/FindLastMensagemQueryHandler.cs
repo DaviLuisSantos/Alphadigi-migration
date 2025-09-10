@@ -6,7 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.MensagemDisplay;
 
-public class FindLastMensagemQueryHandler : IRequestHandler<FindLastMensagemQuery, Domain.EntitiesNew.MensagemDisplay>
+public class FindLastMensagemQueryHandler : IRequestHandler<FindLastMensagemQuery, 
+                                                            Domain.EntitiesNew.MensagemDisplay>
 {
     private readonly IMensagemDisplayRepository _repository;
     private readonly ILogger<FindLastMensagemQueryHandler> _logger;
@@ -19,7 +20,8 @@ public class FindLastMensagemQueryHandler : IRequestHandler<FindLastMensagemQuer
         _logger = logger;
     }
 
-    public async Task<Domain.EntitiesNew.MensagemDisplay> Handle(FindLastMensagemQuery request, CancellationToken cancellationToken)
+    public async Task<Domain.EntitiesNew.MensagemDisplay> Handle(FindLastMensagemQuery request, 
+                                                                 CancellationToken cancellationToken)
     {
         _logger.LogInformation("Buscando última mensagem para Alphadigi: {AlphadigiId}", request.AlphadigiId);
 

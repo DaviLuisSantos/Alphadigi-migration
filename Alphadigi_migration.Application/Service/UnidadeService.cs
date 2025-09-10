@@ -6,7 +6,7 @@ namespace Alphadigi_migration.Application.Service;
 
 public interface IUnidadeService
 {
-    Task<QueryResult> GetUnidadeInfo(Guid idUnidade);
+    Task<QueryResult> GetUnidadeInfo(int idUnidade);
 }
 
 
@@ -24,7 +24,7 @@ public class UnidadeService: IUnidadeService
     }
 
 
-    public async Task<QueryResult> GetUnidadeInfo(Guid idUnidade)
+    public async Task<QueryResult> GetUnidadeInfo(int idUnidade)
     {
         return await _unidadeRepository.GetUnidadeInfoAsync(idUnidade);
     }

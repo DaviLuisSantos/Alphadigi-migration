@@ -1,6 +1,7 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Alphadigi_migration.Domain.EntitiesNew
@@ -11,6 +12,8 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         public PlacaVeiculo Placa { get; private set; }
         public string Mensagem { get; private set; }
         public DateTime DataHora { get; private set; }
+
+        [ForeignKey("Alphadigi")]
         public int AlphadigiId { get; private set; }
 
         public Alphadigi Alphadigi { get; private set; }

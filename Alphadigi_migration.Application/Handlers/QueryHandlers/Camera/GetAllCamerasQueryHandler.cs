@@ -5,7 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Camera;
 
-public class GetAllCamerasQueryHandler : IRequestHandler<GetAllCamerasQuery, List<Domain.EntitiesNew.Camera>>
+public class GetAllCamerasQueryHandler : IRequestHandler<GetAllCamerasQuery, 
+                                                         List<Domain.EntitiesNew.Camera>>
 {
     private readonly ICameraRepository _repository;
     private readonly ILogger<GetAllCamerasQueryHandler> _logger;
@@ -18,7 +19,8 @@ public class GetAllCamerasQueryHandler : IRequestHandler<GetAllCamerasQuery, Lis
         _logger = logger;
     }
 
-    public async Task<List<Domain.EntitiesNew.Camera>> Handle(GetAllCamerasQuery request, CancellationToken cancellationToken)
+    public async Task<List<Domain.EntitiesNew.Camera>> Handle(GetAllCamerasQuery request, 
+                                                              CancellationToken cancellationToken)
     {
         _logger.LogInformation("Buscando todas as câmeras");
         return await _repository.GetAllAsync();

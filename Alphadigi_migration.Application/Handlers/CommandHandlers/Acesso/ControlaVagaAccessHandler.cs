@@ -51,7 +51,7 @@ public class ControlaVagaAccessHandler : IRequestHandler<HandleAccessCommand, (b
                     var vagasQuery = new GetUnidadeVagasQuery { UnidadeId = request.Veiculo.Unidade };
                     var vagas = await _mediator.Send(vagasQuery, cancellationToken);
 
-                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadas || request.Veiculo.VeiculoDentro))
+                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadas || vagas.NumVagas > request.Veiculo.VeiculoDentro ))
                     {
                         await _mediator.Send(new UpdateVagaVeiculoCommand
                         {

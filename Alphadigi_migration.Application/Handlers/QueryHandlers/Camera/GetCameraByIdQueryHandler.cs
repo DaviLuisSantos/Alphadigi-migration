@@ -18,7 +18,8 @@ public class GetCameraByIdQueryHandler : IRequestHandler<GetCameraByIdQuery, Dom
         _logger = logger;
     }
 
-    public async Task<Domain.EntitiesNew.Camera> Handle(GetCameraByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Domain.EntitiesNew.Camera> Handle(GetCameraByIdQuery request, 
+                                                        CancellationToken cancellationToken)
     {
         _logger.LogInformation("Buscando câmera por ID: {Id}", request.Id);
         return await _repository.GetByIdAsync(request.Id);

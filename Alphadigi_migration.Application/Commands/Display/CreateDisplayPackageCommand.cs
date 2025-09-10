@@ -8,9 +8,9 @@ public class CreateDisplayPackageCommand : IRequest<List<SerialData>>
 {
     public string Placa { get; set; }
     public string Acesso { get; set; }
-    public Guid AlphadigiId { get; set; }
+    public int AlphadigiId { get; set; }
 
-    public CreateDisplayPackageCommand(string placa, string acesso, Guid alphadigiId)
+    public CreateDisplayPackageCommand(string placa, string acesso, int alphadigiId)
     {
         Placa = placa;
         Acesso = acesso;

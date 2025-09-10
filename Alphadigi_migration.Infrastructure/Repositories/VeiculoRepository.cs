@@ -26,7 +26,7 @@ public class VeiculoRepository : IVeiculoRepository
         return await _contextFirebird.Veiculo.ToListAsync();
     }
 
-    public async Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSendAsync(Guid lastId)
+    public async Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSendAsync(int lastId)
     {
         _logger.LogInformation($"GetVeiculosSendAsync chamado com lastId: {lastId}");
         return await _contextFirebird.Veiculo
@@ -41,17 +41,59 @@ public class VeiculoRepository : IVeiculoRepository
              .ToListAsync();
     }
 
+    //public async Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters)
+    //{
+    //    _logger.LogInformation($"GetByPlateAsync chamado com placa: {plate}");
+
+    //    // Obter todos os veículos primeiro (async)
+    //    var veiculos = await _contextFirebird.Veiculo
+    //       .Include(v => v.UnidadeNavigation)
+    //        .Include(v => v.Rota)
+    //        .ToListAsync(); // Mudança importante: usar ToListAsync()
+
+    //    // Fazer a comparação no client side
+    //    var resultado = veiculos
+    //        .Select(v => new
+    //        {
+    //            Veiculo = v,
+    //            MatchCount = v.Placa?.Numero?
+    //                .Take(7)
+    //                .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0)
+    //                .Sum() ?? 0
+    //        })
+    //        .Where(v => v.MatchCount >= minMatchingCharacters)
+    //        .OrderByDescending(v => v.MatchCount)
+    //        .Select(v => v.Veiculo)
+    //        .ToList();
+
+    //    return resultado.FirstOrDefault();
+    //}
     public async Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters)
     {
-        _logger.LogInformation($"GetByPlateAsync chamado com placa: {plate}");
+        // ✅ VALIDAÇÃO CRÍTICA - verificar se plate é null ou vazio
+        if (string.IsNullOrEmpty(plate))
+        {
+            _logger.LogWarning("Placa é null ou vazia. Retornando null.");
+            return null;
+        }
 
-        // Obter todos os veículos primeiro (async)
-        var veiculos = await _contextFirebird.Veiculo
-            .Include(v => v.UnidadeNavigation)
-            .Include(v => v.Rota)
-            .ToListAsync(); // Mudança importante: usar ToListAsync()
+        _logger.LogInformation($"GetByPlateAsync chamado com placa: '{plate}'");
 
-        // Fazer a comparação no client side
+        // ✅ Busca exata primeiro
+        var veiculoExato = await _contextFirebird.Veiculo
+            .FirstOrDefaultAsync(v => v.Placa.Numero == plate);
+
+        if (veiculoExato != null)
+        {
+            _logger.LogInformation($"Veículo encontrado (busca exata): {veiculoExato.Placa.Numero}");
+            return veiculoExato;
+        }
+
+        _logger.LogInformation($"Nenhum veículo encontrado por busca exata para: '{plate}'");
+
+        // ✅ Só então usar similaridade (com plate garantidamente não-nulo)
+        var veiculos = await _contextFirebird.Veiculo.ToListAsync();
+
         var resultado = veiculos
             .Select(v => new
             {
@@ -66,10 +108,20 @@ public class VeiculoRepository : IVeiculoRepository
             .Select(v => v.Veiculo)
             .ToList();
 
-        return resultado.FirstOrDefault();
-    }
+        var veiculoSimilar = resultado.FirstOrDefault();
 
-    public async Task<bool> UpdateVagaVeiculoAsync(Guid id, bool dentro)
+        if (veiculoSimilar != null)
+        {
+            _logger.LogInformation($"Veículo similar encontrado: {veiculoSimilar.Placa.Numero}");
+        }
+        else
+        {
+            _logger.LogInformation($"Nenhum veículo similar encontrado para: '{plate}'");
+        }
+
+        return veiculoSimilar;
+    }
+    public async Task<bool> UpdateVagaVeiculoAsync(int id, bool dentro)
     {
         _logger.LogInformation($"UpdateVagaVeiculoAsync chamado com id: {id} e dentro: {dentro}");
 

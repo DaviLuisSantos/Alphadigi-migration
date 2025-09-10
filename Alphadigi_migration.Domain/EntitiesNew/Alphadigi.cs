@@ -1,23 +1,36 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Events;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 
-[Table("LPR_MT_ACESSO")]
+
 public class Alphadigi : EntityBase, IAggregateRoot
 {
     // Propriedades
+    [Required]
+    [StringLength(15)]
     public string Ip { get; private set; }
+
+    [Required]
+    [StringLength(100)]
     public string Nome { get; private set; }
+
+    [ForeignKey("Area")]
     public int AreaId { get; private set; }
     public Area Area { get; private set; }
 
     public bool Sentido { get; private set; }
+
+    [Required]
+    [StringLength(50)]
     public string Estado { get; private set; }
     public int? UltimoId { get; private set; }
-    public string UltimaPlaca { get; private set; }
+
+    [StringLength(10)]
+    public string UltimaPlaca { get; private set; } = "N/A";
     public DateTime? UltimaHora { get; private set; }
     public int LinhasDisplay { get; private set; }
     public bool Enviado { get; private set; }
@@ -49,6 +62,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
         Enviado = false;
         FotoEvento = false;
         DataCriacao = DateTime.UtcNow;
+        UltimaPlaca = "N/A";
 
         AddDomainEvent(new AlphadigiCreatedEvent(Id, Nome, Ip, AreaId));
     }

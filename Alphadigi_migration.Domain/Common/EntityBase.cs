@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 public abstract class EntityBase
 {
     [Key]
-    public int Id { get; protected set; }
+    public virtual int Id { get; protected set; }
 
     private List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();

@@ -1,19 +1,32 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.Events;
 using Alphadigi_migration.Domain.ValueObjects;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 [Table("DADOS_CLIENTE")]
 public class Condominio : EntityBase, IAggregateRoot
     {
-        // Propriedades
+    // Propriedades
+    [Key]
+    [Column("ID")]
+    public override int Id { get; protected set; }
+    [Column("NOME")]
         public string Nome { get; private set; }
+
+        [Column("CNPJ")]
         public Cnpj Cnpj { get; private set; }
+
+        [Column("FANTASIA")]
         public string Fantasia { get; private set; }
-        public DateTime DataCriacao { get; private set; }
-        public DateTime? DataAtualizacao { get; private set; }
-        public bool Ativo { get; private set; }
+    [NotMapped]
+    public DateTime DataCriacao { get; private set; }
+    [NotMapped]
+    public DateTime? DataAtualizacao { get; private set; }
+
+    [NotMapped]
+    public bool Ativo { get; private set; }
 
         // Construtores
         protected Condominio() { } // Para ORM

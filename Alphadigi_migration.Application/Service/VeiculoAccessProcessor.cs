@@ -47,7 +47,10 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
         }
     }
 
-    private async Task<bool> SendMonitorAcessoLinear(Veiculo veiculo, string ipCamera, string acesso, DateTime timestamp)
+    private async Task<bool> SendMonitorAcessoLinear(Veiculo veiculo, 
+                                                     string ipCamera, 
+                                                     string acesso, 
+                                                     DateTime timestamp)
     {
         var monitorAcesso = new DadosVeiculoMonitorDTO
         {
@@ -59,7 +62,9 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
         return await _monitorAcessoLinear.DadosVeiculo(monitorAcesso);
     }
 
-    private async Task<bool> SendUpdateLastAccess(string ipCamera, Guid idVeiculo, DateTime timestamp)
+    private async Task<bool> SendUpdateLastAccess(string ipCamera, 
+                                                  int idVeiculo, 
+                                                  DateTime timestamp)
     {
         var lastAccess = new LastAcessUpdateVeiculoDTO
         {

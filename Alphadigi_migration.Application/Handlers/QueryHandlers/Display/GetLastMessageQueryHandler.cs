@@ -5,7 +5,8 @@ using MediatR;
 
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Display;
 
-public class GetLastMessageQueryHandler : IRequestHandler<GetLastMessageQuery, Domain.EntitiesNew.MensagemDisplay>
+public class GetLastMessageQueryHandler : IRequestHandler<GetLastMessageQuery, 
+                                                          Domain.EntitiesNew.MensagemDisplay>
 {
     private readonly IMensagemDisplayRepository _mensagemDisplayRepository;
 

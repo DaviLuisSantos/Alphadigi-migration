@@ -13,15 +13,44 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
     private readonly IAcessoRepository _repository;
     private readonly IMediator _mediator;
     private readonly ILogger<SaveVeiculoAcessoCommandHandler> _logger;
+
+    public SaveVeiculoAcessoCommandHandler(IAcessoRepository repository, 
+                                           IMediator mediator, 
+                                           ILogger<SaveVeiculoAcessoCommandHandler> logger)
+    {
+        _repository = repository;
+        _mediator = mediator;
+        _logger = logger;
+    }
+
     public async Task<bool> Handle(SaveVeiculoAcessoCommand request, CancellationToken cancellationToken)
     {
         try
         {
+            // VALIDAÇÕES INICIAIS
+            if (request.Veiculo == null)
+            {
+                _logger.LogError("Veículo não pode ser nulo");
+                return false;
+            }
+
+            if (request.Alphadigi == null)
+            {
+                _logger.LogError("Alphadigi não pode ser nulo");
+                return false;
+            }
+
+            if (request.Timestamp == default)
+            {
+                request.Timestamp = DateTime.Now;
+            }
+
+            _logger.LogInformation("Iniciando salvamento de acesso para veículo: {Placa}", request.Veiculo.Placa);
             // 1. Verificar antipassback
             var verifyPassbackCommand = new VerifyAntiPassbackCommand
             {
-                Veiculo = request.Veiculo,
-                Alphadigi = request.Alphadigi,
+                Veiculo = request.Veiculo ?? throw new ArgumentNullException(nameof(request.Veiculo)),
+                Alphadigi = request.Alphadigi ?? throw new ArgumentNullException(nameof(request.Alphadigi)),
                 Timestamp = request.Timestamp
             };
 
@@ -57,10 +86,25 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
             string unidade = "NAO CADASTRADO";
             if (!string.IsNullOrEmpty(request.Veiculo.Unidade))
             {
-                var unidadeQuery = new GetUnidadeByIdQuery { UnidadeId = request.Veiculo.Unidade };
-                var unidadeObj = await _mediator.Send(unidadeQuery, cancellationToken);
-                unidade = unidadeObj?.Nome ?? "UNIDADE NAO ENCONTRADA";
+
+                if (int.TryParse(request.Veiculo.Unidade, out int unidadeId))
+                {
+                    var unidadeQuery = new GetUnidadeByIdQuery { UnidadeId = unidadeId };
+                    var unidadeObj = await _mediator.Send(unidadeQuery, cancellationToken);
+                    unidade = unidadeObj?.Nome ?? "UNIDADE NAO ENCONTRADA";
+                }
+                else
+                {
+                    _logger.LogWarning($"ID da unidade inválido: '{request.Veiculo.Unidade}'");
+                    unidade = "ID INVALIDO";
+                }
+
+
+
+                   
             }
+
+
 
             // 6. Criar e salvar acesso
             var acesso = new Domain.EntitiesNew.Acesso

@@ -12,7 +12,7 @@ public class AlphadigiLinhasDisplayAtualizadasEvent : DomainEvent
 
     public override string EventType => throw new NotImplementedException();
 
-    public override Guid AggregateId => throw new NotImplementedException();
+    public override int AggregateId => throw new NotImplementedException();
 
     public AlphadigiLinhasDisplayAtualizadasEvent(int alphadigiId, string alphadigiNome, int novasLinhasDisplay)
     {

@@ -37,6 +37,25 @@ public class AlphadigiRepository : IAlphadigiRepository
         _logger = logger;
         _mapper = mapper;
     }
+    public async Task<List<SerialData>> ProcessReceivedMessageAsync(string message, string cameraIp)
+    {
+        _logger.LogInformation("Processando mensagem: {Message} da câmera: {CameraIp}", message, cameraIp);
+
+        // Implemente a lógica real de processamento da mensagem aqui
+        var serialDataList = new List<SerialData>();
+
+        if (!string.IsNullOrEmpty(message))
+        {
+            serialDataList.Add(new SerialData
+            {
+                serialChannel = 1, 
+                data = message,    
+                dataLen = message.Length 
+            });
+        }
+
+        return await Task.FromResult(serialDataList);
+    }
 
     public async Task<bool> SyncAlphadigi()
     {
@@ -168,24 +187,24 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    public async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(Guid id)
+    public async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(string ip)
     {
         try
         {
             var cameraSqlite = await _contextSqlite.Alphadigi
-                .Where(c => c.Id == id)
+                .Where(c => c.Ip == ip)
                 .Include(a => a.Area)
                 .FirstOrDefaultAsync();
             if (cameraSqlite == null)
             {
-                _logger.LogWarning($"Camera não encontrada no SQLite para o IP: {id}");
+                _logger.LogWarning($"Camera não encontrada no SQLite para o IP: {ip}");
                 throw new Exception("Camera não encontrada");
             }
             return cameraSqlite;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Erro ao obter camera para o IP: {id}");
+            _logger.LogError(ex, $"Erro ao obter camera para o IP: {ip}");
             throw;
         }
     }
@@ -238,7 +257,9 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, Camera cameraFire, IDbContextTransaction transaction)
+    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, 
+                                                                                         Camera cameraFire, 
+                                                                                         IDbContextTransaction transaction)
     {
         _logger.LogInformation($"Camera não encontrada no SQLite para o IP: {ip}. Criando nova entrada.");
 
@@ -331,6 +352,14 @@ public class AlphadigiRepository : IAlphadigiRepository
             return false;
         }
     }
-    
+
+    public async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> GetById(int id)
+    {
+        return await _contextSqlite.Alphadigi
+            .Include(a => a.Area)
+            .FirstOrDefaultAsync(a => a.Id == id);
+    }
+
+
 
 }

@@ -19,7 +19,8 @@ public class GetAreaByIdGuidQueryHandler : IRequestHandler<GetAreaByIdGuidQuery,
         _repository = repository;
     }
 
-    public async Task<Domain.EntitiesNew.Area> Handle(GetAreaByIdGuidQuery request, CancellationToken cancellationToken)
+    public async Task<Domain.EntitiesNew.Area> Handle(GetAreaByIdGuidQuery request, 
+        CancellationToken cancellationToken)
     {
         _logger.LogInformation("Buscando área por GUID: {Id}", request.Id);
 

@@ -5,7 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.MensagemDisplay;
 
-public class FindLastCamMensagemQueryHandler : IRequestHandler<FindLastCamMensagemQuery, Domain.EntitiesNew.MensagemDisplay>
+public class FindLastCamMensagemQueryHandler : IRequestHandler<FindLastCamMensagemQuery, 
+                                                               Domain.EntitiesNew.MensagemDisplay>
 {
     private readonly IMensagemDisplayRepository _repository;
     private readonly ILogger<FindLastCamMensagemQueryHandler> _logger;
@@ -18,7 +19,8 @@ public class FindLastCamMensagemQueryHandler : IRequestHandler<FindLastCamMensag
         _logger = logger;
     }
 
-    public async Task<Domain.EntitiesNew.MensagemDisplay> Handle(FindLastCamMensagemQuery request, CancellationToken cancellationToken)
+    public async Task<Domain.EntitiesNew.MensagemDisplay> Handle(FindLastCamMensagemQuery request, 
+                                                                 CancellationToken cancellationToken)
     {
         _logger.LogInformation("Buscando última mensagem da câmera: {AlphadigiId}", request.AlphadigiId);
 

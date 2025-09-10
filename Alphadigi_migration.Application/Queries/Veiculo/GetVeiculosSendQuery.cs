@@ -9,5 +9,5 @@ namespace Alphadigi_migration.Application.Queries.Veiculo;
 
 public class GetVeiculosSendQuery : IRequest<List<Domain.DTOs.Veiculos.VeiculoInfoSendAlphadigi>>
 {
-    public Guid UltimoId { get; set; }
+    public int UltimoId { get; set; }
 }

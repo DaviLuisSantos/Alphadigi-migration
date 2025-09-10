@@ -8,6 +8,6 @@ namespace Alphadigi_migration.Domain.Interfaces;
     {
         Task<bool> SaveMensagemDisplayAsync(MensagemDisplay mensagem);
         Task<MensagemDisplay> FindLastMensagemAsync(FindLastMessage termo);
-        Task<MensagemDisplay> FindLastCamMensagemAsync(Guid alphadigiId);
+        Task<MensagemDisplay> FindLastCamMensagemAsync(int alphadigiId);
     }
 

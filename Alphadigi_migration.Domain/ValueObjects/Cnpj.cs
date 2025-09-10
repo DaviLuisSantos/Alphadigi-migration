@@ -4,6 +4,7 @@ public record Cnpj
 {
     public string Numero { get; }
 
+
     private Cnpj() { }
 
     public Cnpj(string numero)

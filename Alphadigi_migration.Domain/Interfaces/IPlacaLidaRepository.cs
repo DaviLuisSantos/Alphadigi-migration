@@ -13,6 +13,8 @@ public interface IPlacaLidaRepository
     Task<bool> SavePlacaLidaAsync(PlacaLida placaLida);
     Task<bool> UpdatePlacaLidaAsync(PlacaLida placaLida);
     Task<List<PlacaLida>> GetDatePlateAsync(LogGetDatePlateDTO logPayload);
-    Task<PlacaLida> GetByIdAsync(Guid id);
+    Task<PlacaLida> GetByIdAsync(int id);
+
+    Task<PlacaLida> AddAsync(PlacaLida placaLida); 
 
 }

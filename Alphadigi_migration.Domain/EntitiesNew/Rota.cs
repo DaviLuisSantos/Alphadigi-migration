@@ -1,13 +1,21 @@
 ﻿
 
 using Alphadigi_migration.Domain.Common;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Alphadigi_migration.Domain.EntitiesNew;
 [Table("LPR_MT_ROTAS_CAM")]
 public class Rota : EntityBase, IAggregateRoot
 {
+    [Key]
+    [Column("ID")]
+    public override int Id { get; protected set; }
+
+    [Column("ID_ROTA")]
     public int RotaId { get; private set; }
+
+    [Column("ID_CAM")]
     public int CameraId { get; private set; }
 
     // Navegação para a entidade Camera (opcional, se necessário)

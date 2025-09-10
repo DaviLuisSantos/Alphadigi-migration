@@ -3,6 +3,7 @@ using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using SkiaSharp;
 
 namespace Alphadigi_migration.Infrastructure.Repositories;
 
@@ -61,8 +62,15 @@ public class PlacaLidaRepository : IPlacaLidaRepository
             .ToListAsync();
     }
 
-    public async Task<PlacaLida> GetByIdAsync(Guid id)
+    public async Task<PlacaLida> GetByIdAsync(int id)
     {
         return await _contextSqlite.PlacaLida.FindAsync(id);
+    }
+
+    public async Task<PlacaLida> AddAsync(PlacaLida placaLida)
+    {
+        _contextSqlite.PlacaLida.Add(placaLida);
+        await _contextSqlite.SaveChangesAsync();
+        return placaLida;
     }
 }

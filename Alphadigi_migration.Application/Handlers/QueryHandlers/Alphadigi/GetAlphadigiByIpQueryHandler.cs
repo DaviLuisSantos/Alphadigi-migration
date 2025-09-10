@@ -6,7 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Alphadigi;
 
-public class GetAlphadigiByIpQueryHandler : IRequestHandler<GetAlphadigiByIpQuery, Domain.EntitiesNew.Alphadigi>
+public class GetAlphadigiByIpQueryHandler : IRequestHandler<GetAlphadigiByIpQuery, 
+                                                            Domain.EntitiesNew.Alphadigi>
 {
     private readonly IAlphadigiRepository _repository;
     private readonly ILogger<GetAlphadigiByIpQueryHandler> _logger;

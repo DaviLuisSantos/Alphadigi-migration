@@ -23,11 +23,15 @@ public class AcessoRepository : IAcessoRepository
 
     public async Task<Acesso?> VerifyAntiPassbackAsync(string placa, DateTime? timestamp)
     {
-        var ultimoAcesso = await _contextFirebird.Acesso
-            .Where(a => a.Placa == placa && a.DataHora >= timestamp)
+        //var ultimoAcesso = await _contextFirebird.Acesso
+        //    .Where(a => a.Placa == placa && a.DataHora >= timestamp)
+        //    .OrderByDescending(a => a.DataHora)
+        //    .FirstOrDefaultAsync();
+
+        var ultimoAcesso = await _contextFirebird.Acesso.Where(a => a.Placa.Numero == placa 
+                                                               && a.DataHora >= timestamp)
             .OrderByDescending(a => a.DataHora)
             .FirstOrDefaultAsync();
-
         return ultimoAcesso;
     }
 }

@@ -5,7 +5,7 @@ namespace Alphadigi_migration.Application.Commands.PlacaLida;
 
 public class UpdatePlacaLidaCommand : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public bool? Liberado { get; set; }
     public string Acesso { get; set; }
     public bool? Cadastrado { get; set; }

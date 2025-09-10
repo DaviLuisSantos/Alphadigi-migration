@@ -139,7 +139,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
 
     public async Task<AddWhiteListDTO> HandleCreate(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
-        Guid ultimoId = alphadigi.UltimoId ?? Guid.Empty;
+        int ultimoId = alphadigi.UltimoId ?? 0;
         var veiculosEnvio = await _veiculoService.GetVeiculosSend(ultimoId);
 
         if (veiculosEnvio.Count == 0)
@@ -147,7 +147,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
             return null;
         }
 
-        Guid novoUltimoId = veiculosEnvio.Max(item => item.Id);
+        int novoUltimoId = veiculosEnvio.Max(item => item.Id);
         alphadigi.AtualizarUltimoId(novoUltimoId);
 
         var envio = new AddWhiteListDTO

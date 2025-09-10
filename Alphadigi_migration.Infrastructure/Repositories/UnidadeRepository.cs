@@ -19,7 +19,7 @@ public class UnidadeRepository : IUnidadeRepository
         _logger = logger;
     }
 
-    public async Task<QueryResult> GetUnidadeInfoAsync(Guid idUnidade)
+    public async Task<QueryResult> GetUnidadeInfoAsync(int idUnidade)
     {
         try
         {
@@ -30,7 +30,7 @@ public class UnidadeRepository : IUnidadeRepository
 
             var vagasOcupadas = _contextFirebird.Veiculo
                 .AsEnumerable()
-                .Where(v => v.Unidade == unidade.Nome && v.VeiculoDentro)
+                .Where(v => v.Unidade == unidade.Nome && v.VeiculoDentro == 0)
                 .Count();
 
             var retorno = new QueryResult
@@ -49,7 +49,7 @@ public class UnidadeRepository : IUnidadeRepository
         }
     }
 
-    public async Task<Unidade> GetByIdAsync(Guid id)
+    public async Task<Unidade> GetByIdAsync(int id)
     {
         return await _contextFirebird.Unidade.FindAsync(id);
     }

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Camera;
 
-public class CreateCameraCommandHandler : IRequestHandler<CreateCameraCommand, Guid>
+public class CreateCameraCommandHandler : IRequestHandler<CreateCameraCommand, bool>
 {
     private readonly ICameraRepository _repository;
     private readonly ILogger<CreateCameraCommandHandler> _logger;
@@ -18,7 +18,7 @@ public class CreateCameraCommandHandler : IRequestHandler<CreateCameraCommand, G
         _logger = logger;
     }
 
-    public async Task<Guid> Handle(CreateCameraCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(CreateCameraCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Criando nova câmera: {Nome} ({Ip})", request.Nome, request.Ip);
 

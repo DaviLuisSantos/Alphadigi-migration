@@ -1,4 +1,4 @@
-﻿using Alphadigi_migration.Application.Commands.Alphadigi;
+﻿using Alphadigi_migration.Application.Commands.Acesso;
 using Alphadigi_migration.Application.Commands.Veiculo;
 using Alphadigi_migration.Application.Queries.Veiculo;
 using MediatR;
@@ -47,20 +47,31 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             // 2. Verificar unidade
             if (!string.IsNullOrEmpty(veiculoExistente.Unidade))
             {
-                var unidadeQuery = new GetUnidadeByIdQuery { UnidadeId = veiculoExistente.Unidade };
-                var unidade = await _mediator.Send(unidadeQuery, cancellationToken);
+                _logger.LogInformation("Convertendo Unidade ID: {UnidadeString} para int", veiculoExistente.Unidade);
 
-                if (unidade == null)
+                if (int.TryParse(veiculoExistente.Unidade, out int unidadeId) && unidadeId > 0)
                 {
-                    _logger.LogWarning($"Unidade {veiculoExistente.Unidade} não encontrada para veículo {veiculo.Placa}");
-                    return (false, "ACESSO NEGADO - UNIDADE INVÁLIDA");
+                    // ✅ CORRETO: Passando int convertido
+                    var unidadeQuery = new GetUnidadeByIdQuery { UnidadeId = unidadeId };
+                    var unidade = await _mediator.Send(unidadeQuery, cancellationToken);
+
+                    if (unidade == null)
+                    {
+                        _logger.LogWarning("Unidade {UnidadeId} não encontrada para veículo {Placa}", unidadeId, veiculo.Placa);
+                        return (false, "ACESSO NEGADO - UNIDADE INVÁLIDA");
+                    }
+
+                    // 3. Verificar se unidade está ativa
+                    //if (!unidade.EstaAtiva())
+                    //{
+                    //    _logger.LogInformation("Unidade {UnidadeId} inativa. Acesso NEGADO.", unidadeId);
+                    //    return (false, "ACESSO NEGADO - UNIDADE INATIVA");
+                    //}
                 }
-
-                // 3. Verificar se unidade está ativa
-                if (!unidade.EstaAtiva())
+                else
                 {
-                    _logger.LogInformation($"Unidade {veiculoExistente.Unidade} inativa. Acesso NEGADO.");
-                    return (false, "ACESSO NEGADO - UNIDADE INATIVA");
+                    _logger.LogWarning("ID da unidade inválido: {UnidadeString}", veiculoExistente.Unidade);
+                    return (false, "ACESSO NEGADO - UNIDADE INVÁLIDA");
                 }
             }
 
@@ -82,7 +93,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             // 5. Determinar acesso baseado na direção da câmera
             if (alphadigi.Sentido) // Entrada
             {
-                if (veiculoExistente.VeiculoDentro)
+                if (veiculoExistente.VeiculoDentro > 1)
                 {
                     _logger.LogInformation($"Veículo {veiculo.Placa} já está dentro. Acesso NEGADO.");
                     return (false, "ACESSO NEGADO - JÁ ESTÁ DENTRO");
@@ -100,7 +111,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             }
             else // Saída
             {
-                if (!veiculoExistente.VeiculoDentro)
+                if (veiculoExistente.VeiculoDentro > 0)
                 {
                     _logger.LogInformation($"Veículo {veiculo.Placa} não está dentro. Acesso NEGADO.");
                     return (false, "ACESSO NEGADO - NÃO ESTÁ DENTRO");

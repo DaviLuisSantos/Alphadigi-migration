@@ -41,8 +41,8 @@ namespace Alphadigi_migration.Api.Controllers
         }
 
         // PUT: api/camera/update
-        [HttpPut("update")]
-        public async Task<IActionResult> Update([FromBody]Guid id,  UpdateCameraDTO cameraDto)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute]int id,  UpdateCameraDTO cameraDto)
         {
             var result = await _mediator.Send(new UpdateCameraCommand(id, cameraDto));
 
@@ -51,7 +51,7 @@ namespace Alphadigi_migration.Api.Controllers
 
         // DELETE: api/camera/delete/5
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(int id)
         {
             var result = await _mediator.Send(new DeleteCameraCommand(id));
             return result ? Ok() : StatusCode(500, "Erro ao deletar");

@@ -1,4 +1,6 @@
 using Alphadigi_migration.Api.Factories;
+using Alphadigi_migration.Application.Handlers.CommandHandlers.Acesso;
+using Alphadigi_migration.Application.Handlers.CommandHandlers.Veiculo;
 using Alphadigi_migration.Application.Mapping;
 using Alphadigi_migration.Application.Queries.Veiculo;
 using Alphadigi_migration.Application.Service;
@@ -102,7 +104,9 @@ public static class ServiceCollectionExtensions
             cfg.RegisterServicesFromAssembly(Assembly.Load("Alphadigi_migration.Application"));
         });
 
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetVeiculosQuery).Assembly));
+      
+
+       
 
         return services;
     }

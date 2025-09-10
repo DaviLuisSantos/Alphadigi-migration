@@ -10,7 +10,7 @@ namespace Alphadigi_migration.Domain.Interfaces;
 
 public interface IUnidadeRepository
 {
-    Task<QueryResult> GetUnidadeInfoAsync(Guid idUnidade);
-    Task<Unidade> GetByIdAsync(Guid id);
+    Task<QueryResult> GetUnidadeInfoAsync(int idUnidade);
+    Task<Unidade> GetByIdAsync(int id);
     
 }

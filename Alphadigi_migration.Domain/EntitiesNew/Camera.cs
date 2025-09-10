@@ -1,6 +1,7 @@
 ﻿using Alphadigi_migration.Domain.Common;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Events;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
@@ -10,15 +11,35 @@ namespace Alphadigi_migration.Domain.EntitiesNew;
 public class Camera : EntityBase, IAggregateRoot
 {
     // Propriedades
+    [Key]
+    [Column("ID")]
+    public override int Id { get; protected set; }
+
+    [Column("LOCAL")]
     public string Nome { get; private set; }
+
+    [Column("IP")]
     public string Ip { get; private set; }
+
+    [Column("MODELO")]
     public string Modelo { get; private set; }
+
+    [Column("DIRECAO")]
     public string Direcao { get; private set; }
+
+    [Column("ID_AREA")]
     public int IdArea { get; private set; }
     public Area Area { get; private set; }
-    public bool FotoEvento { get; private set; }
+
+    [Column("FOTO_EVENTO")]
+    public bool? FotoEvento { get; private set; } = false;
+
+    [NotMapped]
     public DateTime DataCriacao { get; private set; }
+    [NotMapped]
     public DateTime? DataAtualizacao { get; private set; }
+
+    [NotMapped]
     public bool Ativa { get; private set; }
 
     // Construtores
@@ -153,7 +174,7 @@ public class Camera : EntityBase, IAggregateRoot
 
     // Métodos de consulta
     public bool EstaAtiva() => Ativa;
-    public bool CapturaFotoEvento() => FotoEvento;
+    public bool? CapturaFotoEvento() => FotoEvento;
     public string ObterLocalizacao() => Area?.Nome ?? "Área não especificada";
 
     public override string ToString()

@@ -12,7 +12,8 @@ public class GetNewCondominioQueryHandler : IRequestHandler<GetNewCondominioQuer
     private readonly ICondominioRepository _repository;
     private readonly ILogger<GetNewCondominioQueryHandler> _logger;
 
-    public GetNewCondominioQueryHandler(ICondominioRepository repository, ILogger<GetNewCondominioQueryHandler> logger)
+    public GetNewCondominioQueryHandler(ICondominioRepository repository, 
+                                        ILogger<GetNewCondominioQueryHandler> logger)
     {
         _repository = repository;
         _logger = logger;

@@ -45,7 +45,7 @@ public class SaidaSempreAbreAccessHandler : IAccessHandler
         try
         {
             string acesso = "NÃO CADASTRADO";
-            if (veiculo != null && veiculo.Id != Guid.Empty)
+            if (veiculo != null && veiculo.Id != null)
             {
                 _logger.LogInformation($"Aprovando saída do veículo cadastrado com ID {veiculo.Id}.");
                 await _veiculoService.UpdateVagaVeiculo(veiculo.Id, false);
@@ -104,7 +104,7 @@ public class ControlaVagaAccessHandler : IAccessHandler
                 if (veiculo != null && veiculo.UnidadeNavigation != null)
                 {
                     var vagas = await _unidadeService.GetUnidadeInfo(veiculo.UnidadeNavigation.Id);
-                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || veiculo.VeiculoDentro))
+                    if (vagas != null && (vagas.NumVagas > vagas.VagasOcupadasMoradores || vagas.NumVagas > veiculo.VeiculoDentro))
                     {
                         await _veiculoService.UpdateVagaVeiculo(veiculo.Id, true);
                         _logger.LogInformation($"Concedendo acesso e ocupando vaga para veículo com ID {veiculo.Id}.");

@@ -14,6 +14,8 @@ public interface IVeiculoService
     Task<bool> UpdateVagaVeiculo(int id, bool dentro);
     Task<bool> UpdateLastAccess(Domain.DTOs.Veiculos.LastAcessUpdateVeiculoDTO lastAccess);
     string PrepareVeiculoDataString(Veiculo veiculo);
+
+    
 }
 
 public class VeiculoService : IVeiculoService
@@ -71,6 +73,6 @@ public class VeiculoService : IVeiculoService
         }
         return $"{veiculo.Modelo} - {veiculo.Marca} - {veiculo.Cor}";
     }
-
   
+
 }

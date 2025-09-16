@@ -2,6 +2,7 @@
 using Alphadigi_migration.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Numerics;
 
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.PlacaLida;
 
@@ -33,6 +34,7 @@ public class CreatePlacaLidaCommandHandler : IRequestHandler<CreatePlacaLidaComm
             throw new ArgumentException("Placa não pode ser nula ou vazia");
         }
 
+
         var placaLida = new Domain.EntitiesNew.PlacaLida
         (
             alphadigiId: request.AlphadigiId,
@@ -45,6 +47,7 @@ public class CreatePlacaLidaCommandHandler : IRequestHandler<CreatePlacaLidaComm
             liberado :false,
             processado: false
         );
+        _logger.LogInformation("Registro de placa lida criado com sucesso para a placa: {Placa}", request.Placa);
 
         return await _repository.AddAsync(placaLida);
     }

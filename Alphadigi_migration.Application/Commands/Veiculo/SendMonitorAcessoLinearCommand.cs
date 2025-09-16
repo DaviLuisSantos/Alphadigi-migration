@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Alphadigi_migration.Domain.DTOs.Veiculos;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,8 @@ namespace Alphadigi_migration.Application.Commands.Veiculo;
 
 public class SendMonitorAcessoLinearCommand : IRequest<bool>
 {
-    public Domain.EntitiesNew.Veiculo Veiculo { get; set; }
+    public DadosVeiculoMonitorDTO DadosVeiculo { get; set; }
     public string IpCamera { get; set; }
     public string Acesso { get; set; }
     public DateTime Timestamp { get; set; }
-
 }

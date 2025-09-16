@@ -30,7 +30,7 @@ public class MensagemDisplayRepository :IMensagemDisplayRepository
             var placaString = placa;
 
             var mensagemDisplay = await _contextSqlite.MensagemDisplay
-                .Where(x => x.Placa.Numero == placa)
+                .Where(x => x.Placa == placa)
 
            
             .Where(x => x.Mensagem == mensagem)

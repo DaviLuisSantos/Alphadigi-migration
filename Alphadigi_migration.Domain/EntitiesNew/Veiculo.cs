@@ -17,7 +17,7 @@ public class Veiculo : EntityBase, IAggregateRoot
     [Column("UNIDADE")]
     public string Unidade { get; private set; }
 
-    [Column("PLACA")]
+   
     public PlacaVeiculo Placa { get; private set; }
 
     [ForeignKey("Unidade")]
@@ -87,29 +87,40 @@ public class Veiculo : EntityBase, IAggregateRoot
         AddDomainEvent(new VeiculoAtualizadoEvent(Id, Placa.Numero));
     }
 
-  
+    public static Veiculo CreateUnregistered(string placa)
+    {
+        
+        return new Veiculo(
+            placa: placa,
+            unidade: "SEM UNIDADE",
+            marca: "NAO CADASTRADO",
+            modelo: "NAO CADASTRADO",
+            cor: "NAO CADASTRADO"
+        );
+    }
+
 
     public void RegistrarAcesso(string ipCamera, DateTime dataHoraAcesso)
     {
-        ValidarIpCamera(ipCamera);
+        //ValidarIpCamera(ipCamera);
 
-        IpCamUltAcesso = ipCamera;
-        DataHoraUltAcesso = dataHoraAcesso;
-     
+        //IpCamUltAcesso = ipCamera;
+        //DataHoraUltAcesso = dataHoraAcesso;
 
-        AddDomainEvent(new VeiculoAcessoRegistradoEvent(Id, Placa.Numero, ipCamera, dataHoraAcesso));
+
+        //AddDomainEvent(new VeiculoAcessoRegistradoEvent(Id, Placa.Numero, ipCamera, dataHoraAcesso));
     }
 
     public void EntrarCondominio(string ipCamera)
     {
-        ValidarIpCamera(ipCamera);
+        //ValidarIpCamera(ipCamera);
 
-        VeiculoDentro = null;
-        IpCamUltAcesso = ipCamera;
-        DataHoraUltAcesso = DateTime.UtcNow;
+        //VeiculoDentro = null;
+        //IpCamUltAcesso = ipCamera;
+        //DataHoraUltAcesso = DateTime.UtcNow;
        
 
-        AddDomainEvent(new VeiculoEntrouEvent(Id, Placa.Numero, ipCamera));
+        //AddDomainEvent(new VeiculoEntrouEvent(Id, Placa.Numero, ipCamera));
     }
 
     public void SairCondominio(string ipCamera)

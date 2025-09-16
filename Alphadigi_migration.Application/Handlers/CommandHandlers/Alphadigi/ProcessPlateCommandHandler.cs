@@ -1,11 +1,13 @@
-﻿using Alphadigi_migration.Application.Commands.Alphadigi;
+﻿using Alphadigi_migration.Application.Commands.Acesso;
+using Alphadigi_migration.Application.Commands.Alphadigi;
+using Alphadigi_migration.Application.Commands.Display;
 using Alphadigi_migration.Application.Commands.PlacaLida;
+using Alphadigi_migration.Application.Commands.Veiculo;
 using Alphadigi_migration.Application.Queries.Alphadigi;
 using Alphadigi_migration.Application.Queries.Veiculo;
-using Alphadigi_migration.Domain.EntitiesNew;
+using Alphadigi_migration.Domain.DTOs.Veiculos;
 using MediatR;
 using Microsoft.Extensions.Logging;
-
 
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Alphadigi;
 
@@ -14,8 +16,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
     private readonly IMediator _mediator;
     private readonly ILogger<ProcessPlateCommandHandler> _logger;
 
-    public ProcessPlateCommandHandler(IMediator mediator, 
-                                      ILogger<ProcessPlateCommandHandler> logger)
+    public ProcessPlateCommandHandler(IMediator mediator, ILogger<ProcessPlateCommandHandler> logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -23,31 +24,21 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
 
     public async Task<object> Handle(ProcessPlateCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Início do processamento da placa: {Plate}, IP da câmera: {Ip}", request.Plate, request.Ip);
         try
         {
-            _logger.LogInformation("Plate value: '{Plate}'", request.Plate);
-            _logger.LogInformation("Plate is null: {IsNull}", request.Plate == null);
             DateTime timeStamp = DateTime.Now;
-            _logger.LogInformation("Placa recebida: {Plate} Camera: {Ip}", request.Plate, request.Ip);
 
-            // Buscar ou criar câmera
+            // 1. Buscar câmera. Se não existir, abortar.
             var camera = await _mediator.Send(new GetOrCreateAlphadigiQuery { Ip = request.Ip });
-
             if (camera == null)
             {
-                _logger.LogError("Câmera não encontrada para o IP {Ip}.", request.Ip);
+                _logger.LogError("Câmera não encontrada para o IP {Ip}. Abortando.", request.Ip);
                 throw new Exception("Camera não encontrada");
             }
 
-            // Atualizar configuração do display se necessário
-            if (camera.LinhasDisplay != 0 && request.Modelo == "TOTEM")
-            {
-                camera.AtualizarUltimoId(0);
-                await _mediator.Send(new UpdateAlphadigiEntityCommand { Alphadigi = camera });
-            }
-
-            // Registrar placa lida
-            var logCommand = new CreatePlacaLidaCommand
+            // 2. Registrar a leitura da placa.
+            var log = await _mediator.Send(new CreatePlacaLidaCommand
             {
                 AlphadigiId = camera.Id,
                 Placa = request.Plate,
@@ -55,43 +46,56 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 AreaId = camera.AreaId,
                 PlacaImg = request.PlateImage,
                 CarroImg = request.CarImage
-            };
-            var log = await _mediator.Send(logCommand);
+            });
+            _logger.LogInformation("Placa lida registrada com ID: {LogId}", log.Id);
 
-            // Verificar veículo
-            var veiculoQuery = new GetVeiculoByPlateQuery { Plate = request.Plate, 
-                                                            MinMatchingCharacters = 7 };
-
-
-            var veiculoExistente = await _mediator.Send(veiculoQuery, cancellationToken);
-
-            bool veiculoCadastrado = veiculoExistente != null;
-            if (!veiculoCadastrado)
+            // 3. Buscar veículo. Se não encontrar, criar um temporário.
+           
+            
+            var veiculo = await _mediator.Send(new GetVeiculoByPlateQuery { Plate = request.Plate, MinMatchingCharacters = 7 });
+            if (veiculo == null)
             {
-                veiculoExistente = new Domain.EntitiesNew.Veiculo(
-                    placa: request.Plate,
-                    unidade: "TEMPORARIA",
-                    marca: "NAO_CADASTRADO",
-                    modelo: "NAO_CADASTRADO",
-                    cor: "NAO_CADASTRADO"
-                );
+                veiculo = new Domain.EntitiesNew.Veiculo(request.Plate, "SEM UNIDADE", "NAO CADASTRADO", "NAO CADASTRADO", "NAO CADASTRADO");
+                _logger.LogInformation($"Veículo não cadastrado. Criado temporariamente para placa: {veiculo.Placa}");
             }
+            //if (veiculo == null)
+            //{
+            //    _logger.LogInformation($"Veículo não cadastrado encontrado. Criado temporariamente para placa: {request.Plate}");
 
-            // Processar acesso do veículo
-            var accessCommand = new SendVeiculoAccessProcessorCommand
+            
+            //   veiculo = Domain.EntitiesNew.Veiculo.CreateUnregistered(request.Plate);
+            //}
+
+            // 4. Processar o acesso e obter o resultado.
+            var accessResult = await _mediator.Send(new ProcessVeiculoAccessCommand
             {
-                Veiculo = veiculoExistente,
+                Veiculo = veiculo,
                 Alphadigi = camera,
                 Timestamp = timeStamp,
-                Log = log,
-                Imagem = request.CarImage
-            };
-            var accessResult = await _mediator.Send(accessCommand);
+                //Log = log,
+               // Imagem = request.CarImage
+            });
 
-            _logger.LogInformation("Acesso do veículo com a placa {Plate} com resultado {ShouldReturn}",
-                request.Plate, accessResult.ShouldReturn);
+            // 5. Se o acesso for liberado, salve-o.
+            if (accessResult.ShouldReturn)
+            {
+                _logger.LogInformation("✅ Acesso LIBERADO para veículo {Plate}", request.Plate);
+                await _mediator.Send(new SaveVeiculoAcessoCommand
+                {
+                    Veiculo = veiculo,
+                    Alphadigi = camera,
+                    Timestamp = timeStamp,
+                    Imagem = request.CarImage
+                });
+                _logger.LogInformation("Acesso salvo para veículo {Plate}", request.Plate);
+            }
+            else
+            {
+                _logger.LogInformation("❌ Acesso NEGADO para veículo {Plate}. Motivo: {Acesso}", request.Plate, accessResult.Acesso);
+            }
 
-            // Atualizar placa lida com resultado do acesso
+            // 6. Atualize o log da placa lida e envie para o display e monitor,
+            //    independentemente do resultado do acesso.
             await _mediator.Send(new UpdatePlacaLidaAcessoCommand
             {
                 PlacaLidaId = log.Id,
@@ -99,42 +103,46 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 Acesso = accessResult.Acesso
             });
 
-            // Criar pacote para display
-            var displayQuery = new SendCreatePackageDisplayQuery
+            await _mediator.Send(new SendToDisplayCommand
             {
-                Veiculo = veiculoExistente,
+                Placa = request.Plate,
                 Acesso = accessResult.Acesso,
-                Alphadigi = camera
-            };
-            var messageDisplay = await _mediator.Send(displayQuery);
+                Liberado = accessResult.ShouldReturn,
+                Alphadigi = camera,
+                Veiculo = veiculo
+            });
 
-            // CORREÇÃO: Remover o loop infinito e retornar objeto apropriado
-            if (log.Processado)
+            var dadosVeiculoDTO = new DadosVeiculoMonitorDTO
             {
-                var returnQuery = new HandleReturnQuery
-                {
-                    Placa = veiculoExistente.Placa,
-                    Acesso = accessResult.Acesso,
-                    Liberado = accessResult.ShouldReturn,
-                    MessageData = messageDisplay
-                };
-                return await _mediator.Send(returnQuery);
-            }
+                Placa = veiculo.Placa.Numero,
+                Unidade = veiculo.Unidade, 
+                Ip = request.Ip,
+                Acesso = accessResult.Acesso,
+                HoraAcesso = timeStamp
+            };
 
-            // Retornar resultado do processamento
+            await _mediator.Send(new SendMonitorAcessoLinearCommand
+            {
+                DadosVeiculo = dadosVeiculoDTO,
+                 IpCamera = request.Ip, 
+                Acesso = accessResult.Acesso, 
+                Timestamp = timeStamp 
+            });
+          
+
+            _logger.LogInformation(" DADOS ENVIADOS PARA MONITOR ACESSO LINEAR.");
+
             return new
             {
                 Placa = request.Plate,
                 Liberado = accessResult.ShouldReturn,
                 Acesso = accessResult.Acesso,
-                MensagemDisplay = messageDisplay
             };
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Erro em ProcessPlate.");
+            _logger.LogError(e, "Erro em ProcessPlate. Abortando.");
             throw;
         }
     }
 }
-

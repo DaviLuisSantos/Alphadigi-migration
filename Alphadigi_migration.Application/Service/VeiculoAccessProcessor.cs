@@ -54,7 +54,7 @@ public class VeiculoAccessProcessor : IVeiculoAccessProcessor
     {
         var monitorAcesso = new DadosVeiculoMonitorDTO
         {
-            Veiculo = veiculo,
+            Placa = veiculo.Placa,
             Ip = ipCamera,
             Acesso = acesso,
             HoraAcesso = timestamp

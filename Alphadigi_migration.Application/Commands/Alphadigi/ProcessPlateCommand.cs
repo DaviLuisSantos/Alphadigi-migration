@@ -13,6 +13,8 @@ public class ProcessPlateCommand : IRequest<Object>
     public string CarImage { get; set; }
     public string PlateImage { get; set; }
     public string Modelo { get; set; }
+
+
     public ProcessPlateCommand(
         string ip,
         string plate,

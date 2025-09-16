@@ -1,6 +1,8 @@
 ﻿using Alphadigi_migration.Application.Commands.Acesso;
 using Alphadigi_migration.Application.Commands.Veiculo;
+using Alphadigi_migration.Application.Queries.Unidade;
 using Alphadigi_migration.Application.Queries.Veiculo;
+using Alphadigi_migration.Domain.DTOs.Veiculos;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +22,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
         _logger = logger;
     }
 
-    public async Task<(bool ShouldReturn, string Acesso)> Handle(ProcessVeiculoAccessCommand request, 
+    public async Task<(bool ShouldReturn, string Acesso)> Handle(ProcessVeiculoAccessCommand request,
                                                           CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Iniciando ProcessVeiculoAccessAsync para veículo: {request.Veiculo.Placa}");
@@ -44,38 +46,18 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 return (false, "ACESSO NEGADO - VEÍCULO NÃO CADASTRADO");
             }
 
-            // 2. Verificar unidade
-            if (!string.IsNullOrEmpty(veiculoExistente.Unidade))
+            // 2. Buscar unidade pelo nome/código, sem conversão para int
+            var unidade = await _mediator.Send(new GetUnidadeByNomeQuery(veiculoExistente.Unidade), cancellationToken);
+            if (unidade == null)
             {
-                _logger.LogInformation("Convertendo Unidade ID: {UnidadeString} para int", veiculoExistente.Unidade);
-
-                if (int.TryParse(veiculoExistente.Unidade, out int unidadeId) && unidadeId > 0)
-                {
-                    // ✅ CORRETO: Passando int convertido
-                    var unidadeQuery = new GetUnidadeByIdQuery { UnidadeId = unidadeId };
-                    var unidade = await _mediator.Send(unidadeQuery, cancellationToken);
-
-                    if (unidade == null)
-                    {
-                        _logger.LogWarning("Unidade {UnidadeId} não encontrada para veículo {Placa}", unidadeId, veiculo.Placa);
-                        return (false, "ACESSO NEGADO - UNIDADE INVÁLIDA");
-                    }
-
-                    // 3. Verificar se unidade está ativa
-                    //if (!unidade.EstaAtiva())
-                    //{
-                    //    _logger.LogInformation("Unidade {UnidadeId} inativa. Acesso NEGADO.", unidadeId);
-                    //    return (false, "ACESSO NEGADO - UNIDADE INATIVA");
-                    //}
-                }
-                else
-                {
-                    _logger.LogWarning("ID da unidade inválido: {UnidadeString}", veiculoExistente.Unidade);
-                    return (false, "ACESSO NEGADO - UNIDADE INVÁLIDA");
-                }
+                _logger.LogWarning("Unidade {UnidadeNome} não encontrada para veículo {Placa}", veiculoExistente.Unidade, veiculo.Placa);
+                return (false, "ACESSO NEGADO - UNIDADE INVÁLIDA");
             }
 
-            // 4. Verificar antipassback
+            string unidadeNome = unidade.Nome;
+            _logger.LogInformation("Unidade encontrada: {Nome}", unidade.Nome);
+
+            // 3. Verificar antipassback
             var antipassbackCommand = new VerifyAntiPassbackCommand
             {
                 Veiculo = veiculoExistente,
@@ -90,7 +72,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 return (false, "ACESSO NEGADO - ANTIPASSBACK");
             }
 
-            // 5. Determinar acesso baseado na direção da câmera
+            // 4. Determinar acesso baseado na direção da câmera
             if (alphadigi.Sentido) // Entrada
             {
                 if (veiculoExistente.VeiculoDentro > 1)
@@ -102,7 +84,6 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 acesso = "LIBERADO - ENTRADA";
                 shouldReturn = true;
 
-                // Marcar veículo como dentro
                 await _mediator.Send(new UpdateVagaVeiculoCommand
                 {
                     Id = veiculoExistente.Id,
@@ -111,7 +92,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             }
             else // Saída
             {
-                if (veiculoExistente.VeiculoDentro > 0)
+                if (veiculoExistente.VeiculoDentro <= 0)
                 {
                     _logger.LogInformation($"Veículo {veiculo.Placa} não está dentro. Acesso NEGADO.");
                     return (false, "ACESSO NEGADO - NÃO ESTÁ DENTRO");
@@ -120,7 +101,6 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 acesso = "LIBERADO - SAÍDA";
                 shouldReturn = true;
 
-                // Marcar veículo como fora
                 await _mediator.Send(new UpdateVagaVeiculoCommand
                 {
                     Id = veiculoExistente.Id,
@@ -128,7 +108,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 }, cancellationToken);
             }
 
-            // 6. Atualizar último acesso
+            // 5. Atualizar último acesso
             await _mediator.Send(new UpdateLastAccessCommand
             {
                 IdVeiculo = veiculoExistente.Id,
@@ -136,10 +116,19 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 DataHoraAcesso = timestamp
             }, cancellationToken);
 
-            // 7. Enviar para monitor linear
+            // 6. Preparar dados para monitor
+            var dadosMonitor = new DadosVeiculoMonitorDTO
+            {
+                Placa = veiculoExistente.Placa,
+                Unidade = unidadeNome,
+                Ip = alphadigi.Ip,
+                Acesso = acesso,
+                HoraAcesso = timestamp
+            };
+
             var monitorCommand = new SendMonitorAcessoLinearCommand
             {
-                Veiculo = veiculoExistente,
+                DadosVeiculo = dadosMonitor,
                 IpCamera = alphadigi.Ip,
                 Acesso = acesso,
                 Timestamp = timestamp
@@ -155,5 +144,6 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             return (false, "ERRO NO PROCESSAMENTO");
         }
     }
+
 }
-    
+

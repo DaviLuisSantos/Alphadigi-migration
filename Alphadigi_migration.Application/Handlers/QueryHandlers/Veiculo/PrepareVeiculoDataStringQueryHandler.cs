@@ -24,8 +24,17 @@ public class PrepareVeiculoDataStringQueryHandler : IRequestHandler<PrepareVeicu
                 _logger.LogWarning("Veículo é nulo na query PrepareVeiculoDataStringQuery");
                 return Task.FromResult("VEÍCULO NÃO ENCONTRADO");
             }
+            _logger.LogInformation("📊 Dados do veículo - Modelo: {Modelo}, Cor: {Cor}, Proprietário: {Proprietario}",
+            request.Veiculo.Modelo ?? "NULL",
+              request.Veiculo.Placa ?? "NULL",
+             request.Veiculo.Unidade ?? "NULL");
 
             // Formatar os dados do veículo em uma string
+            _logger.LogInformation("Dados do veículo - Modelo: {Modelo}, Cor: {Cor}, Proprietário: {Proprietario}",
+              request.Veiculo.Modelo,
+                 request.Veiculo.Placa,
+                request.Veiculo.Unidade);
+
             var dataString = $"{request.Veiculo.Placa} | " +
                         $"{request.Veiculo.Modelo ?? "N/A"} | " +
                         $"{request.Veiculo.Cor ?? "N/A"} | " +

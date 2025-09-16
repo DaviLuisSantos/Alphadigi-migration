@@ -21,6 +21,7 @@ namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Display
 
         public async Task<List<SerialData>> Handle(RecieveMessageAlphadigiQuery request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("INICIANDO RecieveMessageAlphadigiQuery - Linha1: {Linha1}", request.Linha1);
             try
             {
                 _logger.LogInformation("Processando mensagem Alphadigi: {Linha1} para dispositivo: {AlphadigiId}",
@@ -31,6 +32,7 @@ namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Display
                     _logger.LogWarning("Linha1 está vazia na mensagem Alphadigi");
                     return new List<SerialData>();
                 }
+                _logger.LogInformation("Criando SerialData...");
 
                 if (request.Alphadigi == null)
                 {
@@ -41,7 +43,8 @@ namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Display
                 // Processar a mensagem usando o repositório
                 var serialDataList = await _alphadigiRepository.ProcessReceivedMessageAsync(
                     request.Linha1,
-                    request.Alphadigi.Ip);
+                    request.Alphadigi.Ip
+                    );
 
                 _logger.LogInformation("Mensagem processada com sucesso. {Count} itens de serial data retornados",
                     serialDataList?.Count ?? 0);

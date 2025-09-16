@@ -1,84 +1,118 @@
 ﻿using Alphadigi_migration.Domain.DTOs.MonitorAcessoLinear;
 using Alphadigi_migration.Domain.DTOs.Veiculos;
+using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Service;
 
 public class MonitorAcessoLinear : IMonitorAcessoLinear
 {
     private readonly IVeiculoService _veiculoService;
-    private readonly UdpBroadcastService _udpBroadcastService;
+    private readonly IUdpBroadcastService _udpBroadcastService;
     private readonly IUnidadeService _unidadeService;
+    private readonly ILogger<MonitorAcessoLinear> _logger;
 
-    public MonitorAcessoLinear(IVeiculoService veiculoService, 
-                               UdpBroadcastService udpBroadcast, 
-                               IUnidadeService unidade)
+    public MonitorAcessoLinear(
+        IVeiculoService veiculoService,
+        IUdpBroadcastService udpBroadcastService,
+        IUnidadeService unidadeService,
+        ILogger<MonitorAcessoLinear> logger)
     {
         _veiculoService = veiculoService;
-        _udpBroadcastService = udpBroadcast;
-        _unidadeService = unidade;
+        _udpBroadcastService = udpBroadcastService;
+        _unidadeService = unidadeService;
+        _logger = logger;
     }
 
-    public async Task<bool> DadosVeiculo(Domain.DTOs.Veiculos.DadosVeiculoMonitorDTO dados)
+    public async Task<bool> DadosVeiculo(DadosVeiculoMonitorDTO dados)
     {
-        var dadosVeiculo = _veiculoService.PrepareVeiculoDataString(dados.Veiculo);
-        string ipCamera, acesso, unidade,vagas;
-        ipCamera = dados.Ip;
-        acesso = dados.Acesso;
-        unidade = dados.Veiculo.UnidadeNavigation?.Nome != null ? dados.Veiculo.UnidadeNavigation.Nome : "NÃO CADASTRADO";
-        
-
-        if (unidade == "NÃO CADASTRADO")
+        try
         {
-            vagas = "NÃO CADASTRADO";
+            _logger.LogInformation("Processando dados do veículo para monitor: {Placa}", dados.Placa);
+
+            // 1️⃣ Preparar dados do veículo
+            string dadosVeiculoStr = $"{dados.Placa} | {dados.Modelo} | {dados.Cor} | {dados.Unidade}";
+            string acesso = dados.Acesso;
+            string ip = dados.Ip;
+
+            // 2️⃣ Obter unidade e vagas
+            string unidade = await ObterUnidade(dados.Unidade);
+            string vagas = await ObterVagas(dados.Unidade);
+
+            // 3️⃣ Enviar DTO de dados do veículo
+            await SendDadosVeiculo(dadosVeiculoStr, acesso, ip, vagas);
+
+            // 4️⃣ Enviar DTO de lista de veículos
+            await SendListaVeiculo(dadosVeiculoStr, dados.Placa, dados.HoraAcesso, acesso, unidade, ip);
+
+            _logger.LogInformation("Dados enviados para monitor com sucesso");
+            return true;
         }
-        else
+        catch (Exception ex)
         {
-            var vagasTotal = await _unidadeService.GetUnidadeInfo(dados.Veiculo.UnidadeNavigation.Id);
-
-            vagas = $"{vagasTotal.VagasOcupadasMoradores} / {vagasTotal.NumVagas}"; 
+            _logger.LogError(ex, "Erro ao processar dados do veículo para monitor");
+            return false;
         }
-
-        await SendDadosVeiculo(dadosVeiculo, acesso, ipCamera, vagas);
-
-        await sendListaVeiculo(dadosVeiculo, dados.Veiculo.Placa, dados.HoraAcesso, acesso, unidade, ipCamera);
-
-        return true;
     }
 
-    private async Task<bool> SendDadosVeiculo(string veiculo, string acesso, string ip, string vagas)
+    private async Task<string> ObterUnidade(string unidade)
+    {
+        if (string.IsNullOrEmpty(unidade) || unidade.Equals("SEM UNIDADE", StringComparison.OrdinalIgnoreCase))
+            return "NÃO CADASTRADO";
+
+        return unidade;
+    }
+
+    private async Task<string> ObterVagas(string unidade)
+    {
+        if (unidade == "NÃO CADASTRADO") return "NÃO CADASTRADO";
+
+        try
+        {
+            var unidadeEntidade = await _unidadeService.GetUnidadeByNome(unidade);
+            if (unidadeEntidade == null) return "ERRO";
+
+            var vagasTotal = await _unidadeService.GetUnidadeInfo(unidadeEntidade.Id);
+            return $"{vagasTotal.VagasOcupadasMoradores} / {vagasTotal.NumVagas}";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao obter informações de vagas da unidade");
+            return "ERRO";
+        }
+    }
+
+    private async Task SendDadosVeiculo(string dadosVeiculo, string acesso, string ip, string vagas)
     {
         var envioUdp = new UdpDadosVeiculoMonitorDTO
         {
+            DadosVeiculo = dadosVeiculo,
+            Obs = acesso,
             TotalVagas = vagas,
             CorAviso = MonitorColor(acesso),
-            AvisoVisible = true,
-            DadosVeiculo = veiculo,
-            Obs = acesso
+            AvisoVisible = true
         };
+
         await _udpBroadcastService.SendAsync(envioUdp, ip, true);
-        return true;
     }
 
-    private async Task<bool> sendListaVeiculo(string dadosVeiculo, string placa, DateTime HoraAcesso, string acesso, string nomeUnidade, string ip)
+    private async Task SendListaVeiculo(string dadosVeiculo, string placa, DateTime horaAcesso, string acesso, string unidade, string ip)
     {
-        string hora = HoraAcesso.ToString("HH:mm:ss");
-
         var envioUdp = new UdpListaVeiculoMonitorDTO
         {
             DadosVeiculo = dadosVeiculo,
             Placa = placa,
-            DataHora = hora,
+            DataHora = horaAcesso.ToString("HH:mm:ss"),
             Obs = acesso,
-            Unidade = nomeUnidade,
+            Unidade = unidade,
             PlaPlacaLidaDiretoLPRca = ""
-
         };
+
         await _udpBroadcastService.SendAsync(envioUdp, ip, false);
-        return true;
     }
 
-    public string MonitorColor(string acesso)
+    private string MonitorColor(string acesso)
     {
         return acesso switch
         {

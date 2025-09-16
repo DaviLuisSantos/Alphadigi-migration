@@ -7,4 +7,6 @@ public class RecieveMessageAlphadigiQuery : IRequest<List<Domain.DTOs.Alphadigi.
 {
     public string Linha1 { get; set; }
     public Domain.EntitiesNew.Alphadigi Alphadigi { get; set; }
+
+    public string Tipo { get; set; } = "lista";
 }

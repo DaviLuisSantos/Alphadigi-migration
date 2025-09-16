@@ -1,45 +1,45 @@
 ﻿using Alphadigi_migration.Application.Commands.Veiculo;
-using Alphadigi_migration.Application.Queries.Veiculo;
+using Alphadigi_migration.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Veiculo;
 
 public class SendMonitorAcessoLinearCommandHandler : IRequestHandler<SendMonitorAcessoLinearCommand, bool>
 {
-    private readonly IMediator _mediator;
+    private readonly IMonitorAcessoLinear _monitorAcessoLinear;
     private readonly ILogger<SendMonitorAcessoLinearCommandHandler> _logger;
 
-    public SendMonitorAcessoLinearCommandHandler(IMediator mediator,
-                                                 ILogger<SendMonitorAcessoLinearCommandHandler> logger)
+    public SendMonitorAcessoLinearCommandHandler(
+        IMonitorAcessoLinear monitorAcessoLinear,
+        ILogger<SendMonitorAcessoLinearCommandHandler> logger)
     {
-        _mediator = mediator;
+        _monitorAcessoLinear = monitorAcessoLinear;
         _logger = logger;
     }
 
-    public async Task<bool> Handle(SendMonitorAcessoLinearCommand request,
-                             CancellationToken cancellationToken)
+    public async Task<bool> Handle(SendMonitorAcessoLinearCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Iniciando envio de dados para o Monitor Acesso Linear.");
         try
         {
-            var monitorQuery = new SendDadosVeiculoMonitorQuery
+            // Verifique se o objeto Veiculo e o IP da Câmera estão disponíveis.
+            if (request.IpCamera == null || string.IsNullOrEmpty(request.IpCamera))
             {
-                Veiculo = request.Veiculo,
-                Ip = request.IpCamera,
-                Acesso = request.Acesso,
-                HoraAcesso = request.Timestamp
-            };
+                _logger.LogError("Dados de requisição inválidos: Veículo ou IP da câmera ausentes.");
+                return false;
+            }
 
-            return await _mediator.Send(monitorQuery, cancellationToken);
+            // Chame diretamente o método da classe de serviço para enviar o broadcast,
+            // que agora contém a lógica de formatação da string e envio UDP.
+            await _monitorAcessoLinear.DadosVeiculo(request.DadosVeiculo);
+
+            _logger.LogInformation("Dados de acesso para a placa {Placa} enviados com sucesso para o monitor.", request.DadosVeiculo.Placa);
+            return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao enviar dados para monitor de acesso linear");
+            _logger.LogError(ex, "Erro ao enviar dados para monitor de acesso linear para a placa {Placa}.", request.DadosVeiculo.Placa);
             return false;
         }
     }

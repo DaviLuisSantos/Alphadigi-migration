@@ -1,10 +1,12 @@
 ﻿using Alphadigi_migration.Application.Commands.Acesso;
 using Alphadigi_migration.Application.Queries.Acesso;
+using Alphadigi_migration.Application.Queries.Unidade;
 using Alphadigi_migration.Application.Queries.Veiculo;
 using Alphadigi_migration.Domain.Interfaces;
+using Alphadigi_migration.Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Logging;
-
+using System.Numerics;
 
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Acesso;
 
@@ -14,8 +16,8 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
     private readonly IMediator _mediator;
     private readonly ILogger<SaveVeiculoAcessoCommandHandler> _logger;
 
-    public SaveVeiculoAcessoCommandHandler(IAcessoRepository repository, 
-                                           IMediator mediator, 
+    public SaveVeiculoAcessoCommandHandler(IAcessoRepository repository,
+                                           IMediator mediator,
                                            ILogger<SaveVeiculoAcessoCommandHandler> logger)
     {
         _repository = repository;
@@ -27,7 +29,6 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
     {
         try
         {
-            // VALIDAÇÕES INICIAIS
             if (request.Veiculo == null)
             {
                 _logger.LogError("Veículo não pode ser nulo");
@@ -41,22 +42,20 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
             }
 
             if (request.Timestamp == default)
-            {
                 request.Timestamp = DateTime.Now;
-            }
 
             _logger.LogInformation("Iniciando salvamento de acesso para veículo: {Placa}", request.Veiculo.Placa);
+
             // 1. Verificar antipassback
             var verifyPassbackCommand = new VerifyAntiPassbackCommand
             {
-                Veiculo = request.Veiculo ?? throw new ArgumentNullException(nameof(request.Veiculo)),
-                Alphadigi = request.Alphadigi ?? throw new ArgumentNullException(nameof(request.Alphadigi)),
+                Veiculo = request.Veiculo,
+                Alphadigi = request.Alphadigi,
                 Timestamp = request.Timestamp
             };
 
             var estaNoAntiPassback = await _mediator.Send(verifyPassbackCommand, cancellationToken);
-
-            if (estaNoAntiPassback)
+            if (!estaNoAntiPassback)
             {
                 _logger.LogInformation($"Antipassback detectado para veículo {request.Veiculo.Placa}. Acesso não salvo.");
                 return false;
@@ -64,12 +63,13 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
 
             // 2. Salvar imagem se necessário
             string caminhoImg = null;
-            if (request.Imagem != null && request.Alphadigi.FotoEvento == true)
+            var placaSave = new PlacaVeiculo(request.Veiculo.Placa.Numero);
+            if (request.Imagem != null && request.Alphadigi.FotoEvento)
             {
                 var saveImageCommand = new SaveImageCommand
                 {
                     FotoBase64 = request.Imagem,
-                    Placa = request.Veiculo.Placa
+                    Placa = placaSave
                 };
                 caminhoImg = await _mediator.Send(saveImageCommand, cancellationToken);
             }
@@ -82,29 +82,16 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
             var veiculoDataQuery = new PrepareVeiculoDataStringQuery { Veiculo = request.Veiculo };
             var dadosVeiculo = await _mediator.Send(veiculoDataQuery, cancellationToken);
 
-            // 5. Determinar unidade
+            // 5. Determinar unidade pelo NOME (sem converter para int)
             string unidade = "NAO CADASTRADO";
             if (!string.IsNullOrEmpty(request.Veiculo.Unidade))
             {
-
-                if (int.TryParse(request.Veiculo.Unidade, out int unidadeId))
-                {
-                    var unidadeQuery = new GetUnidadeByIdQuery { UnidadeId = unidadeId };
-                    var unidadeObj = await _mediator.Send(unidadeQuery, cancellationToken);
-                    unidade = unidadeObj?.Nome ?? "UNIDADE NAO ENCONTRADA";
-                }
-                else
-                {
-                    _logger.LogWarning($"ID da unidade inválido: '{request.Veiculo.Unidade}'");
-                    unidade = "ID INVALIDO";
-                }
-
-
-
-                   
+                var unidadeObj = await _mediator.Send(new GetUnidadeByNomeQuery(request.Veiculo.Unidade), cancellationToken);
+                unidade = unidadeObj?.Nome ?? "UNIDADE NAO ENCONTRADA";
             }
 
-
+            string grupoNome = "VISITANTE";
+            var placaVO = new PlacaVeiculo(request.Veiculo.Placa.Numero);
 
             // 6. Criar e salvar acesso
             var acesso = new Domain.EntitiesNew.Acesso
@@ -112,12 +99,11 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
                 local: local,
                 dataHora: request.Timestamp,
                 unidade: unidade,
-                placa: request.Veiculo.Placa,
+                placa: placaVO,
                 dadosVeiculo: dadosVeiculo,
-                grupoNome: "",
+                grupoNome: grupoNome,
                 foto: caminhoImg,
                 ipCamera: request.Alphadigi.Ip
-
             );
 
             await _repository.SaveAcessoAsync(acesso);
@@ -132,4 +118,3 @@ public class SaveVeiculoAcessoCommandHandler : IRequestHandler<SaveVeiculoAcesso
         }
     }
 }
-    

@@ -1,13 +1,14 @@
 ﻿using Alphadigi_migration.Domain.DTOs.Veiculos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Alphadigi_migration.Domain.EntitiesNew;
+
 
 namespace Alphadigi_migration.Domain.Interfaces;
 
 public interface IMonitorAcessoLinear
 {
     Task<bool> DadosVeiculo(DadosVeiculoMonitorDTO monitorAcesso);
+
+   // Task<Unidade> GetUnidadeByNome(string unidade);
+
+    //Task EnviarDadosVeiculoParaMonitor(string placa, string acesso, string ipCamera);
 }

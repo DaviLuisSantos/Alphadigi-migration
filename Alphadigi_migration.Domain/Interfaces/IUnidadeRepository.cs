@@ -12,5 +12,7 @@ public interface IUnidadeRepository
 {
     Task<QueryResult> GetUnidadeInfoAsync(int idUnidade);
     Task<Unidade> GetByIdAsync(int id);
-    
+
+    Task<Unidade> GetUnidadeByNomeAsync(string nome);
+
 }

@@ -1,5 +1,4 @@
 ﻿using Alphadigi_migration.Application.Queries.Veiculo;
-using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Veiculo;
 
-public class GetUnidadeByIdQueryHandler : IRequestHandler<GetUnidadeByIdQuery, Unidade>
+public class GetUnidadeByIdQueryHandler : IRequestHandler<GetUnidadeByIdQuery, Domain.EntitiesNew.Unidade>
 {
     private readonly IUnidadeRepository _unidadeRepository;
     private readonly ILogger<GetUnidadeByIdQueryHandler> _logger;
@@ -18,23 +17,23 @@ public class GetUnidadeByIdQueryHandler : IRequestHandler<GetUnidadeByIdQuery, U
         _logger = logger;
     }
 
-    public async Task<Unidade> Handle(GetUnidadeByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Domain.EntitiesNew.Unidade> Handle(GetUnidadeByIdQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogInformation($"Buscando unidade por ID: {request.UnidadeId}");
+            _logger.LogInformation($"Buscando unidade por ID: {request.Unidade}");
 
-            if (request.UnidadeId <= 0)
+            if (request.Unidade == "")
             {
-                _logger.LogWarning("ID da unidade inválido");
+                _logger.LogWarning("unidade inválido");
                 return null;
             }
 
-            var unidade = await _unidadeRepository.GetByIdAsync(request.UnidadeId);
+            var unidade = await _unidadeRepository.GetUnidadeByNomeAsync(request.Unidade);
 
             if (unidade == null)
             {
-                _logger.LogWarning($"Unidade com ID {request.UnidadeId} não encontrada");
+                _logger.LogWarning($"Unidade não {request.Unidade} não encontrada");
                 return null;
             }
 
@@ -43,7 +42,7 @@ public class GetUnidadeByIdQueryHandler : IRequestHandler<GetUnidadeByIdQuery, U
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Erro ao buscar unidade com ID {request.UnidadeId}");
+            _logger.LogError(ex, $"Erro ao buscar unidade com ID {request.Unidade}");
             throw;
         }
     }

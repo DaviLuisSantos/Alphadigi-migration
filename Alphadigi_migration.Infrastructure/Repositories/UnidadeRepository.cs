@@ -2,6 +2,7 @@
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Domain.ValueObjects;
 using Alphadigi_migration.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Infrastructure.Repositories;
@@ -19,13 +20,14 @@ public class UnidadeRepository : IUnidadeRepository
         _logger = logger;
     }
 
+
     public async Task<QueryResult> GetUnidadeInfoAsync(int idUnidade)
     {
         try
         {
             var unidade = await _contextFirebird.Unidade.FindAsync(idUnidade);
             var vagasTotais = unidade.NumeroVagas;
-          
+
 
 
             var vagasOcupadas = _contextFirebird.Veiculo
@@ -36,7 +38,7 @@ public class UnidadeRepository : IUnidadeRepository
             var retorno = new QueryResult
             (
                numVagas: vagasTotais,
-               vagasOcupadasVisitantes: null, 
+               vagasOcupadasVisitantes: null,
                vagasOcupadasMoradores: vagasOcupadas
             );
 
@@ -47,6 +49,10 @@ public class UnidadeRepository : IUnidadeRepository
             _logger.LogError(ex, "Erro ao buscar informações da unidade");
             return null;
         }
+    }
+    public async Task<Unidade> GetUnidadeByNomeAsync(string nome)
+    {
+        return await _contextFirebird.Unidade.FirstOrDefaultAsync(u => u.Nome == nome);
     }
 
     public async Task<Unidade> GetByIdAsync(int id)

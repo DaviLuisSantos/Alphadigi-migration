@@ -1,12 +1,5 @@
 {
-  "Placa": "SGR6569",
-  "Liberado": true,
-  "Acesso": "LIBERADO - ENTRADA",
-  "MensagemDisplay": [
-    {
-      "serialChannel": 1,
-      "data": "SGR6569",
-      "dataLen": 7
-    }
-  ]
+  "Placa": "RGS7R59",
+  "Liberado": false,
+  "Acesso": "ACESSO NEGADO - VE\u00CDCULO N\u00C3O CADASTRADO"
 }

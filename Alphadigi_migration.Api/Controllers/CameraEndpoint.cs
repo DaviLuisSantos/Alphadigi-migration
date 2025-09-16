@@ -1,6 +1,5 @@
 ﻿using Alphadigi_migration.Application.Commands.Camera;
 using Alphadigi_migration.Application.Queries.Camera;
-using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using Alphadigi_migration.Domain.DTOs.Camera;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

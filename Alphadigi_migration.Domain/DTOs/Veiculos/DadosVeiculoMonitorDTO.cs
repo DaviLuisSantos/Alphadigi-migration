@@ -1,16 +1,17 @@
 ﻿using Alphadigi_migration.Domain.EntitiesNew;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Alphadigi_migration.Domain.DTOs.Veiculos;
 
 public class DadosVeiculoMonitorDTO
 {
-    public Veiculo Veiculo { get; set; }
-    public string Ip { get; set; } = string.Empty;
-    public string Acesso { get; set; } = string.Empty;
+    public string Placa { get; set; }
+    public string Unidade { get; set; }
+    public string Acesso { get; set; }
     public DateTime HoraAcesso { get; set; }
+    public string Ip { get; set; }
+    public string Modelo { get; set; }
+    public string Cor { get; set; }
+
+
 }

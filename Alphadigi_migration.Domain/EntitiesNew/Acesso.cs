@@ -71,7 +71,7 @@ public class Acesso : EntityBase, IAggregateRoot
         //AcessoPermitido = acessoPermitido;
         //Motivo = motivo;
         //IpCamera = ipCamera;
-        //DataHora = dataHora;
+        DataHora = dataHora;
 
         AddDomainEvent(new AcessoRegistradoEvent(Id, Placa.Numero, Local));
     }

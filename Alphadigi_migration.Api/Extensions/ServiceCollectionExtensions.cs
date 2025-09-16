@@ -32,7 +32,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<UdpBroadcastService>();
 
-       
+        services.AddScoped<IUdpBroadcastService, UdpBroadcastService>();
+
+
         services.AddScoped<IMensagemDisplayRepository, MensagemDisplayRepository>();
 
         services.AddScoped<IMensagemDisplayService, MensagemDisplayService>();

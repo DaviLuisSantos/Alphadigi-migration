@@ -41,36 +41,9 @@ public class VeiculoRepository : IVeiculoRepository
              .ToListAsync();
     }
 
-    //public async Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters)
-    //{
-    //    _logger.LogInformation($"GetByPlateAsync chamado com placa: {plate}");
-
-    //    // Obter todos os veículos primeiro (async)
-    //    var veiculos = await _contextFirebird.Veiculo
-    //       .Include(v => v.UnidadeNavigation)
-    //        .Include(v => v.Rota)
-    //        .ToListAsync(); // Mudança importante: usar ToListAsync()
-
-    //    // Fazer a comparação no client side
-    //    var resultado = veiculos
-    //        .Select(v => new
-    //        {
-    //            Veiculo = v,
-    //            MatchCount = v.Placa?.Numero?
-    //                .Take(7)
-    //                .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0)
-    //                .Sum() ?? 0
-    //        })
-    //        .Where(v => v.MatchCount >= minMatchingCharacters)
-    //        .OrderByDescending(v => v.MatchCount)
-    //        .Select(v => v.Veiculo)
-    //        .ToList();
-
-    //    return resultado.FirstOrDefault();
-    //}
     public async Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters)
     {
-        // ✅ VALIDAÇÃO CRÍTICA - verificar se plate é null ou vazio
+       
         if (string.IsNullOrEmpty(plate))
         {
             _logger.LogWarning("Placa é null ou vazia. Retornando null.");
@@ -168,7 +141,7 @@ public class VeiculoRepository : IVeiculoRepository
                 return false;
             }
         
-            veiculo.RegistrarAcesso(lastAccess.IpCamera, lastAccess.TimeAccess);
+                veiculo.RegistrarAcesso(lastAccess.IpCamera, lastAccess.TimeAccess);
             //veiculo.IpCamUltAcesso = lastAccess.IpCamera;
             //veiculo.DataHoraUltAcesso = lastAccess.TimeAccess;
             _contextFirebird.Veiculo.Update(veiculo);

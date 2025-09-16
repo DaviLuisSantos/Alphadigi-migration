@@ -17,7 +17,7 @@
             //if (!IsValidPlacaFormat(numero))
             //    throw new ArgumentException("Formato de placa inválido");
 
-            //Numero = numero.ToUpper().Replace(" ", "").Replace("-", "");
+            Numero = numero.ToUpper().Replace(" ", "").Replace("-", "");
         }
         public PlacaVeiculo(PlacaVeiculo original)
         {

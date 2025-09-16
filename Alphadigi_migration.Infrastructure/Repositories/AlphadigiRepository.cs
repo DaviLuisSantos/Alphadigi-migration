@@ -41,20 +41,42 @@ public class AlphadigiRepository : IAlphadigiRepository
     {
         _logger.LogInformation("Processando mensagem: {Message} da câmera: {CameraIp}", message, cameraIp);
 
-        // Implemente a lógica real de processamento da mensagem aqui
-        var serialDataList = new List<SerialData>();
-
-        if (!string.IsNullOrEmpty(message))
+        try
         {
-            serialDataList.Add(new SerialData
+            // Implemente a lógica real de processamento da mensagem aqui
+            var serialDataList = new List<SerialData>
+        {
+            new SerialData
             {
-                serialChannel = 1, 
-                data = message,    
-                dataLen = message.Length 
-            });
-        }
+                serialChannel = 1,          // Canal fixo ou dinâmico
+                data = message,             // A mensagem recebida
+                dataLen = message.Length    // Comprimento da mensagem
+            }
+        };
+            _logger.LogInformation("SerialData criado: Canal={Channel}, Dados='{Data}', Tamanho={Length}",
+              serialDataList[0].serialChannel,
+              serialDataList[0].data,
+              serialDataList[0].dataLen);
 
-        return await Task.FromResult(serialDataList);
+            //if (!string.IsNullOrEmpty(message))
+            //{
+            //    serialDataList.Add(new SerialData
+            //    {
+            //        serialChannel = 1, 
+            //        data = message,    
+            //        dataLen = message.Length 
+            //    });
+            //}
+
+            return await Task.FromResult(serialDataList);
+
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro em ProcessReceivedMessageAsync");
+            return new List<SerialData>();
+        }
+       
     }
 
     public async Task<bool> SyncAlphadigi()

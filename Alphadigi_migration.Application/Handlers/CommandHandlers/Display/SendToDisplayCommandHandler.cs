@@ -21,7 +21,7 @@ public class SendToDisplayCommandHandler : IRequestHandler<SendToDisplayCommand>
     {
         try
         {
-            _logger.LogInformation("🖥️ ENVIANDO PARA DISPLAY - Placa: {Placa}, Acesso: {Acesso}",
+            _logger.LogInformation(" ENVIANDO PARA DISPLAY - Placa: {Placa}, Acesso: {Acesso}",
                 request.Placa, request.Acesso);
 
 
@@ -35,13 +35,13 @@ public class SendToDisplayCommandHandler : IRequestHandler<SendToDisplayCommand>
 
             var messageDisplay = await _mediator.Send(displayQuery, cancellationToken);
 
-            _logger.LogInformation("✅ Dados enviados para display: {Mensagens} mensagens",
+            _logger.LogInformation(" Dados enviados para display: {Mensagens} mensagens",
                 messageDisplay.Count);
           
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao enviar para display");
+            _logger.LogError(ex, " Erro ao enviar para display");
             throw;
         }
     }

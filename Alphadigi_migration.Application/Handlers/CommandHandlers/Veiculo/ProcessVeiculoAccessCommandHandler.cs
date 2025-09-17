@@ -51,7 +51,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             if (unidade == null)
             {
                 _logger.LogWarning("Unidade {UnidadeNome} não encontrada para veículo {Placa}", veiculoExistente.Unidade, veiculo.Placa);
-                return (false, "ACESSO NEGADO - UNIDADE INVÁLIDA");
+                return (false, "NÃO CADASTRADO");
             }
 
             string unidadeNome = unidade.Nome;
@@ -81,7 +81,7 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                     return (false, "ACESSO NEGADO - JÁ ESTÁ DENTRO");
                 }
 
-                acesso = "LIBERADO - ENTRADA";
+                acesso = "CADASTRADO";
                 shouldReturn = true;
 
                 await _mediator.Send(new UpdateVagaVeiculoCommand

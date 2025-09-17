@@ -73,13 +73,13 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 Alphadigi = camera,
                 Timestamp = timeStamp,
                 //Log = log,
-               // Imagem = request.CarImage
+                //Imagem = request.CarImage
             });
 
             // 5. Se o acesso for liberado, salve-o.
             if (accessResult.ShouldReturn)
             {
-                _logger.LogInformation("✅ Acesso LIBERADO para veículo {Plate}", request.Plate);
+                _logger.LogInformation(" Acesso LIBERADO para veículo {Plate}", request.Plate);
                 await _mediator.Send(new SaveVeiculoAcessoCommand
                 {
                     Veiculo = veiculo,
@@ -91,7 +91,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             }
             else
             {
-                _logger.LogInformation("❌ Acesso NEGADO para veículo {Plate}. Motivo: {Acesso}", request.Plate, accessResult.Acesso);
+                _logger.LogInformation(" Acesso NEGADO para veículo {Plate}. Motivo: {Acesso}", request.Plate, accessResult.Acesso);
             }
 
             // 6. Atualize o log da placa lida e envie para o display e monitor,
@@ -118,15 +118,23 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 Unidade = veiculo.Unidade, 
                 Ip = request.Ip,
                 Acesso = accessResult.Acesso,
-                HoraAcesso = timeStamp
+                HoraAcesso = timeStamp,
+                Modelo = veiculo.Modelo,
+                Marca = veiculo.Marca,
+                Cor = veiculo.Cor
+
             };
+
+
+            string dadosVeiculoStr = $"{dadosVeiculoDTO.Modelo ?? "INDEFINIDO"} - {dadosVeiculoDTO.Marca ?? "INDEFINIDO"} - {dadosVeiculoDTO.Cor ?? "INDEFINIDO"}";
 
             await _mediator.Send(new SendMonitorAcessoLinearCommand
             {
                 DadosVeiculo = dadosVeiculoDTO,
                  IpCamera = request.Ip, 
                 Acesso = accessResult.Acesso, 
-                Timestamp = timeStamp 
+                Timestamp = timeStamp,
+                DadosVeiculoStr = dadosVeiculoStr
             });
           
 

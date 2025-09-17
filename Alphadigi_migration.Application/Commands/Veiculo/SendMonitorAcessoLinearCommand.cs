@@ -14,4 +14,6 @@ public class SendMonitorAcessoLinearCommand : IRequest<bool>
     public string IpCamera { get; set; }
     public string Acesso { get; set; }
     public DateTime Timestamp { get; set; }
+
+    public string DadosVeiculoStr { get; set; }
 }

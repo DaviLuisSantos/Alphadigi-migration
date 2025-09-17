@@ -32,9 +32,10 @@ public class MonitorAcessoLinear : IMonitorAcessoLinear
             _logger.LogInformation("Processando dados do veículo para monitor: {Placa}", dados.Placa);
 
             // 1️⃣ Preparar dados do veículo
-            string dadosVeiculoStr = $"{dados.Placa} | {dados.Modelo} | {dados.Cor} | {dados.Unidade}";
+            string dadosVeiculoStr = $"{dados.Modelo ?? "INDEFINIDO"} - {dados.Marca ?? "INDEFINIDO"} - {dados.Cor ?? "INDEFINIDO"}";
             string acesso = dados.Acesso;
             string ip = dados.Ip;
+          
 
             // 2️⃣ Obter unidade e vagas
             string unidade = await ObterUnidade(dados.Unidade);
@@ -71,7 +72,7 @@ public class MonitorAcessoLinear : IMonitorAcessoLinear
         try
         {
             var unidadeEntidade = await _unidadeService.GetUnidadeByNome(unidade);
-            if (unidadeEntidade == null) return "ERRO";
+            if (unidadeEntidade == null) return "NÃO CADASTRADO";
 
             var vagasTotal = await _unidadeService.GetUnidadeInfo(unidadeEntidade.Id);
             return $"{vagasTotal.VagasOcupadasMoradores} / {vagasTotal.NumVagas}";
@@ -79,12 +80,17 @@ public class MonitorAcessoLinear : IMonitorAcessoLinear
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao obter informações de vagas da unidade");
-            return "ERRO";
+            return "NÃO CADASTRADO";
         }
     }
 
-    private async Task SendDadosVeiculo(string dadosVeiculo, string acesso, string ip, string vagas)
+    private async Task SendDadosVeiculo(string dadosVeiculo,  
+                                        string acesso, 
+                                        string ip, 
+                                        string vagas)
     {
+
+
         var envioUdp = new UdpDadosVeiculoMonitorDTO
         {
             DadosVeiculo = dadosVeiculo,
@@ -97,7 +103,12 @@ public class MonitorAcessoLinear : IMonitorAcessoLinear
         await _udpBroadcastService.SendAsync(envioUdp, ip, true);
     }
 
-    private async Task SendListaVeiculo(string dadosVeiculo, string placa, DateTime horaAcesso, string acesso, string unidade, string ip)
+    private async Task SendListaVeiculo(string dadosVeiculo, 
+                                        string placa, 
+                                        DateTime horaAcesso, 
+                                        string acesso, 
+                                        string unidade, 
+                                        string ip)
     {
         var envioUdp = new UdpListaVeiculoMonitorDTO
         {
@@ -106,7 +117,8 @@ public class MonitorAcessoLinear : IMonitorAcessoLinear
             DataHora = horaAcesso.ToString("HH:mm:ss"),
             Obs = acesso,
             Unidade = unidade,
-            PlaPlacaLidaDiretoLPRca = ""
+            PlaPlacaLidaDiretoLPRca = "",
+          
         };
 
         await _udpBroadcastService.SendAsync(envioUdp, ip, false);

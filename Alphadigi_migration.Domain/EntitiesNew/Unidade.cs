@@ -72,6 +72,8 @@ public class Unidade : EntityBase, IAggregateRoot
        // AddDomainEvent(new UnidadeNomeAlteradoEvent(Id, Nome));
     }
 
+
+
     public void AtribuirAoCondominio(int condominioId)
     {
         if (condominioId <= 0)

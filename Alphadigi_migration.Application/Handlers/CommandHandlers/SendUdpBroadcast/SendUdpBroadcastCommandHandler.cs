@@ -39,7 +39,7 @@ public class SendUdpBroadcastCommandHandler : IRequestHandler<SendUdpBroadcastCo
             }
             else
             {
-                _logger.LogWarning("❌ TIPO NAO SUPORTADO: {Type}", request.Data.GetType().Name);
+                _logger.LogWarning(" TIPO NAO SUPORTADO: {Type}", request.Data.GetType().Name);
             }
         }
         catch (Exception ex)

@@ -71,6 +71,9 @@ public class Veiculo : EntityBase, IAggregateRoot
         Placa = new PlacaVeiculo(placa);
     }
 
+  
+
+
     // Métodos de Domínio
     public void AtualizarInformacoes(string marca, string modelo, string cor, string unidade)
     {

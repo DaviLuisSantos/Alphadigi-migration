@@ -145,6 +145,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 Placa = request.Plate,
                 Liberado = accessResult.ShouldReturn,
                 Acesso = accessResult.Acesso,
+                
             };
         }
         catch (Exception e)

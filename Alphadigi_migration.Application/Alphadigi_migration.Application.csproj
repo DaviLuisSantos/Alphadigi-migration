@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net9.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  
+	  
+	  
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Factories\" />
+    <Folder Include="Interfaces\" />
+	 
+  </ItemGroup>
+
+	
+
+
+	<ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+	  
+    <PackageReference Include="MediatR" Version="13.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
+  </ItemGroup>
+
+	
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Alphadigi_migration.Domain\Alphadigi_migration.Domain.csproj" />
+	</ItemGroup>
+
+</Project>

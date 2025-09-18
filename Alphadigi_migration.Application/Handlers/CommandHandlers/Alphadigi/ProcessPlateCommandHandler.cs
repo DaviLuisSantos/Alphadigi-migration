@@ -25,11 +25,12 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
     public async Task<object> Handle(ProcessPlateCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Início do processamento da placa: {Plate}, IP da câmera: {Ip}", request.Plate, request.Ip);
+
         try
         {
             DateTime timeStamp = DateTime.Now;
 
-            // 1. Buscar câmera. Se não existir, abortar.
+            // 1. Buscar câmera
             var camera = await _mediator.Send(new GetOrCreateAlphadigiQuery { Ip = request.Ip });
             if (camera == null)
             {
@@ -37,7 +38,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 throw new Exception("Camera não encontrada");
             }
 
-            // 2. Registrar a leitura da placa.
+            // 2. Registrar a leitura da placa
             var log = await _mediator.Send(new CreatePlacaLidaCommand
             {
                 AlphadigiId = camera.Id,
@@ -49,37 +50,26 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             });
             _logger.LogInformation("Placa lida registrada com ID: {LogId}", log.Id);
 
-            // 3. Buscar veículo. Se não encontrar, criar um temporário.
-           
-            
+            // 3. Buscar veículo
             var veiculo = await _mediator.Send(new GetVeiculoByPlateQuery { Plate = request.Plate, MinMatchingCharacters = 7 });
             if (veiculo == null)
             {
                 veiculo = new Domain.EntitiesNew.Veiculo(request.Plate, "SEM UNIDADE", "NAO CADASTRADO", "NAO CADASTRADO", "NAO CADASTRADO");
                 _logger.LogInformation($"Veículo não cadastrado. Criado temporariamente para placa: {veiculo.Placa}");
             }
-            //if (veiculo == null)
-            //{
-            //    _logger.LogInformation($"Veículo não cadastrado encontrado. Criado temporariamente para placa: {request.Plate}");
 
-            
-            //   veiculo = Domain.EntitiesNew.Veiculo.CreateUnregistered(request.Plate);
-            //}
-
-            // 4. Processar o acesso e obter o resultado.
+            // 4. Processar acesso
             var accessResult = await _mediator.Send(new ProcessVeiculoAccessCommand
             {
                 Veiculo = veiculo,
                 Alphadigi = camera,
-                Timestamp = timeStamp,
-                //Log = log,
-                //Imagem = request.CarImage
+                Timestamp = timeStamp
             });
 
-            // 5. Se o acesso for liberado, salve-o.
+            // 5. Salvar acesso se liberado
             if (accessResult.ShouldReturn)
             {
-                _logger.LogInformation(" Acesso LIBERADO para veículo {Plate}", request.Plate);
+                _logger.LogInformation("Acesso LIBERADO para veículo {Plate}", request.Plate);
                 await _mediator.Send(new SaveVeiculoAcessoCommand
                 {
                     Veiculo = veiculo,
@@ -87,15 +77,13 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                     Timestamp = timeStamp,
                     Imagem = request.CarImage
                 });
-                _logger.LogInformation("Acesso salvo para veículo {Plate}", request.Plate);
             }
             else
             {
-                _logger.LogInformation(" Acesso NEGADO para veículo {Plate}. Motivo: {Acesso}", request.Plate, accessResult.Acesso);
+                _logger.LogInformation("Acesso NEGADO para veículo {Plate}. Motivo: {Acesso}", request.Plate, accessResult.Acesso);
             }
 
-            // 6. Atualize o log da placa lida e envie para o display e monitor,
-            //    independentemente do resultado do acesso.
+            // 6. Atualizar log da placa lida
             await _mediator.Send(new UpdatePlacaLidaAcessoCommand
             {
                 PlacaLidaId = log.Id,
@@ -103,6 +91,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 Acesso = accessResult.Acesso
             });
 
+            // 7. Enviar para display
             await _mediator.Send(new SendToDisplayCommand
             {
                 Placa = request.Plate,
@@ -112,30 +101,37 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 Veiculo = veiculo
             });
 
+            // 8. Enviar dados para monitor (uma única vez)
             var dadosVeiculoDTO = new DadosVeiculoMonitorDTO
             {
-                Placa = veiculo.Placa.Numero,
-                Unidade = veiculo.Unidade, 
+                Placa = veiculo.Placa?.Numero ?? request.Plate,
+                Unidade = veiculo.Unidade ?? "NAO CADASTRADO",
                 Ip = request.Ip,
                 Acesso = accessResult.Acesso,
                 HoraAcesso = timeStamp,
-                Modelo = veiculo.Modelo,
-                Marca = veiculo.Marca,
-                Cor = veiculo.Cor
-
+                Modelo = veiculo.Modelo ?? "INDEFINIDO",
+                Marca = veiculo.Marca ?? "INDEFINIDO",
+                Cor = veiculo.Cor ?? "INDEFINIDO"
             };
 
+            string dadosVeiculoStr = $"{dadosVeiculoDTO.Modelo} - {dadosVeiculoDTO.Marca} - {dadosVeiculoDTO.Cor}";
 
-            string dadosVeiculoStr = $"{dadosVeiculoDTO.Modelo ?? "INDEFINIDO"} - {dadosVeiculoDTO.Marca ?? "INDEFINIDO"} - {dadosVeiculoDTO.Cor ?? "INDEFINIDO"}";
+            await _mediator.Send(new SendMonitorAcessoLinearCommand
+            {
+                DadosVeiculo = dadosVeiculoDTO,
+                IpCamera = request.Ip,
+                Acesso = accessResult.Acesso,
+                Timestamp = timeStamp,
+                DadosVeiculoStr = dadosVeiculoStr
+            });
 
-           
+            _logger.LogInformation("Dados enviados para monitor de acesso linear com sucesso.");
 
             return new
             {
                 Placa = request.Plate,
                 Liberado = accessResult.ShouldReturn,
-                Acesso = accessResult.Acesso,
-                
+                Acesso = accessResult.Acesso
             };
         }
         catch (Exception e)

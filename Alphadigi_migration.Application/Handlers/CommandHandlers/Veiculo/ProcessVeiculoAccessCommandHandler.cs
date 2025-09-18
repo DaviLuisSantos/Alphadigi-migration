@@ -37,9 +37,9 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             var timestamp = request.Timestamp;
 
             // 1. Verificar se veículo existe no banco
-            var veiculoQuery = new GetVeiculoByPlateQuery { Plate = veiculo.Placa, MinMatchingCharacters = 7 };
-            var veiculoExistente = await _mediator.Send(veiculoQuery, cancellationToken);
-
+            //var veiculoQuery = new GetVeiculoByPlateQuery { Plate = veiculo.Placa, MinMatchingCharacters = 7 };
+            //var veiculoExistente = await _mediator.Send(veiculoQuery, cancellationToken);
+            var veiculoExistente = veiculo;
             if (veiculoExistente == null)
             {
                 _logger.LogInformation($"Veículo {veiculo.Placa} não encontrado no banco. Acesso NEGADO.");
@@ -119,23 +119,16 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
             // 6. Preparar dados para monitor
             var dadosMonitor = new DadosVeiculoMonitorDTO
             {
-                Placa = veiculoExistente.Placa,
+                Placa = veiculoExistente.Placa?.Numero ?? veiculo.Placa,
                 Unidade = unidadeNome,
                 Ip = alphadigi.Ip,
                 Acesso = acesso,
-                HoraAcesso = timestamp
+                HoraAcesso = timestamp,
+                Modelo = veiculoExistente.Modelo ?? "INDEFINIDO",
+                Marca = veiculoExistente.Marca ?? "INDEFINIDO",
+                Cor = veiculoExistente.Cor ?? "INDEFINIDO"
             };
-
-            var monitorCommand = new SendMonitorAcessoLinearCommand
-            {
-                DadosVeiculo = dadosMonitor,
-                IpCamera = alphadigi.Ip,
-                Acesso = acesso,
-                Timestamp = timestamp
-            };
-            await _mediator.Send(monitorCommand, cancellationToken);
-
-            _logger.LogInformation($"Acesso {acesso} para veículo {veiculo.Placa}");
+        
             return (shouldReturn, acesso);
         }
         catch (Exception ex)

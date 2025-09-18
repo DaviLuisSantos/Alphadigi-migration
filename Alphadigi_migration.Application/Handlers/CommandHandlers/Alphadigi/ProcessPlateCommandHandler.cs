@@ -128,17 +128,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
 
             string dadosVeiculoStr = $"{dadosVeiculoDTO.Modelo ?? "INDEFINIDO"} - {dadosVeiculoDTO.Marca ?? "INDEFINIDO"} - {dadosVeiculoDTO.Cor ?? "INDEFINIDO"}";
 
-            await _mediator.Send(new SendMonitorAcessoLinearCommand
-            {
-                DadosVeiculo = dadosVeiculoDTO,
-                 IpCamera = request.Ip, 
-                Acesso = accessResult.Acesso, 
-                Timestamp = timeStamp,
-                DadosVeiculoStr = dadosVeiculoStr
-            });
-          
-
-            _logger.LogInformation(" DADOS ENVIADOS PARA MONITOR ACESSO LINEAR.");
+           
 
             return new
             {

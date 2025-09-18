@@ -24,7 +24,7 @@ public class CreatePlacaLidaCommandHandler : IRequestHandler<CreatePlacaLidaComm
         CancellationToken cancellationToken)
     {
         _logger.LogInformation("Criando registro de placa lida: {Placa}", request.Placa);
-        _logger.LogInformation("Criando registro de placa lida: {Placa}", request.Placa);
+     
         _logger.LogInformation("Placa é nula?: {IsNull}", request.Placa == null);
         _logger.LogInformation("Placa é vazia?: {IsEmpty}", string.IsNullOrEmpty(request.Placa));
 

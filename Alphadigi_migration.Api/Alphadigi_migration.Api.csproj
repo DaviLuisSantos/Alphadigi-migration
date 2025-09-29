@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>36952326-3163-4236-9d56-a978f55b0fff</UserSecretsId>
+	  <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
     <PublishReadyToRun>true</PublishReadyToRun>

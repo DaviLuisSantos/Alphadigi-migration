@@ -40,8 +40,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMensagemDisplayService, MensagemDisplayService>();
 
         services.AddScoped<IVeiculoAccessProcessor, VeiculoAccessProcessor>();
-      
-     
+
+        services.AddScoped<IVisitanteRepository, VisitanteRepository>();
+
+
         services.AddScoped<IPlacaLidaRepository, PlacaLidaRepository>();
         services.AddScoped<IPlacaLidaService, PlacaLidaService>();
 

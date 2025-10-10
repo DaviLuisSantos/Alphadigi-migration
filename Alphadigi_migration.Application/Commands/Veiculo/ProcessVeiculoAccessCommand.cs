@@ -12,4 +12,6 @@ public class ProcessVeiculoAccessCommand : IRequest<(bool ShouldReturn, string A
     public Domain.EntitiesNew.Veiculo Veiculo { get; set; }
     public Domain.EntitiesNew.Alphadigi Alphadigi { get; set; }
     public DateTime Timestamp { get; set; }
+
+    public bool IsVisitante { get; set; } = false;
 }

@@ -15,4 +15,5 @@ public class SaveVeiculoAcessoCommand : IRequest<bool>
     public string Imagem { get; set; }
     public bool AcessoPermitido { get; set; }
     public string MotivoAcesso { get; set; }
+    public bool IsVisitante { get; set; } = false;
 }

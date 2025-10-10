@@ -13,4 +13,6 @@ public class UpdatePlacaLidaAcessoCommand : IRequest
     public bool Liberado { get; set; }
     public string Acesso { get; set; }
 
+    public bool IsVisitante { get; set; } = false;
+
 }

@@ -10,4 +10,9 @@ public class SendToDisplayCommand : IRequest
     public bool Liberado { get; set; }
     public Domain.EntitiesNew.Alphadigi Alphadigi { get; set; }
     public Domain.EntitiesNew.Veiculo Veiculo { get; set; }
+    public bool IsVisitante { get; set; } = false;
+    public string VisitanteNome { get; set; }
+    public string VisitanteUnidade { get; set; }
+
+
 }

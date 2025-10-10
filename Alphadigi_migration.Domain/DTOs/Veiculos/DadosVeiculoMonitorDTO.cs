@@ -15,5 +15,9 @@ public class DadosVeiculoMonitorDTO
     public string Marca { get; set; }
     public string Cor { get; set; }
 
+    public bool IsVisitante { get; set; } = false;
+    public string VisitanteNome { get; set; }
+    public string VisitanteUnidade { get; set; }
+
 
 }

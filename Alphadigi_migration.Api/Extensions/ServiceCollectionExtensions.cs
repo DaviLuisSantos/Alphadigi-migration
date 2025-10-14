@@ -43,7 +43,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IVisitanteRepository, VisitanteRepository>();
 
-
+       
+        services.AddScoped<IVisitaSaiuSemControleRepository, VisitaSaiuSemControleRepository>();
         services.AddScoped<IPlacaLidaRepository, PlacaLidaRepository>();
         services.AddScoped<IPlacaLidaService, PlacaLidaService>();
 

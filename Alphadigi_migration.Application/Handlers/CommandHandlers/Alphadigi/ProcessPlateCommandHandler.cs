@@ -82,6 +82,9 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                     bool isSaida = !camera.Sentido; // Sentido = false → Saída
                     _logger.LogInformation("📷 Configuração da câmera - Sentido: {Sentido} (True=Entrada, False=Saída)", camera.Sentido);
 
+                    isVisitante = true;
+                    isSaidaVisitante = isSaida;
+
                     // CORREÇÃO: SEMPRE cria veículo temporário, mesmo para saída
                     var marcaVisitante = !string.IsNullOrWhiteSpace(visitanteAutorizado.Marca) ? visitanteAutorizado.Marca : "INDEFINIDO";
                     var modeloVisitante = !string.IsNullOrWhiteSpace(visitanteAutorizado.Modelo) ? visitanteAutorizado.Modelo : "INDEFINIDO";

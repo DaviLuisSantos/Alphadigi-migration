@@ -19,8 +19,40 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         [MaxLength(70)]
         public string? UnidadeDestino { get; private set; }
 
+        [Column("CARTAOVISITA")]
+        [MaxLength(20)]
+        public string? Cartao { get; set; }
+
         [Column("PLACAVISITANTE")]
         public PlacaVeiculo Placa { get; private set; }
+
+        [Column("FOTO1")]
+        [MaxLength(60)]
+        public string? Foto1 { get; set; }
+
+        [Column("FOTO2")]
+        [MaxLength(60)]
+        public string? Foto2 { get; set; }
+
+        [Column("FOTO3")]
+        [MaxLength(60)]
+        public string? Foto3 { get; set; }
+
+        [Column("FOTO4")]
+        [MaxLength(60)]
+        public string? Foto4 { get; set; }
+
+        [Column("PORTEIROENTRADA")]
+        [MaxLength(60)]
+        public string? PorteiroEntrada { get; set; }
+
+        [Column("PORTEIROPRORROGOU")]
+        [MaxLength(60)]
+        public string? PorteiroProrrogou { get; set; }
+
+        [Column("PORTEIROSAIDA")]
+        [MaxLength(60)]
+        public string? PorteiroSaida { get; set; }
 
         [Column("MARCACARROVISITA")]
         [MaxLength(30)]
@@ -65,6 +97,12 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         [Column("DATAHORAENTRADA")]
         public DateTime? DataHoraEntrada { get; private set; }
 
+        [Column("TEMPOPERMANENCIA")]
+        public int? TempoPermanencia { get; set; }
+
+        [Column("TEMPO_PRORROGACAO")]
+        public int? TempoProrrogacao { get; set; }
+
         [Column("DATAHORAPREVISAOSAIDA")]
         public DateTime? DataHoraPrevisaoSaida { get; private set; }
 
@@ -73,6 +111,10 @@ namespace Alphadigi_migration.Domain.EntitiesNew
 
         [Column("DATA_VISITA_AGENDADA")]
         public DateTime? DataVisitaAgendada { get; private set; }
+
+        [Column("ANUNCIO_VISITA_AGENDADA")]
+        [MaxLength(3)]
+        public string? AnuncioVisitaAgendada { get; set; }
 
         [Column("HORA_VISITA_AGENDADA")]
         public TimeSpan? HoraVisitaAgendada { get; private set; }
@@ -85,9 +127,17 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         [MaxLength(60)]
         public string? AutorizadoPor { get; private set; }
 
+        [Column("OBS")]
+        [MaxLength(512)]
+        public string? Obs { get; set; }
+
         [Column("AGENDADO_POR")]
         [MaxLength(60)]
         public string? AgendadoPor { get; private set; }
+
+        [Column("DATA_CAD_AGENDAMENTO")]
+        public DateTime? DataCadAgendamento { get; set; }
+
 
         // Propriedades computadas para lógica de negócio
         public bool EstaDentroDoCondominio => DataHoraEntrada.HasValue && !DataHoraSaida.HasValue;
@@ -102,36 +152,51 @@ namespace Alphadigi_migration.Domain.EntitiesNew
             }
         }
 
-        public TimeSpan? TempoPermanencia
-        {
-            get
-            {
-                if (DataHoraEntrada.HasValue)
-                {
-                    var saida = DataHoraSaida ?? DateTime.Now;
-                    return saida - DataHoraEntrada.Value;
-                }
-                return null;
-            }
-        }
+    
 
         // Construtor
         protected Visitante() { }
 
         // Novo construtor que aceita PlacaLida
-        public Visitante(
-            string nome,
-            string placa,
-            string unidadeDestino,
-            DateTime? dataVisitaAgendada,
-            string? tipoVisitante = null,
-            string? marca = null,
-            string? modelo = null,
-            string? cor = null,
-            string? documento = null,
-            string? cpf = null,
-            string? telefone = null,
-            string? email = null)
+
+
+       
+
+        public Visitante(int id, 
+            int? idCadVisita, 
+            string? unidadeDestino, 
+            string? cartao, 
+            PlacaVeiculo placa, 
+            string? foto1, 
+            string? foto2, 
+            string? foto3, 
+            string? foto4, 
+            string? porteiroEntrada, 
+            string? porteiroProrrogou, 
+            string? porteiroSaida, 
+            string? marca, 
+            string? modelo, 
+            string? cor, 
+            string? tipoVisitante, 
+            string? nome, 
+            string? documento, 
+            string? cpf, 
+            string? empresaVisitante, 
+            string? telefone, 
+            string? email, 
+            DateTime? dataHoraEntrada, 
+            int? tempoPermanencia, 
+            int? tempoProrrogacao, 
+            DateTime? dataHoraPrevisaoSaida, 
+            DateTime? dataHoraSaida, 
+            DateTime? dataVisitaAgendada, 
+            string? anuncioVisitaAgendada, 
+            TimeSpan? horaVisitaAgendada, 
+            bool? vagaOcupada, 
+            string? autorizadoPor, 
+            string? obs, 
+            string? agendadoPor, 
+            DateTime? dataCadAgendamento)
         {
             ValidarNome(nome);
             ValidarPlaca(placa);
@@ -149,8 +214,8 @@ namespace Alphadigi_migration.Domain.EntitiesNew
             Cpf = cpf;
             Telefone = telefone;
             Email = email;
-           // DataCadastro = DateTime.Now;
         }
+
 
         // Métodos de Domínio
         public void RegistrarEntrada(string porteiroEntrada = null)

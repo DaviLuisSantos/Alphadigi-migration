@@ -182,8 +182,9 @@ namespace Alphadigi_migration.Domain.EntitiesNew
             Email = visitante.Email;
             VagaOcupada = visitante.VagaOcupada;
             Cpf = visitante.Cpf;
+            Obs = visitante.Obs;
 
-          
+
         }
 
         // Método para calcular tempo de permanência real

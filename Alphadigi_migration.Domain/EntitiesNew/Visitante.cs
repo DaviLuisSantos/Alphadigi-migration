@@ -214,6 +214,7 @@ namespace Alphadigi_migration.Domain.EntitiesNew
             Cpf = cpf;
             Telefone = telefone;
             Email = email;
+            Obs = obs;
         }
 
 

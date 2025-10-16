@@ -16,6 +16,14 @@ public class AppDbContextFirebird : DbContext
     public DbSet<Acesso> Acesso { get; set; }
     public DbSet<Condominio> Condominio { get; set; }
 
+    public DbSet<Visitante> Visitantes { get; set; }
+   
+    public DbSet<VisitaSaiuSemControle> VisitaSaiuSemControle { get; set; }
+
+   
+
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Camera>()
@@ -55,6 +63,41 @@ public class AppDbContextFirebird : DbContext
                 .IsRequired();
             });
         });
+
+        modelBuilder.Entity<Visitante>(entity =>
+        {
+            entity.OwnsOne(v => v.Placa, placa =>
+            {
+                placa.Property(p => p.Numero)
+                .HasColumnName("PLACAVISITANTE")
+                .HasMaxLength(10);
+            });
+            entity.Property(v => v.VagaOcupada)
+         .HasColumnName("VAGA_OCUPADA")
+         .HasMaxLength(2)
+         .HasConversion(
+             v => v.HasValue ? (v.Value ? "1" : "0") : null, // bool? -> string
+             v => v == "1" ? true : (v == "0" ? false : (bool?)null) // string -> bool?
+         );
+        });
+
+        modelBuilder.Entity<VisitaSaiuSemControle>(entity =>
+        {
+            entity.OwnsOne(v => v.Placa, placa =>
+            {
+                placa.Property(p => p.Numero)
+                .HasColumnName("PLACAVISITANTE")
+                .HasMaxLength(10);
+            });
+            entity.Property(v => v.VagaOcupada)
+         .HasColumnName("VAGA_OCUPADA")
+         .HasMaxLength(2)
+         .HasConversion(
+             v => v.HasValue ? (v.Value ? "1" : "0") : null, // bool? -> string
+             v => v == "1" ? true : (v == "0" ? false : (bool?)null) // string -> bool?
+         );
+        });
+
         modelBuilder.Entity<Condominio>(entity =>
         {
             entity.OwnsOne(e => e.Cnpj, cnpj =>

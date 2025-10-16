@@ -14,6 +14,7 @@ public class DailyTaskSchedulerService
         taskToExecute = task;
     }
 
+
     public void Start()
     {
         DateTime now = DateTime.Now;

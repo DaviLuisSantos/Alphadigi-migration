@@ -8,8 +8,5 @@ public abstract class DomainEvent : IDomainEvent
     public abstract string EventType { get; }
     public abstract int AggregateId { get; }
 
-    protected DomainEvent()
-    {
-      
-    }
+  
 }

@@ -246,30 +246,43 @@ public class AlphadigiRepository : IAlphadigiRepository
                 throw new Exception("Camera não encontrada");
             }
 
-            using (var transaction = _contextSqlite.Database.BeginTransaction())
-            {
-                try
-                {
-                    var cameraSqlite = await _contextSqlite.Alphadigi
-                        .Where(c => c.Ip == ip)
-                        .Include(a => a.Area)
-                        .FirstOrDefaultAsync();
+            // REMOVA o using (var transaction = ...) e faça o gerenciamento manual
+            var cameraSqlite = await _contextSqlite.Alphadigi
+                .Where(c => c.Ip == ip)
+                .Include(a => a.Area)
+                .FirstOrDefaultAsync();
 
-                    if (cameraSqlite == null)
-                    {
-                        return await CreateNewCamera(ip, cameraFire, transaction);
-                    }
-                    else
-                    {
-                        return await UpdateExistingCamera(ip, cameraFire, cameraSqlite, transaction);
-                    }
-                }
-                catch (Exception ex)
+            if (cameraSqlite == null)
+            {
+                _logger.LogInformation($"Camera não encontrada no SQLite para o IP: {ip}. Criando nova entrada.");
+
+                var camera = new Alphadigi_migration.Domain.EntitiesNew.Alphadigi(
+                    ip: cameraFire.Ip,
+                    nome: cameraFire.Nome,
+                    areaId: cameraFire.IdArea,
+                    sentido: cameraFire.Direcao == "ENTRADA",
+                    linhasDisplay: 2
+                );
+
+                _contextSqlite.Alphadigi.Add(camera);
+                await _contextSqlite.SaveChangesAsync(); // SEM transação explícita
+                _logger.LogInformation($"Nova camera criada no SQLite para o IP: {ip}");
+                return camera;
+            }
+            else
+            {
+                bool sentidoFire = cameraFire.Direcao == "ENTRADA";
+                if (cameraSqlite.AreaId != cameraFire.IdArea || cameraSqlite.Sentido != sentidoFire)
                 {
-                    _logger.LogError(ex, $"Erro ao processar a transação no SQLite para o IP: {ip}");
-                    await transaction.RollbackAsync();
-                    throw;
+                    _logger.LogInformation($"Alterações detectadas na camera no SQLite para o IP: {ip}. Atualizando.");
+
+                    cameraSqlite.AtualizarDadosBasicos(cameraFire.IdArea, sentidoFire);
+
+                    _contextSqlite.Alphadigi.Update(cameraSqlite);
+                    await _contextSqlite.SaveChangesAsync(); // SEM transação explícita
+                    _logger.LogInformation($"Camera atualizada no SQLite para o IP: {ip}");
                 }
+                return cameraSqlite;
             }
         }
         catch (Exception ex)
@@ -279,29 +292,24 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, 
-                                                                                         Camera cameraFire, 
-                                                                                         IDbContextTransaction transaction)
+    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, Camera cameraFire)
     {
         _logger.LogInformation($"Camera não encontrada no SQLite para o IP: {ip}. Criando nova entrada.");
 
         var camera = new Alphadigi_migration.Domain.EntitiesNew.Alphadigi(
-        ip: cameraFire.Ip,
-        nome: cameraFire.Nome,
-        areaId: cameraFire.IdArea,
-        sentido: cameraFire.Direcao == "ENTRADA",
-        linhasDisplay: 2 
-    );
+            ip: cameraFire.Ip,
+            nome: cameraFire.Nome,
+            areaId: cameraFire.IdArea,
+            sentido: cameraFire.Direcao == "ENTRADA",
+            linhasDisplay: 2
+        );
+
         _contextSqlite.Alphadigi.Add(camera);
         await _contextSqlite.SaveChangesAsync();
-        await transaction.CommitAsync();
         _logger.LogInformation($"Nova camera criada no SQLite para o IP: {ip}");
         return camera;
     }
-
-    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> UpdateExistingCamera(string ip, Camera cameraFire,
-                                                                                           Alphadigi_migration.Domain.EntitiesNew.Alphadigi cameraSqlite, 
-                                                                                           IDbContextTransaction transaction)
+    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> UpdateExistingCamera(string ip, Camera cameraFire, Alphadigi_migration.Domain.EntitiesNew.Alphadigi cameraSqlite)
     {
         bool sentidoFire = cameraFire.Direcao == "ENTRADA";
         if (cameraSqlite.AreaId != cameraFire.IdArea || cameraSqlite.Sentido != sentidoFire)
@@ -312,10 +320,8 @@ public class AlphadigiRepository : IAlphadigiRepository
 
             _contextSqlite.Alphadigi.Update(cameraSqlite);
             await _contextSqlite.SaveChangesAsync();
-            await transaction.CommitAsync();
             _logger.LogInformation($"Camera atualizada no SQLite para o IP: {ip}");
         }
-        await transaction.CommitAsync();
         return cameraSqlite;
     }
 

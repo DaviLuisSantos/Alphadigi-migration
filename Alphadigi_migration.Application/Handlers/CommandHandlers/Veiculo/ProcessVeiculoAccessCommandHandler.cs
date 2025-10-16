@@ -84,11 +84,14 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 acesso = "CADASTRADO";
                 shouldReturn = true;
 
-                await _mediator.Send(new UpdateVagaVeiculoCommand
+                if (veiculoExistente.Id != null && veiculoExistente.Id > 0)
                 {
-                    Id = veiculoExistente.Id,
-                    Dentro = true
-                }, cancellationToken);
+                    await _mediator.Send(new UpdateVagaVeiculoCommand
+                    {
+                        Id = veiculoExistente.Id,
+                        Dentro = true
+                    }, cancellationToken);
+                }
             }
             else // Saída
             {
@@ -101,20 +104,34 @@ public class ProcessVeiculoAccessCommandHandler : IRequestHandler<ProcessVeiculo
                 acesso = "LIBERADO - SAÍDA";
                 shouldReturn = true;
 
-                await _mediator.Send(new UpdateVagaVeiculoCommand
+                if(veiculoExistente.Id != null && veiculoExistente.Id > 0)
                 {
-                    Id = veiculoExistente.Id,
-                    Dentro = false
-                }, cancellationToken);
+                    await _mediator.Send(new UpdateVagaVeiculoCommand
+                    {
+                        Id = veiculoExistente.Id,
+                        Dentro = false
+                    }, cancellationToken);
+                }
             }
 
             // 5. Atualizar último acesso
-            await _mediator.Send(new UpdateLastAccessCommand
+            if (veiculoExistente.Id != null && veiculoExistente.Id > 0 )
             {
-                IdVeiculo = veiculoExistente.Id,
-                IpCamera = alphadigi.Ip,
-                DataHoraAcesso = timestamp
-            }, cancellationToken);
+                try
+                {
+                    await _mediator.Send(new UpdateLastAccessCommand
+                    {
+                        IdVeiculo = veiculoExistente.Id,
+                        IpCamera = alphadigi.Ip,
+                        DataHoraAcesso = timestamp
+                    }, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Erro ao atualizar último acesso do veículo {Placa}", veiculo.Placa);
+                    // Não falha o processo por causa disso
+                }
+            }
 
             // 6. Preparar dados para monitor
             var dadosMonitor = new DadosVeiculoMonitorDTO

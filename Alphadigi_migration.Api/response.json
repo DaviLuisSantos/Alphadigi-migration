@@ -1,5 +1,12 @@
 {
-  "Placa": "LTI2596",
+  "Placa": "BRA0S17",
   "Liberado": true,
-  "Acesso": "CADASTRADO"
+  "Acesso": "SA\u00CDDA - VISITANTE: LAURA - EXCLU\u00CDDO",
+  "Tipo": "VISITANTE",
+  "Visitante": {
+    "Nome": "LAURA",
+    "Unidade": "1104BLOCO A",
+    "DataVisita": null,
+    "Excluido": true
+  }
 }

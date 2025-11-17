@@ -54,7 +54,8 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         {
             //ValidarPlaca(placa);
             PlacaNumero = placa;
-            ValidarImagens(carroImg, placaImg);
+            // Removida validação de tamanho pois imagens vêm em base64
+            // ValidarImagens(carroImg, placaImg);
 
             //Placa = new PlacaVeiculo(placa);
             AlphadigiId = alphadigiId;
@@ -101,7 +102,8 @@ namespace Alphadigi_migration.Domain.EntitiesNew
 
         public void AtualizarImagens(string carroImg, string placaImg)
         {
-            ValidarImagens(carroImg, placaImg);
+            // Removida validação para suportar base64
+            // ValidarImagens(carroImg, placaImg);
 
             CarroImg = carroImg;
             PlacaImg = placaImg;
@@ -125,14 +127,15 @@ namespace Alphadigi_migration.Domain.EntitiesNew
         //        throw new Exception("Placa não pode ser vazia");
         //}
 
-        private void ValidarImagens(string carroImg, string placaImg)
-        {
-            if (carroImg != null && carroImg.Length > 500)
-                throw new Exception("URL da imagem do carro muito longa");
-
-            if (placaImg != null && placaImg.Length > 500)
-                throw new Exception("URL da imagem da placa muito longa");
-        }
+        // Método removido - imagens podem ser base64 muito longas
+        // private void ValidarImagens(string carroImg, string placaImg)
+        // {
+        //     if (carroImg != null && carroImg.Length > 2000)
+        //         throw new Exception("URL da imagem do carro muito longa");
+        //
+        //     if (placaImg != null && placaImg.Length > 2000)
+        //         throw new Exception("URL da imagem da placa muito longa");
+        // }
 
         // Métodos de consulta
         public bool FoiProcessada() => Processado;

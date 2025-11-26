@@ -41,58 +41,62 @@ public class VeiculoRepository : IVeiculoRepository
              .ToListAsync();
     }
 
-    public async Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters)
+    public async Task<Veiculo> GetByPlateAsync(string plate)
     {
-       
-        if (string.IsNullOrEmpty(plate))
+        if (string.IsNullOrEmpty(plate) || plate.Length < 7)
         {
-            _logger.LogWarning("Placa é null ou vazia. Retornando null.");
+            _logger.LogWarning("Placa inválida ou muito curta. Retornando null.");
             return null;
         }
-
-        _logger.LogInformation($"GetByPlateAsync chamado com placa: '{plate}'");
 
         // ✅ Busca exata primeiro
         var veiculoExato = await _contextFirebird.Veiculo
             .FirstOrDefaultAsync(v => v.Placa.Numero == plate);
 
         if (veiculoExato != null)
-        {
-            _logger.LogInformation($"Veículo encontrado (busca exata): {veiculoExato.Placa.Numero}");
             return veiculoExato;
-        }
 
-        _logger.LogInformation($"Nenhum veículo encontrado por busca exata para: '{plate}'");
+       
+        var primeiros7Chars = plate.Substring(0, 7);
 
-        // ✅ Só então usar similaridade (com plate garantidamente não-nulo)
-        var veiculos = await _contextFirebird.Veiculo.ToListAsync();
+        var veiculo7Chars = await _contextFirebird.Veiculo
+            .Where(v => v.Placa.Numero != null &&
+                       v.Placa.Numero.Length >= 7 &&
+                       v.Placa.Numero.Substring(0, 7) == primeiros7Chars)
+            .FirstOrDefaultAsync();
 
-        var resultado = veiculos
-            .Select(v => new
-            {
-                Veiculo = v,
-                MatchCount = v.Placa?.Numero?
-                    .Take(7)
-                    .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0)
-                    .Sum() ?? 0
-            })
-            .Where(v => v.MatchCount >= minMatchingCharacters)
-            .OrderByDescending(v => v.MatchCount)
-            .Select(v => v.Veiculo)
-            .ToList();
-
-        var veiculoSimilar = resultado.FirstOrDefault();
-
-        if (veiculoSimilar != null)
+        if (veiculo7Chars != null)
         {
-            _logger.LogInformation($"Veículo similar encontrado: {veiculoSimilar.Placa.Numero}");
+            _logger.LogInformation($"Veículo encontrado (7 primeiros caracteres): {veiculo7Chars.Placa.Numero}");
+            return veiculo7Chars;
         }
-        else
-        {
-            _logger.LogInformation($"Nenhum veículo similar encontrado para: '{plate}'");
-        }
+
+        // ✅ Busca flexível - pelo menos 7 caracteres iguais em qualquer posição
+        var todosVeiculos = await _contextFirebird.Veiculo
+            .Where(v => v.Placa.Numero != null && v.Placa.Numero.Length >= 7)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var veiculoSimilar = todosVeiculos
+            .Where(v => CountMatchingCharacters(v.Placa.Numero, plate) >= 7)
+            .OrderByDescending(v => CountMatchingCharacters(v.Placa.Numero, plate))
+            .FirstOrDefault();
 
         return veiculoSimilar;
+    }
+
+    private int CountMatchingCharacters(string str1, string str2)
+    {
+        int matches = 0;
+        int minLength = Math.Min(str1.Length, str2.Length);
+
+        for (int i = 0; i < minLength; i++)
+        {
+            if (str1[i] == str2[i])
+                matches++;
+        }
+
+        return matches;
     }
     public async Task<bool> UpdateVagaVeiculoAsync(int id, bool dentro)
     {

@@ -8,7 +8,7 @@ public interface IVeiculoRepository
 {
     Task<List<Veiculo>> GetVeiculosAsync();
     Task<List<VeiculoInfoSendAlphadigi>> GetVeiculosSendAsync(int lastId);
-    Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters);
+    Task<Veiculo> GetByPlateAsync(string plate);
     Task<bool> UpdateVagaVeiculoAsync(int  id, bool dentro);
     Task<bool> UpdateLastAccessAsync(LastAcessUpdateVeiculoDTO lastAccess);
     Task<Veiculo> GetByIdAsync(int id);

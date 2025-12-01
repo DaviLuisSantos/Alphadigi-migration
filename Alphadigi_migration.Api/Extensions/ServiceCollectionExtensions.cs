@@ -32,6 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMonitorAcessoLinear, MonitorAcessoLinear>();
 
         services.AddScoped<UdpBroadcastService>();
+        //services.AddScoped<IAlphaDigiCommunicationService, AlphaDigiCommunicationService>();
 
         services.AddScoped<IUdpBroadcastService, UdpBroadcastService>();
 

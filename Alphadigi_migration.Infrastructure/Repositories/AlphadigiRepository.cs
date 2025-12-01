@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore.Storage;
-using Alphadigi_migration.Infrastructure.Data;
+﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.Entities;
 using Alphadigi_migration.Domain.EntitiesNew;
-using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using Alphadigi_migration.Domain.Interfaces;
+using Alphadigi_migration.Infrastructure.Data;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Infrastructure.Repositories;
 
@@ -57,7 +58,7 @@ public class AlphadigiRepository : IAlphadigiRepository
               serialDataList[0].serialChannel,
               serialDataList[0].data,
               serialDataList[0].dataLen);
-
+            
             //if (!string.IsNullOrEmpty(message))
             //{
             //    serialDataList.Add(new SerialData
@@ -99,7 +100,7 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    private async Task SyncCamera(Camera cameraFire)
+    private async Task SyncCamera(Domain.EntitiesNew.Camera cameraFire)
     {
         var cameraSqlite = await _contextSqlite.Alphadigi.FindAsync(cameraFire.Id);
         if (cameraSqlite == null)
@@ -292,7 +293,7 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, Camera cameraFire)
+    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, Domain.EntitiesNew.Camera cameraFire)
     {
         _logger.LogInformation($"Camera não encontrada no SQLite para o IP: {ip}. Criando nova entrada.");
 
@@ -309,7 +310,7 @@ public class AlphadigiRepository : IAlphadigiRepository
         _logger.LogInformation($"Nova camera criada no SQLite para o IP: {ip}");
         return camera;
     }
-    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> UpdateExistingCamera(string ip, Camera cameraFire, Alphadigi_migration.Domain.EntitiesNew.Alphadigi cameraSqlite)
+    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> UpdateExistingCamera(string ip, Domain.EntitiesNew.Camera cameraFire, Alphadigi_migration.Domain.EntitiesNew.Alphadigi cameraSqlite)
     {
         bool sentidoFire = cameraFire.Direcao == "ENTRADA";
         if (cameraSqlite.AreaId != cameraFire.IdArea || cameraSqlite.Sentido != sentidoFire)

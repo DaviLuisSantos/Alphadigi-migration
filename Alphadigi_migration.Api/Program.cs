@@ -20,9 +20,9 @@ builder.Services.Configure<PlateComparisonSettings>(
     builder.Configuration.GetSection("PlateComparisonSettings")
 );
 
-builder.Services.AddCarter(configurator: c =>
-    c.WithResponseNegotiator<SystemTextJsonResponseNegotiator>()
-);
+//builder.Services.AddCarter(configurator: c =>
+//    c.WithResponseNegotiator<SystemTextJsonResponseNegotiator>()
+//);
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();

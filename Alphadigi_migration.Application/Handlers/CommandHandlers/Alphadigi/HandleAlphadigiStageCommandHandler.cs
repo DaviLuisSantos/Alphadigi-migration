@@ -3,7 +3,6 @@ using Alphadigi_migration.Application.Queries.Alphadigi;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Alphadigi;
 
 public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadigiStageCommand, object>
@@ -19,14 +18,15 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
         _logger = logger;
     }
 
-    public async Task<object> Handle(HandleAlphadigiStageCommand request, 
+    public async Task<object> Handle(HandleAlphadigiStageCommand request,
                                      CancellationToken cancellationToken)
     {
         var alphadigi = request.Alphadigi;
         string stage = alphadigi.Estado ?? "DELETE";
         string newStage = null;
         object response = null;
-        bool enviado = false;
+
+        _logger.LogInformation($"🔄 Processando estágio: {stage} para câmera {alphadigi.Ip}");
 
         switch (stage)
         {
@@ -34,47 +34,56 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
                 if (!alphadigi.Enviado)
                 {
                     response = HandleDelete(alphadigi);
+                    _logger.LogInformation($"🗑️  Estágio DELETE: retornando limpeza de whitelist");
                 }
                 else
                 {
                     newStage = "CREATE";
-                    enviado = false;
+                    alphadigi.MarcarComoNaoEnviado(); // Reset para próximo estágio
                 }
                 break;
+
             case "CREATE":
                 if (!alphadigi.Enviado)
                 {
                     var createQuery = new HandleCreateQuery { Alphadigi = alphadigi };
                     response = await _mediator.Send(createQuery, cancellationToken);
                     newStage = "SEND";
+                    _logger.LogInformation($"📝 Estágio CREATE: {(response != null ? "Whitelist gerada" : "Nada para enviar")}");
                 }
                 else
                 {
                     newStage = "SEND";
-                    enviado = false;
+                    alphadigi.MarcarComoNaoEnviado();
                 }
                 break;
+
             case "SEND":
                 var sendQuery = new HandleCreateQuery { Alphadigi = alphadigi };
                 response = await _mediator.Send(sendQuery, cancellationToken);
+
                 if (response == null)
                 {
                     newStage = "FINAL";
+                    _logger.LogInformation($"✅ Estágio SEND: Todas as whitelists enviadas. Indo para FINAL");
                 }
-                if (enviado)
+                else
                 {
-                    newStage = response == null ? "FINAL" : "SEND";
-                    enviado = false;
+                    _logger.LogInformation($"📤 Estágio SEND: Enviando lote de whitelists");
                 }
                 break;
+
             case "FINAL":
-                var normalQuery = new HandleNormalQuery { Alphadigi = alphadigi };
-                response = await _mediator.Send(normalQuery, cancellationToken);
+                // 🔥 IMPORTANTE: No estágio FINAL, NÃO retornamos um objeto de resposta!
+                // Deixamos o ProcessHeartbeatCommandHandler retornar os dados do display
+                _logger.LogInformation($"🎯 Estágio FINAL: Mantendo estágio (display será gerenciado pelo heartbeat)");
                 newStage = "FINAL";
+                response = null; // 🔥 CRÍTICO: Null para o heartbeat assumir
                 break;
+
             default:
-                var defaultQuery = new HandleNormalQuery { Alphadigi = alphadigi };
-                response = await _mediator.Send(defaultQuery, cancellationToken);
+                _logger.LogWarning($"⚠️  Estágio desconhecido: {stage}. Resetando para DELETE");
+                response = HandleDelete(alphadigi);
                 newStage = "DELETE";
                 break;
         }
@@ -82,6 +91,7 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
         if (newStage != null)
         {
             alphadigi.AtualizarEstado(newStage);
+            _logger.LogInformation($"📊 Novo estágio: {newStage}");
         }
 
         alphadigi.MarcarComoEnviado();
@@ -90,6 +100,7 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
         var updateCommand = new UpdateAlphadigiEntityCommand { Alphadigi = alphadigi };
         await _mediator.Send(updateCommand, cancellationToken);
 
+        _logger.LogInformation($"🏁 Estágio {stage} processado. Response é null? {response == null}");
         return response;
     }
 

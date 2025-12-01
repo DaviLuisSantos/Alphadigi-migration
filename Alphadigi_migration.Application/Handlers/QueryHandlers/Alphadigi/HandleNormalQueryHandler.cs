@@ -44,7 +44,7 @@ public class HandleNormalQueryHandler : IRequestHandler<HandleNormalQuery, Domai
 
         var retorno = new Domain.DTOs.Alphadigi.ResponseHeathbeatDTO
         {
-            Response_Heartbeat = new Domain.DTOs.Alphadigi.ResponseAlarmInfoPlate
+            Response_Heartbeat = new Domain.DTOs.Alphadigi.Response_AlarmInfoPlate
             {
                 info = "no",
                 serialData = messageData

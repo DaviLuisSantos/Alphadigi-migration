@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Alphadigi_migration.Domain.DTOs.Alphadigi;
 
-    public class ResponseAlarmInfoPlate
+    public class Response_AlarmInfoPlate
     {
        public string info { get; set; }
        public List<SerialData>? serialData { get; set; }

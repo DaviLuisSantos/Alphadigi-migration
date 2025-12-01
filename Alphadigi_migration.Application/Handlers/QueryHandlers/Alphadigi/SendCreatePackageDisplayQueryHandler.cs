@@ -1,77 +1,65 @@
 ﻿using Alphadigi_migration.Application.Queries.Alphadigi;
 using Alphadigi_migration.Application.Queries.Display;
-using Alphadigi_migration.Application.Queries.Veiculo;
+using Alphadigi_migration.Application.Service; // Adicione esta using
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-
 namespace Alphadigi_migration.Application.Handlers.QueryHandlers.Alphadigi;
 
-public class SendCreatePackageDisplayQueryHandler : IRequestHandler<SendCreatePackageDisplayQuery, 
+public class SendCreatePackageDisplayQueryHandler : IRequestHandler<SendCreatePackageDisplayQuery,
                                                                     List<Domain.DTOs.Alphadigi.SerialData>>
 {
     private readonly IMediator _mediator;
     private readonly ILogger<SendCreatePackageDisplayQueryHandler> _logger;
+    private readonly DisplayService _displayService; // Adicione esta linha
 
-    public SendCreatePackageDisplayQueryHandler(IMediator mediator, 
-                                                ILogger<SendCreatePackageDisplayQueryHandler> logger)
+    public SendCreatePackageDisplayQueryHandler(
+        IMediator mediator,
+        ILogger<SendCreatePackageDisplayQueryHandler> logger,
+        DisplayService displayService) // Adicione no construtor
     {
         _mediator = mediator;
         _logger = logger;
+        _displayService = displayService;
     }
 
-    public async Task<List<Domain.DTOs.Alphadigi.SerialData>> Handle(SendCreatePackageDisplayQuery request, 
-                                                                     CancellationToken cancellationToken)
+    public async Task<List<Domain.DTOs.Alphadigi.SerialData>> Handle(
+        SendCreatePackageDisplayQuery request,
+        CancellationToken cancellationToken)
     {
-        _logger.LogInformation("INICIANDO SendCreatePackageDisplayQuery - Placa: {Placa}", request.Veiculo.Placa);
+        _logger.LogInformation("INICIANDO SendCreatePackageDisplayQuery - Placa: {Placa}",
+            request.Veiculo?.Placa);
 
-        string placaFormatada = request.Veiculo.Placa;
         try
         {
             if (request.Veiculo == null)
             {
-                _logger.LogError(" VEÍCULO É NULL!");
+                _logger.LogError("VEÍCULO É NULL!");
                 return new List<SerialData>();
             }
 
             if (string.IsNullOrEmpty(request.Acesso))
             {
-                _logger.LogWarning(" ACESSO ESTÁ VAZIO!");
+                _logger.LogWarning("ACESSO ESTÁ VAZIO!");
                 request.Acesso = "ACESSO INDEFINIDO";
             }
 
-            var veiculoDataQuery = new PrepareVeiculoDataStringQuery { Veiculo = request.Veiculo };
-            var dadosCompletos = await _mediator.Send(veiculoDataQuery, cancellationToken);
+            // ***** USE O DISPLAY SERVICE CORRETO *****
+            var serialData = await _displayService.RecieveMessageAlphadigi(
+                request.Veiculo.Placa ?? "SEM PLACA",
+                request.Acesso,
+                request.Alphadigi);
 
-            _logger.LogInformation("Dados completos do veículo: {Dados}", dadosCompletos);
+            _logger.LogInformation("✅ Pacotes gerados: {Count}", serialData?.Count ?? 0);
 
-            var mensagemDisplay = $"{placaFormatada} | {dadosCompletos} | {request.Acesso}";
-            _logger.LogInformation(" Mensagem do display: {Mensagem}", mensagemDisplay);
+            return serialData ?? new List<SerialData>();
 
-            string mensagemAviso = request.Acesso.Contains("NEGADO") ?
-           $"ACESSO NEGADO: {placaFormatada}" :
-           $"ACESSO LIBERADO: {placaFormatada}";
-
-            var displayQuery = new RecieveMessageAlphadigiQuery
-            {
-                Linha1 = mensagemDisplay,
-                Alphadigi = request.Alphadigi,
-                Tipo = "lista",
-            };
-
-            _logger.LogInformation("Enviando para display: {Mensagem}", mensagemDisplay);
-            return await _mediator.Send(displayQuery, cancellationToken);
-
-
-
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
-            _logger.LogError(ex, " ERRO em SendCreatePackageDisplayQuery");
+            _logger.LogError(ex, "❌ ERRO em SendCreatePackageDisplayQuery");
             throw;
         }
-
-        
-       
     }
 }

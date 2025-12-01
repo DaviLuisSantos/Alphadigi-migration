@@ -198,7 +198,7 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         var messageData = await sendDisplay(nome, alphadigi);
         ResponseHeathbeatDTO retorno = new()
         {
-            Response_Heartbeat = new ResponseAlarmInfoPlate
+            Response_Heartbeat = new Response_AlarmInfoPlate
             {
                 info = "no",
                 serialData = messageData

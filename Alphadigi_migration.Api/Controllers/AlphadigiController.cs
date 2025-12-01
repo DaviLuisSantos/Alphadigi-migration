@@ -70,6 +70,10 @@ public class AlphadigiController : ControllerBase
 
             var plateResult = await _mediator.Send(command);
 
+            var json = System.Text.Json.JsonSerializer.Serialize(result);
+            _logger.LogInformation("📤 RESPOSTA GERADA:");
+            _logger.LogInformation($"   Tipo: {plateResult?.GetType().Name}");
+
             if (plateResult == null)
             {
                 return BadRequest("PlateResult is null");

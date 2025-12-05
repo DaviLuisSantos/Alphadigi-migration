@@ -2,13 +2,7 @@
 
 public class ResponsePlateDTO
 {
-    public ResponseAlarmInfoPlate Response_AlarmInfoPlate  { get; set; }
+    public Response_AlarmInfoPlate Response_AlarmInfoPlate  { get; set; }
 }
 
 
-public class SerialData
-{
-    public int serialChannel { get; set; }
-    public string data { get; set; }
-    public int dataLen { get; set; }
-}

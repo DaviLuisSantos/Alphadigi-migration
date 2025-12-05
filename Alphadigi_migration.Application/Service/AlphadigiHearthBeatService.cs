@@ -198,12 +198,16 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         var messageData = await sendDisplay(nome, alphadigi);
         ResponseHeathbeatDTO retorno = new()
         {
-            Response_Heartbeat = new ResponseAlarmInfoPlate
+            Response_Heartbeat = new Response_AlarmInfoPlate
             {
                 info = "no",
                 serialData = messageData
             }
         };
+
+        _logger.LogInformation("🫀 Heartbeat gerado: info={Info}, pacotes={Count}",
+        retorno.Response_Heartbeat.info,
+        messageData?.Count ?? 0);
         return retorno;
     }
 
@@ -212,8 +216,8 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
         string? linha1 = "BEM VINDO";
         if (!alphadigi.Sentido)
             linha1 = "ATE LOGO";
-       // var pacote = await _displayService.RecieveMessageAlphadigi(linha1, Nome, alphadigi);
-        return null;
+       var pacote = await _displayService.RecieveMessageAlphadigi(linha1, Nome, alphadigi);
+        return pacote ?? new List<SerialData>();
     }
 
   

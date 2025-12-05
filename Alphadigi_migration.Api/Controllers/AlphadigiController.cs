@@ -70,6 +70,10 @@ public class AlphadigiController : ControllerBase
 
             var plateResult = await _mediator.Send(command);
 
+            var json = System.Text.Json.JsonSerializer.Serialize(result);
+            _logger.LogInformation("📤 RESPOSTA GERADA:");
+            _logger.LogInformation($"   Tipo: {plateResult?.GetType().Name}");
+
             if (plateResult == null)
             {
                 return BadRequest("PlateResult is null");
@@ -108,7 +112,11 @@ public class AlphadigiController : ControllerBase
             switch (request)
             {
                 case HeartbeatDTO dto:
-                    var resposta = await _hearthbeatService.ProcessHearthBeat(ipAddress);
+                    // 🔥 USAR O COMMAND HANDLER NOVO
+                    var command = new ProcessHeartbeatCommand(ipAddress, body); // body é o JSON completo
+                    var resposta = await _mediator.Send(command);
+
+
                     if (resposta is ResponseHeathbeatDTO)
                     {
                         var options = new JsonSerializerOptions { PropertyNamingPolicy = null, WriteIndented = true };
@@ -117,16 +125,16 @@ public class AlphadigiController : ControllerBase
                     return Ok(resposta);
 
                 case ReturnAddPlateDTO dto:
+                    // Manter o antigo para compatibilidade
                     if (dto.Response_AddWhiteList == null)
                         return BadRequest("Response_AddWhiteList não pode ser nulo.");
-
                     await _hearthbeatService.HandleCreateReturn(ipAddress);
                     return Ok($"Adição processada para: {dto.Response_AddWhiteList.serialno}");
 
                 case ReturnDelPlateDTO dto:
+                    // Manter o antigo para compatibilidade
                     if (dto.Response_DelWhiteListAll == null)
                         return BadRequest("Response_DelWhiteListAll não pode ser nulo.");
-
                     await _hearthbeatService.HandleDeleteReturn(ipAddress);
                     return Ok($"Remoção processada para: {dto.Response_DelWhiteListAll.serialno}");
 

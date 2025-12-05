@@ -6,6 +6,9 @@ using Alphadigi_migration.Application.Commands.Veiculo;
 using Alphadigi_migration.Application.Commands.Visitante;
 using Alphadigi_migration.Application.Queries.Alphadigi;
 using Alphadigi_migration.Application.Queries.Veiculo;
+using Alphadigi_migration.Application.Service;
+using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.DTOs.Display;
 using Alphadigi_migration.Domain.DTOs.Veiculos;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
@@ -19,15 +22,18 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
     private readonly IMediator _mediator;
     private readonly ILogger<ProcessPlateCommandHandler> _logger;
     private readonly IVisitanteRepository _visitanteRepository;
+    private readonly DisplayService _displayService; 
 
     public ProcessPlateCommandHandler(
         IMediator mediator,
         ILogger<ProcessPlateCommandHandler> logger,
-        IVisitanteRepository visitanteRepository)
+        IVisitanteRepository visitanteRepository,
+        DisplayService displayService)
     {
         _mediator = mediator;
         _logger = logger;
         _visitanteRepository = visitanteRepository;
+        _displayService = displayService;
     }
 
     public async Task<object> Handle(ProcessPlateCommand request, CancellationToken cancellationToken)
@@ -45,6 +51,8 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 _logger.LogError("Câmera não encontrada para o IP {Ip}. Abortando.", request.Ip);
                 throw new Exception("Camera não encontrada");
             }
+
+
 
             // 2. Registrar a leitura da placa
             var log = await _mediator.Send(new CreatePlacaLidaCommand
@@ -232,17 +240,14 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             });
 
             // 8. Enviar para display (com informações do visitante se aplicável)
-            await _mediator.Send(new SendToDisplayCommand
-            {
-                Placa = request.Plate,
-                Acesso = mensagemAcesso,
-                Liberado = accessResult.ShouldReturn,
-                Alphadigi = camera,
-                Veiculo = veiculoProcessado,
-                IsVisitante = isVisitante,
-                VisitanteNome = visitanteAutorizado?.Nome,
-                VisitanteUnidade = visitanteAutorizado?.UnidadeDestino
-            });
+
+            var serialData = await _displayService.RecieveMessageAlphadigi(
+            request.Plate,
+            mensagemAcesso,  // Use a mensagem corrigida
+            camera);
+
+            _logger.LogInformation("📦 Dados do display gerados: {Count} pacotes", serialData?.Count ?? 0);
+
 
             // 9. Enviar dados para monitor
             var dadosVeiculoDTO = new DadosVeiculoMonitorDTO
@@ -274,6 +279,14 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             });
 
             // 10. 🆕 EXCLUSÃO DO VISITANTE APÓS LIBERAR A CANCELA (apenas para saída)
+
+            await _mediator.Send(new UpdatePlacaLidaAcessoCommand
+            {
+                PlacaLidaId = log.Id,
+                Liberado = accessResult.ShouldReturn,
+                Acesso = mensagemAcesso,
+                IsVisitante = isVisitante
+            });
             if (isVisitante && visitanteAutorizado != null && isSaidaVisitante && accessResult.ShouldReturn)
             {
                 _logger.LogInformation("🗑️  Processando EXCLUSÃO do visitante após saída liberada: {Nome}", visitanteAutorizado.Nome);
@@ -307,20 +320,33 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             _logger.LogInformation("🏁 Processamento concluído para placa: {Plate}. Tipo: {Tipo}, Acesso: {Acesso}",
                 request.Plate, isVisitante ? "VISITANTE" : "MORADOR", accessResult.ShouldReturn ? "LIBERADO" : "NEGADO");
 
-            return new
+            _logger.LogInformation("📋 RESUMO DOS PACOTES:");
+            if (serialData != null)
             {
-                Placa = request.Plate,
-                Liberado = accessResult.ShouldReturn,
-                Acesso = mensagemAcesso,
-                Tipo = isVisitante ? "VISITANTE" : "MORADOR",
-                Visitante = isVisitante ? new
+                foreach (var data in serialData)
                 {
-                    Nome = visitanteAutorizado?.Nome,
-                    Unidade = visitanteAutorizado?.UnidadeDestino,
-                    DataVisita = visitanteAutorizado?.DataVisitaAgendada,
-                    Excluido = isSaidaVisitante && accessResult.ShouldReturn
-                } : null
+                    _logger.LogInformation("   Canal {Canal}: {Bytes} bytes, Base64: {Base64}",
+                        data.serialChannel,
+                        data.dataLen,
+                        data.data?.Substring(0, Math.Min(20, data.data?.Length ?? 0)) + "...");
+                }
+            }
+
+            _logger.LogInformation("📨 RETORNANDO PARA ALPHADIGI:");
+
+           
+
+
+            return new AlarmInfoPlateResponseDTO
+            {
+                ResponseAlarmInfoPlate = new Response_AlarmInfoPlate
+                {
+                    info = accessResult.ShouldReturn ? "ok" : "no",
+                    serialData = serialData
+                }
             };
+
+
 
         }
         catch (Exception e)

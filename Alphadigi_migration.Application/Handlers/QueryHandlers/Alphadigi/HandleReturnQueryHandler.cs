@@ -24,7 +24,7 @@ public class HandleReturnQueryHandler : IRequestHandler<HandleReturnQuery, Domai
 
         var retorno = new Domain.DTOs.Alphadigi.ResponsePlateDTO
         {
-            Response_AlarmInfoPlate = new Domain.DTOs.Alphadigi.ResponseAlarmInfoPlate
+            Response_AlarmInfoPlate = new Domain.DTOs.Alphadigi.Response_AlarmInfoPlate
             {
                 info = info,
                 serialData = request.MessageData

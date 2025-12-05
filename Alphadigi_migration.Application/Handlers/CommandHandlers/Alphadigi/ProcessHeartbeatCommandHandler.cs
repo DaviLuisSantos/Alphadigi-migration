@@ -1,11 +1,10 @@
 ﻿using Alphadigi_migration.Application.Commands.Alphadigi;
 using Alphadigi_migration.Application.Queries.Alphadigi;
+using Alphadigi_migration.Application.Service;
+using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using Alphadigi_migration.Domain.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
-
-
-namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Alphadigi;
 
 public class ProcessHeartbeatCommandHandler : IRequestHandler<ProcessHeartbeatCommand, object>
 {
@@ -20,26 +19,48 @@ public class ProcessHeartbeatCommandHandler : IRequestHandler<ProcessHeartbeatCo
         _logger = logger;
     }
 
-    public async Task<object> Handle(ProcessHeartbeatCommand request, 
-                                     CancellationToken cancellationToken)
+    public async Task<object> Handle(ProcessHeartbeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"ProcessHeartbeat chamado com IP: {request.Ip}");
+        _logger.LogInformation($"💓 HEARTBEAT recebido - IP: {request.Ip}");
 
         try
         {
-            // Buscar ou criar Alphadigi usando query
+            // 1. Buscar ou criar Alphadigi
             var getOrCreateQuery = new GetOrCreateAlphadigiQuery { Ip = request.Ip };
             var alphadigi = await _mediator.Send(getOrCreateQuery, cancellationToken);
 
-            // Processar estágio do Alphadigi
+            _logger.LogInformation($"📷 Câmera: {alphadigi.Ip}, Estado: {alphadigi.Estado}");
+
+            // 2. Processar estágio do Alphadigi
             var stageCommand = new HandleAlphadigiStageCommand { Alphadigi = alphadigi };
-            return await _mediator.Send(stageCommand, cancellationToken);
+            var stageResponse = await _mediator.Send(stageCommand, cancellationToken);
+
+            // 3. Se stageResponse não for null, retornar
+            if (stageResponse != null)
+            {
+                _logger.LogInformation($"📤 Retornando resposta do estágio: {alphadigi.Estado}");
+                return stageResponse;
+            }
+
+            // 4. Heartbeat: NÃO ENVIA NADA para o display!
+            // Apenas mantém a conexão
+
+            var response = new ResponseHeathbeatDTO
+            {
+                Response_Heartbeat = new Response_AlarmInfoPlate
+                {
+                    info = "no",
+                    serialData = new List<SerialData>()  // Lista VAZIA
+                }
+            };
+
+            _logger.LogInformation("✅ Heartbeat: apenas verificação, sem envio para display");
+            return response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro em ProcessHeartbeat");
+            _logger.LogError(ex, "❌ ERRO em ProcessHeartbeatCommandHandler");
             throw;
         }
     }
 }
-

@@ -1,47 +1,44 @@
 ﻿using Alphadigi_migration.Application.Commands.Display;
-using Alphadigi_migration.Application.Commands.SendUdpBroadcast;
-using Alphadigi_migration.Application.Queries.Alphadigi;
+using Alphadigi_migration.Application.Service;
 using MediatR;
 using Microsoft.Extensions.Logging;
-
-namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Display;
 
 public class SendToDisplayCommandHandler : IRequestHandler<SendToDisplayCommand>
 {
     private readonly IMediator _mediator;
     private readonly ILogger<SendToDisplayCommandHandler> _logger;
+    private readonly DisplayService _displayService;
 
-    public SendToDisplayCommandHandler(IMediator mediator, ILogger<SendToDisplayCommandHandler> logger)
+    public SendToDisplayCommandHandler(
+        IMediator mediator,
+        ILogger<SendToDisplayCommandHandler> logger,
+        DisplayService displayService)
     {
         _mediator = mediator;
         _logger = logger;
+        _displayService = displayService;
     }
 
     public async Task Handle(SendToDisplayCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogInformation(" ENVIANDO PARA DISPLAY - Placa: {Placa}, Acesso: {Acesso}",
+            _logger.LogInformation("📺 GERANDO DADOS PARA DISPLAY - Placa: {Placa}, Acesso: {Acesso}",
                 request.Placa, request.Acesso);
 
+            // Apenas gera os dados - o AlphaDigi vai buscá-los
+            var serialData = await _displayService.RecieveMessageAlphadigi(
+                request.Placa,
+                request.Acesso,
+                request.Alphadigi);
 
+            _logger.LogInformation("✅ Dados gerados para display: {Count} pacotes",
+                serialData?.Count ?? 0);
 
-            var displayQuery = new SendCreatePackageDisplayQuery
-            {
-                Veiculo = request.Veiculo,
-                Acesso = request.Acesso,
-                Alphadigi = request.Alphadigi
-            };
-
-            var messageDisplay = await _mediator.Send(displayQuery, cancellationToken);
-
-            _logger.LogInformation(" Dados enviados para display: {Mensagens} mensagens",
-                messageDisplay.Count);
-          
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, " Erro ao enviar para display");
+            _logger.LogError(ex, "❌ Erro ao gerar dados para display");
             throw;
         }
     }

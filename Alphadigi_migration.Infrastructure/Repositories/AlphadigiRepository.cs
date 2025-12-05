@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore.Storage;
-using Alphadigi_migration.Infrastructure.Data;
+﻿using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.Entities;
 using Alphadigi_migration.Domain.EntitiesNew;
-using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using Alphadigi_migration.Domain.Interfaces;
+using Alphadigi_migration.Infrastructure.Data;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 namespace Alphadigi_migration.Infrastructure.Repositories;
 
@@ -57,7 +58,7 @@ public class AlphadigiRepository : IAlphadigiRepository
               serialDataList[0].serialChannel,
               serialDataList[0].data,
               serialDataList[0].dataLen);
-
+            
             //if (!string.IsNullOrEmpty(message))
             //{
             //    serialDataList.Add(new SerialData
@@ -99,7 +100,7 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    private async Task SyncCamera(Camera cameraFire)
+    private async Task SyncCamera(Domain.EntitiesNew.Camera cameraFire)
     {
         var cameraSqlite = await _contextSqlite.Alphadigi.FindAsync(cameraFire.Id);
         if (cameraSqlite == null)
@@ -109,8 +110,12 @@ public class AlphadigiRepository : IAlphadigiRepository
                 ip: cameraFire.Ip,
                 nome: cameraFire.Nome,
                 areaId: cameraFire.IdArea,
-                sentido: cameraFire.Direcao == "ENTRADA"
+                sentido: cameraFire.Direcao == "ENTRADA",
+                estado: "DELETE"
+
+
             );
+            _contextSqlite.Alphadigi.Add(camera);
         }
         else
         {
@@ -164,7 +169,7 @@ public class AlphadigiRepository : IAlphadigiRepository
 
             _contextSqlite.Entry(existingCamera).CurrentValues.SetValues(camera);
 
-            SetUnmodifiedProperties(existingCamera, camera);
+           // SetUnmodifiedProperties(existingCamera, camera);
 
             await _contextSqlite.SaveChangesAsync();
             return true;
@@ -191,23 +196,40 @@ public class AlphadigiRepository : IAlphadigiRepository
     }
 
 
-    private void SetUnmodifiedProperties(Alphadigi_migration.Domain.EntitiesNew.Alphadigi existingCamera, Alphadigi_migration.Domain.EntitiesNew.Alphadigi camera)
-    {
-        foreach (var property in _contextSqlite.Entry(camera).Properties)
-        {
-            var currentValue = property.CurrentValue;
-            var propertyType = property.Metadata.ClrType;
+    //private void SetUnmodifiedProperties(Alphadigi_migration.Domain.EntitiesNew.Alphadigi existingCamera, Alphadigi_migration.Domain.EntitiesNew.Alphadigi camera)
+    //{
+    //    foreach (var property in _contextSqlite.Entry(camera).Properties)
+    //    {
+    //        var currentValue = property.CurrentValue;
+    //        var propertyType = property.Metadata.ClrType;
 
-            if (currentValue == null ||
-                (propertyType == typeof(int) && (int)currentValue == 0) ||
-                (propertyType == typeof(double) && (double)currentValue == 0.0) ||
-                (propertyType == typeof(float) && (float)currentValue == 0.0f) ||
-                (propertyType == typeof(decimal) && (decimal)currentValue == 0.0m))
-            {
-                _contextSqlite.Entry(existingCamera).Property(property.Metadata.Name).IsModified = false;
-            }
-        }
-    }
+    //        if (currentValue == null ||
+    //            (propertyType == typeof(int) && (int)currentValue == 0) ||
+    //            (propertyType == typeof(double) && (double)currentValue == 0.0) ||
+    //            (propertyType == typeof(float) && (float)currentValue == 0.0f) ||
+    //            (propertyType == typeof(decimal) && (decimal)currentValue == 0.0m))
+    //        {
+    //            _contextSqlite.Entry(existingCamera).Property(property.Metadata.Name).IsModified = false;
+    //        }
+    //    }
+    //}
+    //private void SetUnmodifiedProperties(Alphadigi_migration.Domain.EntitiesNew.Alphadigi existingCamera, Alphadigi_migration.Domain.EntitiesNew.Alphadigi camera)
+    //{
+    //    foreach (var property in _contextSqlite.Entry(camera).Properties)
+    //    {
+    //        var currentValue = property.CurrentValue;
+    //        var propertyType = property.Metadata.ClrType;
+
+    //        if (currentValue == null ||
+    //            (propertyType == typeof(int) && (int)currentValue == 0) ||
+    //            (propertyType == typeof(double) && (double)currentValue == 0.0) ||
+    //            (propertyType == typeof(float) && (float)currentValue == 0.0f) ||
+    //            (propertyType == typeof(decimal) && (decimal)currentValue == 0.0m))
+    //        {
+    //            _contextSqlite.Entry(existingCamera).Property(property.Metadata.Name).IsModified = false;
+    //        }
+    //    }
+    //}
 
     public async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> Get(string ip)
     {
@@ -245,44 +267,33 @@ public class AlphadigiRepository : IAlphadigiRepository
                 _logger.LogWarning($"Camera não encontrada no Firebird para o IP: {ip}");
                 throw new Exception("Camera não encontrada");
             }
-
-            // REMOVA o using (var transaction = ...) e faça o gerenciamento manual
-            var cameraSqlite = await _contextSqlite.Alphadigi
-                .Where(c => c.Ip == ip)
-                .Include(a => a.Area)
-                .FirstOrDefaultAsync();
-
-            if (cameraSqlite == null)
+            using (var transaction = _contextSqlite.Database.BeginTransaction())
             {
-                _logger.LogInformation($"Camera não encontrada no SQLite para o IP: {ip}. Criando nova entrada.");
-
-                var camera = new Alphadigi_migration.Domain.EntitiesNew.Alphadigi(
-                    ip: cameraFire.Ip,
-                    nome: cameraFire.Nome,
-                    areaId: cameraFire.IdArea,
-                    sentido: cameraFire.Direcao == "ENTRADA",
-                    linhasDisplay: 2
-                );
-
-                _contextSqlite.Alphadigi.Add(camera);
-                await _contextSqlite.SaveChangesAsync(); // SEM transação explícita
-                _logger.LogInformation($"Nova camera criada no SQLite para o IP: {ip}");
-                return camera;
-            }
-            else
-            {
-                bool sentidoFire = cameraFire.Direcao == "ENTRADA";
-                if (cameraSqlite.AreaId != cameraFire.IdArea || cameraSqlite.Sentido != sentidoFire)
+                try
                 {
-                    _logger.LogInformation($"Alterações detectadas na camera no SQLite para o IP: {ip}. Atualizando.");
+                    var cameraSqlite = await _contextSqlite.Alphadigi
+                        .Where(c => c.Ip == ip)
+                        .Include(a => a.Area)
+                        .FirstOrDefaultAsync();
 
-                    cameraSqlite.AtualizarDadosBasicos(cameraFire.IdArea, sentidoFire);
-
-                    _contextSqlite.Alphadigi.Update(cameraSqlite);
-                    await _contextSqlite.SaveChangesAsync(); // SEM transação explícita
-                    _logger.LogInformation($"Camera atualizada no SQLite para o IP: {ip}");
+                    if (cameraSqlite == null)
+                    {
+                        return await CreateNewCamera(ip, cameraFire, transaction);
+                    }
+                    else
+                    {
+                        return await UpdateExistingCamera(ip, cameraFire, cameraSqlite, transaction);
+                    }
                 }
-                return cameraSqlite;
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Erro ao processar a transação no SQLite para o IP: {ip}");
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            
+
+           
             }
         }
         catch (Exception ex)
@@ -292,16 +303,20 @@ public class AlphadigiRepository : IAlphadigiRepository
         }
     }
 
-    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, Camera cameraFire)
+ 
+    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> CreateNewCamera(string ip, Domain.EntitiesNew.Camera cameraFire, IDbContextTransaction transaction)
     {
         _logger.LogInformation($"Camera não encontrada no SQLite para o IP: {ip}. Criando nova entrada.");
+        
 
         var camera = new Alphadigi_migration.Domain.EntitiesNew.Alphadigi(
             ip: cameraFire.Ip,
             nome: cameraFire.Nome,
+            estado: "DELETE",
             areaId: cameraFire.IdArea,
             sentido: cameraFire.Direcao == "ENTRADA",
             linhasDisplay: 2
+
         );
 
         _contextSqlite.Alphadigi.Add(camera);
@@ -309,7 +324,7 @@ public class AlphadigiRepository : IAlphadigiRepository
         _logger.LogInformation($"Nova camera criada no SQLite para o IP: {ip}");
         return camera;
     }
-    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> UpdateExistingCamera(string ip, Camera cameraFire, Alphadigi_migration.Domain.EntitiesNew.Alphadigi cameraSqlite)
+    private async Task<Alphadigi_migration.Domain.EntitiesNew.Alphadigi> UpdateExistingCamera(string ip, Domain.EntitiesNew.Camera cameraFire, Alphadigi_migration.Domain.EntitiesNew.Alphadigi cameraSqlite, IDbContextTransaction transaction)
     {
         bool sentidoFire = cameraFire.Direcao == "ENTRADA";
         if (cameraSqlite.AreaId != cameraFire.IdArea || cameraSqlite.Sentido != sentidoFire)

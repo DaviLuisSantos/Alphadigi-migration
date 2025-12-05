@@ -1,12 +1,17 @@
 {
-  "Placa": "BRA0S17",
-  "Liberado": true,
-  "Acesso": "SA\u00CDDA - VISITANTE: LAURA - EXCLU\u00CDDO",
-  "Tipo": "VISITANTE",
-  "Visitante": {
-    "Nome": "LAURA",
-    "Unidade": "1104BLOCO A",
-    "DataVisita": null,
-    "Excluido": true
+  "Response_AlarmInfoPlate": {
+    "info": "ok",
+    "serialData": [
+      {
+        "serialChannel": 0,
+        "data": "AGT//244AAIAAAAKAP//AAAHTFRJMTYyNg0BAAAKAAD/AAAITElCRVJBRE8AfHYAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "dataLen": 65
+      },
+      {
+        "serialChannel": 0,
+        "data": "AGT//w8GAAEAAAAFJLc=",
+        "dataLen": 14
+      }
+    ]
   }
 }

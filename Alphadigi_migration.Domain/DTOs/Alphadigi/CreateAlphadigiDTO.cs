@@ -16,7 +16,7 @@ public class CreateAlphadigiDTO : ICreateAlphadigiDTO
     public bool Sentido { get; set; }
     public bool Enviado { get; set; } = false;
 
-    public int LinhasDisplay { get;  set; }
+    public int LinhasDisplay { get;  set; } = 2;
     public string Estado { get;  set; }
 
     public bool FotoEvento { get;  set; }

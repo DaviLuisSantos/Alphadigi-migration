@@ -32,7 +32,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
     [StringLength(10)]
     public string UltimaPlaca { get; private set; } = "N/A";
     public DateTime? UltimaHora { get; private set; }
-    public int LinhasDisplay { get; private set; }
+    public int LinhasDisplay { get; private set; } = 2;
     public bool Enviado { get; private set; }
     public bool FotoEvento { get; private set; }
     public DateTime DataCriacao { get; private set; }
@@ -45,6 +45,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
     public Alphadigi(
         string ip,
         string nome,
+        string estado,
         int areaId,
         bool sentido,
         int linhasDisplay = 2)
@@ -57,7 +58,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
         Nome = nome;
         AreaId = areaId;
         Sentido = sentido;
-        Estado = "ACTIVE";
+        Estado = estado;
         LinhasDisplay = linhasDisplay;
         Enviado = false;
         FotoEvento = false;
@@ -69,14 +70,16 @@ public class Alphadigi : EntityBase, IAggregateRoot
 
     // Métodos de Domínio
 
+ 
+
     public void AtualizarLinhasDisplay(int novaLinhasDisplay)
     {
         ValidarLinhasDisplay(novaLinhasDisplay);
 
         LinhasDisplay = novaLinhasDisplay;
-        DataAtualizacao = DateTime.UtcNow;
+       
 
-         AddDomainEvent(new AlphadigiLinhasDisplayAtualizadasEvent(Id, Nome, novaLinhasDisplay));
+         //AddDomainEvent(new AlphadigiLinhasDisplayAtualizadasEvent(Id, Nome, novaLinhasDisplay));
     }
     public void AtualizarArea(Area area)
     {

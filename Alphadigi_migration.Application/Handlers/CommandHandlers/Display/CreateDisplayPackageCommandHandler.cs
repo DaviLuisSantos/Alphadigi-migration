@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Alphadigi_migration.Application.Handlers.CommandHandlers.Display;
 
 
-public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayPackageCommand, 
+public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayPackageCommand,
                                                                   List<SerialData>>
 {
     private readonly IMensagemDisplayRepository _mensagemDisplayRepository;
@@ -34,7 +34,7 @@ public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayP
         _mapper = mapper;
     }
 
-    public async Task<List<SerialData>> Handle(CreateDisplayPackageCommand request, 
+    public async Task<List<SerialData>> Handle(CreateDisplayPackageCommand request,
                                                CancellationToken cancellationToken)
     {
         var alphadigi = await _alphadigiRepository.GetById(request.AlphadigiId);
@@ -81,8 +81,8 @@ public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayP
         _logger.LogInformation($"PACOTE GERADO: {hexString}");
     }
 
-    private async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(string placa, 
-                                                                           string acesso, 
+    private async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(string placa,
+                                                                           string acesso,
                                                                            Domain.EntitiesNew.Alphadigi alphadigi)
     {
         if (alphadigi.LinhasDisplay == 0 && placa == DisplayConstants.WelcomeMessage)
@@ -195,14 +195,14 @@ public class CreateDisplayPackageCommandHandler : IRequestHandler<CreateDisplayP
             dataHora: DateTime.Now,
             alphadigiId: alphadigiId
         );
-      
+
         await _mensagemDisplayRepository.SaveMensagemDisplayAsync(mensagem);
     }
 
     private ReturnDataDisplayDTO PrepareMessage(List<CreatePackageDisplayDTO> packageDisplayList)
     {
         var package = _displayProtocolService.CreateMultiLinePackage(lines: packageDisplayList,
-        voiceText: null,         
+        voiceText: null,
         saveToFlash: false);
 
 

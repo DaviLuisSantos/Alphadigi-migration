@@ -2,6 +2,7 @@
 using Alphadigi_migration.Domain.DTOs.Display;
 using Alphadigi_migration.Domain.Entities;
 using Alphadigi_migration.Domain.EntitiesNew;
+using Alphadigi_migration.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 
@@ -11,12 +12,13 @@ public class DisplayService
 {
     private readonly MensagemDisplayService _mensagemDisplayService;
     private readonly ILogger<DisplayService> _logger;
+    private readonly IAlphadigiRepository _alphadigiRepository;
 
     private const string Green = "green";
     private const string Yellow = "yellow";
     private const string Red = "red";
     private const string WelcomeMessage = "BEM VINDO";
-    private const string Cadastrado = "CADASTRADO";
+    private const string Cadastrado = "CADASTRADO";  
     private const string NaoCadastrado = "NÃO CADASTRADO";
     private const string NaoCadastradoFixed = "NAO CADADASTRADO";
     private const string SemVaga = "S/VG";
@@ -24,287 +26,235 @@ public class DisplayService
     private const string Liberado = "LIBERADO";
     private const string SinalSerialData = "AGT//w8GAAEAAAAFJLc=";
     private const int SinalSerialDataLen = 14;
+    private bool _isDisplayInitialized = false;
 
     public DisplayService(
         MensagemDisplayService mensagemDisplayService,
-        ILogger<DisplayService> logger)
+        ILogger<DisplayService> logger, IAlphadigiRepository alphadigiRepository)
     {
         _mensagemDisplayService = mensagemDisplayService;
         _logger = logger;
+        _alphadigiRepository = alphadigiRepository;
     }
 
-    public async Task<List<SerialData>> RecieveMessageAlphadigi(
-     string placa,
-     string acesso,
-     Domain.EntitiesNew.Alphadigi alphadigi)
+    public async Task InitializeDisplay(Domain.EntitiesNew.Alphadigi alphadigi)
+    {
+        if (!_isDisplayInitialized)
+        {
+            _logger.LogInformation("🔄 Inicializando display com data/hora padrão");
+
+            // Envia data/hora como conteúdo padrão
+            var defaultPackage = await CreateDefaultDisplayPackage(alphadigi);
+
+            // Marca como inicializado
+            _isDisplayInitialized = true;
+
+            _logger.LogInformation("✅ Display inicializado com conteúdo padrão");
+        }
+    }
+    private async Task<List<SerialData>> CreateDefaultDisplayPackage(Domain.EntitiesNew.Alphadigi alphadigi)
     {
         var serialDataList = new List<SerialData>();
 
-        _logger.LogInformation("🔄 ORDENANDO PACOTES para AlphaDigi");
-
-        // 🔄 TENTE ESTA ORDEM DIFERENTE:
-        // 1. PRIMEIRO o sinal serial (se for CADASTRADO)
-        if (acesso.ToUpper() == "CADASTRADO")
+        if (alphadigi.LinhasDisplay == 4)
         {
-            serialDataList.Add(new SerialData
+            // Para display de 4 linhas: mostra data e hora permanentemente
+            var defaultLines = new List<CreatePackageDisplayDTO>
             {
-                serialChannel = 0,
-                data = "AGT//w8GAAEAAAAFJLc=",
-                dataLen = 14
-            });
-            _logger.LogInformation("📡 1. Sinal serial enviado PRIMEIRO");
-        }
+                new() { Mensagem = "", Linha = 1, Cor = Green, Tempo = 0, Estilo = 0 }, // Linha vazia
+                new() { Mensagem = "", Linha = 2, Cor = Green, Tempo = 0, Estilo = 0 }, // Linha vazia
+                new() { Mensagem = "`D/`M/`Y", Linha = 3, Cor = Red, Tempo = 0, Estilo = 0 }, // Data
+                new() { Mensagem = "`H:`N:`S", Linha = 4, Cor = Yellow, Tempo = 0, Estilo = 0 } // Hora
+            };
 
-        // 2. DEPOIS o pacote principal
-        var packageDisplayList = await GenerateDisplayPackage(placa, acesso, alphadigi);
-        if (packageDisplayList != null && packageDisplayList.Any())
-        {
-            var package = PrepareMessage(packageDisplayList);
+            var package = PrepareMessage(defaultLines);
             serialDataList.Add(CreateSerialData(package));
-            _logger.LogInformation("📦 2. Pacote principal enviado DEPOIS");
+        }
+        else if (alphadigi.LinhasDisplay == 2)
+        {
+            // Para display de 2 linhas: mostra "BEM VINDO" permanentemente
+            var defaultLines = new List<CreatePackageDisplayDTO>
+            {
+                new() { Mensagem = "BEM VINDO", Linha = 1, Cor = Green, Tempo = 0, Estilo = 0 },
+                new() { Mensagem = "AGUARDANDO", Linha = 2, Cor = Yellow, Tempo = 0, Estilo = 0 }
+            };
+
+            var package = PrepareMessage(defaultLines);
+            serialDataList.Add(CreateSerialData(package));
         }
 
         return serialDataList;
     }
 
-    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(
-        string placa,
-        string acesso,
-        Domain.EntitiesNew.Alphadigi alphadigi)
+
+    public async Task<List<SerialData>> RecieveMessageAlphadigi(
+    string placa, string acesso, Domain.EntitiesNew.Alphadigi alphadigi)
     {
-        try
+        await InitializeDisplay(alphadigi);
+
+        var serialDataList = new List<SerialData>();
+
+    
+      
+        var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
+        _logger.LogInformation($"📦 Resultado GenerateDisplayPackage: {(packageDisplayList != null ? "SUCESSO" : "NULL")}");
+
+        if (packageDisplayList != null)
         {
-            _logger.LogInformation("🫀 Gerando heartbeat para display - Placa: {Placa}", placa);
+            var package = PrepareMessage(packageDisplayList);
+            serialDataList.Add(CreateSerialData(package));
+            _logger.LogInformation("📦 Pacote da placa enviado DEPOIS");
+        }
+        
 
-            var serialDataList = new List<SerialData>();
-
-            // 1. Gerar pacote principal
-            var packageDisplayList = await GenerateDisplayPackage(placa, acesso, alphadigi);
-
-            if (packageDisplayList != null && packageDisplayList.Any())
+        
+        if (acesso == Cadastrado)
+        {
+            serialDataList.Add(new SerialData
             {
-                var package = PrepareMessage(packageDisplayList);
-                serialDataList.Add(CreateSerialData(package));
-            }
-
-            // 2. ADICIONAR SINCRONIZAÇÃO DE DATA/HORA (MUITO IMPORTANTE!)
-            var syncPackage = SyncDateDisplay();
-            serialDataList.Add(CreateSerialData(syncPackage));
-
-            _logger.LogInformation("✅ {Count} pacotes de heartbeat gerados", serialDataList.Count);
-            return serialDataList;
+                serialChannel = 0,
+                data = SinalSerialData,
+                dataLen = SinalSerialDataLen
+            });
+            _logger.LogInformation("✅ Sinal verde enviado para placa cadastrada");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "❌ Erro ao gerar heartbeat para display");
-            throw;
-        }
+
+       
+        _logger.LogInformation($"✅ Pacote gerado com {serialDataList.Count} linhas");
+        return serialDataList;
     }
+
+    public async Task<List<SerialData>> RecieveMessageHearthbeatAlphadigi(
+    string placa, string acesso, Domain.EntitiesNew.Alphadigi alphadigi)
+    {
+        
+
+        var serialDataList = new List<SerialData>();
+        var packageDisplayList = await PrepareCreatePackage(placa, acesso, alphadigi);
+
+
+
+        if (packageDisplayList != null)
+        {
+            var package = PrepareMessage(packageDisplayList);
+            serialDataList.Add(CreateSerialData(package));
+        }
+
+        var syncPackage = SyncDateDisplay();
+        serialDataList.Add(CreateSerialData(syncPackage));
+
+        return serialDataList;
+
+
+    }
+
+
 
     public ReturnDataDisplayDTO PrepareMessage(List<CreatePackageDisplayDTO> packageDisplayList)
     {
-        try
+        _logger.LogInformation($"📦 Criando pacote com {packageDisplayList.Count} linhas");
+        foreach (var line in packageDisplayList)
         {
-            _logger.LogInformation("📦 Preparando mensagem para {Count} linhas", packageDisplayList.Count);
-
-            foreach (var line in packageDisplayList)
-            {
-                _logger.LogDebug("   Linha {Linha}: '{Mensagem}' Cor: {Cor}",
-                    line.Linha, line.Mensagem, line.Cor);
-            }
-
-            var package = Display.CreateMultiLinePackage(packageDisplayList);
-
-            // Log HEX e Base64
-            var hexString = BitConverter.ToString(package).Replace("-", "");
-            var base64String = Convert.ToBase64String(package);
-
-            _logger.LogInformation("📊 Pacote gerado - HEX: {Hex}", hexString);
-            _logger.LogInformation("📊 Pacote gerado - Base64: {Base64}", base64String);
-            _logger.LogInformation("📏 Tamanho: {Size} bytes", package.Length);
-
-            return new ReturnDataDisplayDTO
-            {
-                Message = base64String,
-                Size = package.Length
-            };
+            _logger.LogInformation($"  Linha {line.Linha}: '{line.Mensagem}' (Tempo={line.Tempo}s, Estilo={line.Estilo})");
         }
-        catch (Exception ex)
+
+        var package = Display.CreateMultiLinePackage(packageDisplayList);
+
+        _logger.LogInformation("🔍 ANÁLISE DO PACOTE:");
+        _logger.LogInformation($"  Comando: 0x6E (Multi-line display)");
+        _logger.LogInformation($"  SaveFlag: 0x{package[6]:X2} (0=RAM, 1=Flash)");
+        _logger.LogInformation($"  TextContextNumber: 0x{package[7]:X2} ({package[7]} linhas)");
+
+
+        int index = 8;
+        for (int i = 0; i < packageDisplayList.Count; i++)
         {
-            _logger.LogError(ex, "❌ Erro ao preparar mensagem para display");
-            throw;
+            byte lineId = package[index];
+            byte dm = package[index + 1];
+            byte ds = package[index + 2];
+            byte dt = package[index + 3]; // ⚠️ Dwell Time
+            byte dr = package[index + 4];
+
+            _logger.LogInformation($"  Linha {i + 1}: LID={lineId}, DM={dm}, DS={ds}, DT={dt}s, DR={dr}");
+
+            // Pular para próxima linha (LID + DM + DS + DT + DR + TC[4] + TL + TEXT)
+            int textLength = package[index + 9]; // TL
+            index += 10 + textLength + 1; // +1 para o separador
         }
+        // ⭐⭐ LOG HEX DETALHADO ⭐⭐
+        _logger.LogInformation("🔍🔍🔍 PACOTE HEX COMPLETO (65 bytes):");
+        string hex = BitConverter.ToString(package).Replace("-", "");
+
+        // Log em grupos de 32 caracteres (16 bytes)
+        for (int i = 0; i < hex.Length; i += 32)
+        {
+            int length = Math.Min(32, hex.Length - i);
+            _logger.LogInformation($"  {i / 2:X4}: {hex.Substring(i, length)}");
+        }
+
+
+        LogPackage(package);
+
+        return new ReturnDataDisplayDTO
+        {
+            Message = Convert.ToBase64String(package),
+            Size = package.Length
+        };
     }
-    public void DebugComparePackages()
-    {
-        // Teste com dados conhecidos que funcionavam na versão antiga
-        var testPackage = new List<CreatePackageDisplayDTO>
-    {
-        new CreatePackageDisplayDTO
-        {
-            Mensagem = "KXO9G11",
-            Linha = 1,
-            Cor = "yellow", // Na versão antiga, placa era amarela
-            Tempo = 10,
-            Estilo = 0
-        },
-        new CreatePackageDisplayDTO
-        {
-            Mensagem = "LIBERADO",
-            Linha = 2,
-            Cor = "green", // IMPORTANTE: deve ser verde para CADASTRADO
-            Tempo = 10,
-            Estilo = 0
-        }
-    };
 
-        var package = Display.CreateMultiLinePackage(testPackage);
-        var hex = BitConverter.ToString(package).Replace("-", "");
-        var base64 = Convert.ToBase64String(package);
-
-        _logger.LogInformation("🔍 PACOTE DE TESTE:");
-        _logger.LogInformation($"   HEX: {hex}");
-        _logger.LogInformation($"   Base64: {base64}");
-        _logger.LogInformation($"   Tamanho: {package.Length} bytes");
-
-        // Compare com um pacote que você sabe que funcionava
-    }
     public ReturnDataDisplayDTO SyncDateDisplay()
     {
-        try
+        var package = Display.CreateTimeSyncPackage();
+        LogPackage(package);
+        return new ReturnDataDisplayDTO
         {
-            // Verifique se a classe Display existe
-            // Se não existir, implemente CreateTimeSyncPackage
-            var package = Display.CreateTimeSyncPackage();
-            LogPackage(package);
-
-            return new ReturnDataDisplayDTO
-            {
-                Message = Convert.ToBase64String(package),
-                Size = package.Length
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "❌ Erro ao sincronizar data/hora do display");
-            throw;
-        }
-    }
-
-    public async Task<List<CreatePackageDisplayDTO>> GenerateDisplayPackage(
-     string placa,
-     string acesso,
-     Domain.EntitiesNew.Alphadigi alphadigi)
-    {
-        try
-        {
-            _logger.LogInformation("🎯 GERANDO PACOTE DISPLAY - Placa: '{Placa}', Acesso: '{Acesso}', Linhas: {Linhas}",
-       placa, acesso, alphadigi.LinhasDisplay);
-            // Se não tem linhas no display, retorna null
-            if (alphadigi.LinhasDisplay == 0)
-                return null;
-
-            var (displayColor, displayAcesso) = GetDisplayColorAndAcesso(placa, acesso);
-
-            // VERIFICAÇÃO DE REPETIÇÃO (igual à versão antiga)
-            var lastCamMessage = await _mensagemDisplayService.FindLastCamMensagemAsync(alphadigi.Id);
-
-            // Caso especial: se a última mensagem da câmera foi "BEM VINDO" e estamos tentando enviar outra coisa
-            if (lastCamMessage?.Placa == "BEM VINDO" && placa != "BEM VINDO")
-            {
-                _logger.LogDebug("⏸️  Ignorando mensagem após 'BEM VINDO'");
-                return null;
-            }
-
-            // Verifica se mensagem idêntica foi enviada nos últimos 12 segundos
-            var lastIdenticalMessage = await _mensagemDisplayService.FindLastMensagemAsync(
-                new FindLastMessage(placa, displayAcesso, alphadigi.Id));
-
-            var displayLines = new List<CreatePackageDisplayDTO>();
-
-            // Adiciona placa (sempre)
-            displayLines.Add(CreatePlacaDisplayDTO(placa));
-
-            // Só adiciona mensagem de acesso se não for repetição
-            if (lastIdenticalMessage == null ||
-                (DateTime.Now - lastIdenticalMessage.DataHora).TotalSeconds > 12)
-            {
-                displayLines.Add(CreateAcessoDisplayDTO(displayAcesso, displayColor));
-
-                // Salva no histórico
-                var mensagem = new Domain.EntitiesNew.MensagemDisplay(
-                    placa: placa,
-                    mensagem: displayAcesso,
-                    alphadigiId: alphadigi.Id,
-                    dataHora: DateTime.Now,
-                    prioridade: 1
-                );
-                await _mensagemDisplayService.SaveMensagemDisplayAsync(mensagem);
-            }
-            else
-            {
-                _logger.LogDebug("⏭️  Mensagem repetida, ignorando: {Placa} - {Acesso}",
-                    placa, displayAcesso);
-            }
-
-            // Adiciona data/hora se display tem 4 linhas
-            if (alphadigi.LinhasDisplay == 4)
-            {
-                displayLines.Add(CreateDateDisplayDTO());
-                displayLines.Add(CreateTimeDisplayDTO());
-            }
-
-            foreach (var line in displayLines)
-            {
-                _logger.LogInformation(
-                    "📝 Linha {Numero}: '{Texto}' | Cor: {Cor} | Tempo: {Tempo}s | Estilo: {Estilo}",
-                    line.Linha, line.Mensagem, line.Cor, line.Tempo, line.Estilo);
-            }
-
-            return displayLines;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "❌ Erro ao gerar pacote para display");
-            // Em caso de erro, pelo menos mostra algo
-            return new List<CreatePackageDisplayDTO>
-        {
-            CreatePlacaDisplayDTO(placa),
-            CreateAcessoDisplayDTO("ERRO SISTEMA", Red)
+            Message = Convert.ToBase64String(package),
+            Size = package.Length
         };
-        }
     }
 
-
-    private async Task TrySaveToHistory(string placa, string acesso, int alphadigiId)
+    public async Task<List<CreatePackageDisplayDTO>> PrepareCreatePackage(
+     string placa, string acesso, Domain.EntitiesNew.Alphadigi alphadigi)
     {
-        try
-        {
-            // Verifica se já existe mensagem recente para evitar salvar repetidamente
-            var lastMessage = await _mensagemDisplayService.FindLastMensagemAsync(
-                new FindLastMessage(placa, acesso, alphadigiId));
+        if (alphadigi.LinhasDisplay == 0 && placa == WelcomeMessage)
+            return null;
 
-            // Se não tem mensagem recente (últimos 10 segundos), salva
-            if (lastMessage == null || (DateTime.Now - lastMessage.DataHora).TotalSeconds > 10)
-            {
-                var mensagem = new Domain.EntitiesNew.MensagemDisplay(
-                    placa: placa,
-                    mensagem: acesso,
-                    alphadigiId: alphadigiId,
-                    dataHora: DateTime.Now,
-                    prioridade: 1
-                );
+        _logger.LogInformation($"🔍 AAAAA LinhasDisplay: {alphadigi.LinhasDisplay}, Placa: {placa}");
 
-                await _mensagemDisplayService.SaveMensagemDisplayAsync(mensagem);
-                _logger.LogDebug("💾 Mensagem salva no histórico: {Placa} - {Acesso}", placa, acesso);
-            }
-        }
-        catch (Exception ex)
+        var (displayColor, displayAcesso) = GetDisplayColorAndAcesso(placa, acesso);
+        var serialDataList = new List<CreatePackageDisplayDTO>
         {
-            // Não quebra o fluxo principal se falhar ao salvar histórico
-            _logger.LogWarning(ex, "⚠️  Não foi possível salvar no histórico: {Placa}", placa);
+            CreatePlacaDisplayDTO(placa)
+        };
+
+        var lastMessage = await _mensagemDisplayService.FindLastMensagemAsync(new FindLastMessage(placa, displayAcesso, alphadigi.Id));
+        var lastCamMessage = await _mensagemDisplayService.FindLastCamMensagemAsync(alphadigi.Id);
+
+
+
+        // Only save the message if needed
+        if (ShouldAddAcessoLine(lastMessage, lastCamMessage, placa))
+        {
+            // Always add the access/status line
+            serialDataList.Add(CreateAcessoDisplayDTO(displayAcesso, displayColor));
+            await SaveMensagemDisplayAsync(placa, displayAcesso, alphadigi.Id);
         }
+        else if (lastCamMessage?.Placa == WelcomeMessage)
+        {
+            // return null;
+        }
+
+        if (alphadigi.LinhasDisplay == 4)
+        {
+            serialDataList.Add(CreateDateDisplayDTO());
+            serialDataList.Add(CreateTimeDisplayDTO());
+        }
+
+        return serialDataList;
     }
+
+
+
 
     #region Private Helper Methods
 
@@ -326,55 +276,29 @@ public class DisplayService
 
     private static (string Color, string Acesso) GetDisplayColorAndAcesso(string placa, string acesso)
     {
-        // EXATAMENTE igual à versão antiga
-        string cor = "red";
-        string acessoFormatado = acesso;
-
-        if (string.IsNullOrEmpty(acesso))
+        return acesso switch
         {
-            acessoFormatado = "LIBERADO";
-            cor = "green";
-        }
-        else
-        {
-            switch (acesso.ToUpper())
-            {
-                case "CADASTRADO":
-                    cor = "green";
-                    acessoFormatado = "LIBERADO";
-                    break;
-                case "NÃO CADASTRADO":
-                case "NAO CADASTRADO":
-                    acessoFormatado = "NAO CADADASTRADO";
-                    break;
-                case "S/VG":
-                    cor = "yellow";
-                    acessoFormatado = "SEM VAGA";
-                    break;
-            }
-        }
-
-        // CUIDADO: Na versão antiga, só muda para yellow se NÃO for "NAO CADADASTRADO"
-        // e a placa for "BEM VINDO"
-        if (acessoFormatado != "NAO CADADASTRADO" && placa == "BEM VINDO")
-        {
-            cor = "yellow";
-        }
-
-        return (cor, acessoFormatado);
+            "" or Cadastrado => (Green, Liberado),
+            NaoCadastrado => (Red, NaoCadastradoFixed),
+            SemVaga => (Yellow, SemVagaFixed),
+            _ => (placa == WelcomeMessage ? Yellow : Red, acesso == "" ? Liberado : acesso)
+        };
     }
 
     private static CreatePackageDisplayDTO CreatePlacaDisplayDTO(string placa)
     {
-        int tempo = placa.Length > 8 ? 1 : 10;
-        int estilo = placa.Length > 8 ? 15 : 0;
+       
+        int tempo = placa.Length > 8 ? 1 : 10;  
+        int estilo = placa.Length > 8 ? 15 : 0; 
+
+
         return new CreatePackageDisplayDTO
         {
             Mensagem = placa,
             Linha = 1,
-            Cor = placa == WelcomeMessage ? Green : Yellow,
-            Tempo = tempo,
-            Estilo = estilo
+            Cor = placa == WelcomeMessage ? Green : Yellow, 
+            Tempo = 10,   
+            Estilo = 0
         };
     }
 
@@ -382,13 +306,15 @@ public class DisplayService
     {
         int tempo = acesso.Length > 8 ? 1 : 10;
         int estilo = acesso.Length > 8 ? 15 : 0;
+      
+
         return new CreatePackageDisplayDTO
         {
             Mensagem = acesso,
             Linha = 2,
             Cor = cor,
-            Tempo = tempo,
-            Estilo = estilo
+            Tempo = 10,
+            Estilo = 0
         };
     }
 
@@ -396,10 +322,10 @@ public class DisplayService
     {
         return new CreatePackageDisplayDTO
         {
-            Mensagem = "`D-`M-`Y",
-            Linha = 3,
+            Mensagem = "`D/`M/`Y",  
+            Linha = 3,              
             Cor = Red,
-            Tempo = 0,
+            Tempo = 10,              
             Estilo = 0
         };
     }
@@ -408,13 +334,48 @@ public class DisplayService
     {
         return new CreatePackageDisplayDTO
         {
-            Mensagem = "`H:`N:`S",
-            Linha = 4,
+            Mensagem = "`H:`N:`S",  
+            Linha = 4,               
             Cor = Yellow,
-            Tempo = 0,
+            Tempo = 10,               
             Estilo = 0
         };
     }
+
+    private static bool ShouldAddAcessoLine(Domain.EntitiesNew.MensagemDisplay lastMessage, 
+                                            Domain.EntitiesNew.MensagemDisplay lastCamMessage, 
+                                            string placa)
+    {
+        return lastMessage == null ||
+               (lastCamMessage.Id == 0 || (lastCamMessage != null && lastCamMessage.Id != lastMessage.Id && lastCamMessage.Placa != placa));
+    }
+
+    private async Task SaveMensagemDisplayAsync(string placa, string acesso, int alphadigiId)
+    {
+        // Se for "BEM VINDO", não salve como placa
+        if (placa == WelcomeMessage)
+        {
+            _logger.LogInformation("📝 Ignorando salvamento de mensagem para 'BEM VINDO'");
+            return;
+        }
+
+        // Valida se é uma placa válida (máximo 8 caracteres)
+        if (placa.Length > 8)
+        {
+            _logger.LogWarning($"⚠️ Placa muito longa para salvar: '{placa}' ({placa.Length} caracteres)");
+            return;
+        }
+
+        var mensagem = new Domain.EntitiesNew.MensagemDisplay
+        (
+            placa: placa,
+            mensagem: acesso,
+            dataHora: DateTime.Now,
+            alphadigiId: alphadigiId
+        );
+        await _mensagemDisplayService.SaveMensagemDisplayAsync(mensagem);
+    }
+
 
     #endregion
 }

@@ -3,7 +3,6 @@ using Alphadigi_migration.Domain.Interfaces;
 using System.Text;
 
 namespace Alphadigi_migration.Domain.Entities;
-
 // Presumindo que o DTO seja algo assim:
 // namespace Alphadigi_migration.DTO.Display
 // {
@@ -49,7 +48,7 @@ public static class Display
     private const byte VoiceFlag = 0x0A;
     private const int MaxVoiceLength = 64;
 
-    public static byte[] CreatePackage(IDisplayPackage packageParams)
+    public static byte[] CreatePackage(CreatePackageDisplayDTO packageParams)
     {
         if (packageParams == null)
             throw new ArgumentNullException(nameof(packageParams));

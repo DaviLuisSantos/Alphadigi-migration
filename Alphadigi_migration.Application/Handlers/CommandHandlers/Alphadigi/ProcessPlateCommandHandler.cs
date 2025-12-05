@@ -8,6 +8,7 @@ using Alphadigi_migration.Application.Queries.Alphadigi;
 using Alphadigi_migration.Application.Queries.Veiculo;
 using Alphadigi_migration.Application.Service;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
+using Alphadigi_migration.Domain.DTOs.Display;
 using Alphadigi_migration.Domain.DTOs.Veiculos;
 using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
@@ -50,6 +51,8 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
                 _logger.LogError("Câmera não encontrada para o IP {Ip}. Abortando.", request.Ip);
                 throw new Exception("Camera não encontrada");
             }
+
+
 
             // 2. Registrar a leitura da placa
             var log = await _mediator.Send(new CreatePlacaLidaCommand
@@ -237,6 +240,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             });
 
             // 8. Enviar para display (com informações do visitante se aplicável)
+
             var serialData = await _displayService.RecieveMessageAlphadigi(
             request.Plate,
             mensagemAcesso,  // Use a mensagem corrigida
@@ -330,15 +334,17 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
 
             _logger.LogInformation("📨 RETORNANDO PARA ALPHADIGI:");
 
+           
+
+
             return new AlarmInfoPlateResponseDTO
             {
                 ResponseAlarmInfoPlate = new Response_AlarmInfoPlate
                 {
-                    info = "ok",
+                    info = accessResult.ShouldReturn ? "ok" : "no",
                     serialData = serialData
                 }
             };
-
 
 
 

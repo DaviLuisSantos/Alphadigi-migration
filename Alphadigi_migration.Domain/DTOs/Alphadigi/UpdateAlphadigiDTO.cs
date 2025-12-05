@@ -16,6 +16,7 @@ public class UpdateAlphadigiDTO : IUpdateAlphadigiDTO
     public string Nome { get; set; }
     public bool Sentido { get; set; }
 
+    public int LinhasDisplay { get; set; } = 2;
     [Required]
     [StringLength(50)]
     public string? Estado { get; set; } = "DELETE";

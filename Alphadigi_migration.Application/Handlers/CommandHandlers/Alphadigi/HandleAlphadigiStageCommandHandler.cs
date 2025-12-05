@@ -1,5 +1,6 @@
 ﻿using Alphadigi_migration.Application.Commands.Alphadigi;
 using Alphadigi_migration.Application.Queries.Alphadigi;
+using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -25,6 +26,7 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
         string stage = alphadigi.Estado ?? "DELETE";
         string newStage = null;
         object response = null;
+        bool enviado = false; // 🔥 ADICIONADO: Variável enviado como no código antigo
 
         _logger.LogInformation($"🔄 Processando estágio: {stage} para câmera {alphadigi.Ip}");
 
@@ -39,7 +41,7 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
                 else
                 {
                     newStage = "CREATE";
-                    alphadigi.MarcarComoNaoEnviado(); // Reset para próximo estágio
+                    enviado = false; // 🔥 RESET enviado como no código antigo
                 }
                 break;
 
@@ -54,7 +56,7 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
                 else
                 {
                     newStage = "SEND";
-                    alphadigi.MarcarComoNaoEnviado();
+                    enviado = false; // 🔥 RESET enviado como no código antigo
                 }
                 break;
 
@@ -71,14 +73,32 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
                 {
                     _logger.LogInformation($"📤 Estágio SEND: Enviando lote de whitelists");
                 }
+
+                // 🔥 ADICIONADO: Lógica do código antigo para enviado
+                if (enviado)
+                {
+                    newStage = response == null ? "FINAL" : "SEND";
+                    enviado = false;
+                }
                 break;
 
             case "FINAL":
-                // 🔥 IMPORTANTE: No estágio FINAL, NÃO retornamos um objeto de resposta!
-                // Deixamos o ProcessHeartbeatCommandHandler retornar os dados do display
-                _logger.LogInformation($"🎯 Estágio FINAL: Mantendo estágio (display será gerenciado pelo heartbeat)");
-                newStage = "FINAL";
-                response = null; // 🔥 CRÍTICO: Null para o heartbeat assumir
+
+                _logger.LogInformation($"[{DateTime.Now:HH:mm:ss.fff}] 🎯 ESTÁGIO FINAL: Enviando mensagem padrão para display");
+
+              
+
+                // ⭐⭐ NÃO FAÇA RETURN AQUI! Configure a response e deixe o fluxo continuar
+                response = new ResponseHeathbeatDTO
+                {
+                    Response_Heartbeat = new Response_AlarmInfoPlate
+                    {
+                        info = "no",
+                        serialData = new List<SerialData>()
+                    }
+                };
+
+                newStage = "FINAL"; // ⭐ Mantém no mesmo estágio
                 break;
 
             default:
@@ -94,7 +114,8 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
             _logger.LogInformation($"📊 Novo estágio: {newStage}");
         }
 
-        alphadigi.MarcarComoEnviado();
+        // 🔥 CORREÇÃO: Usar MarcarComoEnviado() se tiver, senão:
+        alphadigi.MarcarComoEnviado(); // No código antigo sempre marcava como enviado após processar estágio
 
         // Atualizar Alphadigi
         var updateCommand = new UpdateAlphadigiEntityCommand { Alphadigi = alphadigi };

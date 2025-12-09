@@ -1,6 +1,8 @@
 ﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Domain.Options;
+
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -23,6 +25,7 @@ public class VeiculoService : IVeiculoService
     private readonly IVeiculoRepository _veiculoRepository;
     private readonly ILogger<VeiculoService> _logger;
     private readonly PlateComparisonSettings _plateSettings;
+    //private readonly AppDbContextFirebird _contextFirebird;
 
     public VeiculoService(
         IVeiculoRepository veiculoRepository,

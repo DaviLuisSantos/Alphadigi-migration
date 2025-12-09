@@ -1,8 +1,13 @@
 ﻿using Alphadigi_migration.Api.Factories;
 using Alphadigi_migration.Application.Commands.Alphadigi;
+using Alphadigi_migration.Application.Queries.Alphadigi;
+using Alphadigi_migration.Application.Queries.Veiculo;
 using Alphadigi_migration.Domain.DTOs.Alphadigi;
 using Alphadigi_migration.Domain.Interfaces;
+using Alphadigi_migration.Infrastructure.Data;
+using Alphadigi_migration.Infrastructure.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -16,17 +21,24 @@ public class AlphadigiController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IHeartbeatFactory _heartbeatFactory;
     private readonly IAlphadigiHearthBeatService _hearthbeatService;
+    private readonly IVeiculoRepository _veiculoRepository;
+    private readonly AppDbContextFirebird _contextSqlite;
+    private readonly IAlphadigiRepository _alphadigiRepository;
 
     public AlphadigiController(
         ILogger<AlphadigiController> logger,
         IMediator mediator,
         IHeartbeatFactory heartbeatFactory,
-        IAlphadigiHearthBeatService hearthbeatService)
+        IAlphadigiHearthBeatService hearthbeatService,
+        IVeiculoRepository veiculoRepository, AppDbContextFirebird contextSqlite, IAlphadigiRepository alphadigiRepository)
     {
         _logger = logger;
         _mediator = mediator;
         _heartbeatFactory = heartbeatFactory;
         _hearthbeatService = hearthbeatService;
+        _veiculoRepository = veiculoRepository;
+        _contextSqlite = contextSqlite;
+        _alphadigiRepository = alphadigiRepository;
     }
 
     [HttpGet]
@@ -93,6 +105,7 @@ public class AlphadigiController : ControllerBase
     {
         try
         {
+
             using var reader = new StreamReader(Request.Body);
             var body = await reader.ReadToEndAsync();
             _logger.LogInformation("ProcessHeartbeat chamado com dados: {RequestBody}", body);
@@ -184,4 +197,5 @@ public class AlphadigiController : ControllerBase
             return StatusCode(500, "Internal server error");
         }
     }
+
 }

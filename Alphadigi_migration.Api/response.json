@@ -1,12 +1,7 @@
 {
-  "Placa": "BRA0S17",
-  "Liberado": true,
-  "Acesso": "SA\u00CDDA - VISITANTE: LAURA - EXCLU\u00CDDO",
-  "Tipo": "VISITANTE",
-  "Visitante": {
-    "Nome": "LAURA",
-    "Unidade": "1104BLOCO A",
-    "DataVisita": null,
-    "Excluido": true
-  }
+  "Placa": "PNO4A60",
+  "Liberado": false,
+  "Acesso": "N\u00C3O CADASTRADO",
+  "Tipo": "MORADOR",
+  "Visitante": null
 }

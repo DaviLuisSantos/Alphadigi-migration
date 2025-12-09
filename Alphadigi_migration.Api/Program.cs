@@ -86,11 +86,23 @@ using (var scope = app.Services.CreateScope())
     var condominioService = scope.ServiceProvider.GetRequiredService<CondominioService>();
     await condominioService.SyncCondominio();
 
-    var schedulerService = new DailyTaskSchedulerService(() =>
-    {
-        alphadigiService.UpdateStage("DELETE").Wait();
-    });
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<DailyTaskSchedulerService>>();
 
+    // await alphadigiService.UpdateStage("DELETE");
+
+
+    var schedulerService = new DailyTaskSchedulerService(async () =>
+    {
+        // Cria um novo scope dentro da função
+        using (var newScope = app.Services.CreateScope())
+        {
+            var alphadigiService = newScope.ServiceProvider.GetRequiredService<IAlphadigiService>();
+            await alphadigiService.UpdateStage("DELETE");
+        }
+    }, logger);
+
+
+    schedulerService.Start();
 }
 
 if (app.Environment.IsDevelopment())

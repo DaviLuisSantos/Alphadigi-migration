@@ -41,9 +41,8 @@ public class VeiculoRepository : IVeiculoRepository
              .ToListAsync();
     }
 
-    public async Task<Veiculo> GetByPlateAsync(string plate, int minMatchingCharacters)
+    public async Task<Veiculo> GetByPlateAsync(string plate)
     {
-       
         if (string.IsNullOrEmpty(plate))
         {
             _logger.LogWarning("Placa é null ou vazia. Retornando null.");
@@ -51,6 +50,27 @@ public class VeiculoRepository : IVeiculoRepository
         }
 
         _logger.LogInformation($"GetByPlateAsync chamado com placa: '{plate}'");
+
+        // 1. BUSCA O VALOR QUE JÁ ESTÁ NO BANCO (configurado no AcessoLinear)
+        // NÃO precisa de fallback porque o valor sempre existe
+        int minMatchingFromDb = await _contextFirebird.Camera
+            .Where(c => c.MinMatchingCharacters.HasValue)
+            .OrderBy(c => c.Id)
+            .Select(c => c.MinMatchingCharacters.Value)
+            .FirstOrDefaultAsync();
+
+        if (minMatchingFromDb == 0)
+        {
+            // Aqui SIM usa o valor padrão da entidade
+            minMatchingFromDb = 7; // Ou Camera.ValorPadraoMinMatching
+            _logger.LogWarning($"Nenhuma câmera configurada no banco. Usando valor padrão: {minMatchingFromDb}");
+        }
+        else
+        {
+            _logger.LogInformation($"Usando valor configurado no AcessoLinear: {minMatchingFromDb}");
+        }
+
+
 
         // ✅ Busca exata primeiro
         var veiculoExato = await _contextFirebird.Veiculo
@@ -64,7 +84,7 @@ public class VeiculoRepository : IVeiculoRepository
 
         _logger.LogInformation($"Nenhum veículo encontrado por busca exata para: '{plate}'");
 
-        // ✅ Só então usar similaridade (com plate garantidamente não-nulo)
+        // ✅ Só então usar similaridade
         var veiculos = await _contextFirebird.Veiculo.ToListAsync();
 
         var resultado = veiculos
@@ -76,7 +96,7 @@ public class VeiculoRepository : IVeiculoRepository
                     .Select((c, index) => index < plate.Length && c == plate[index] ? 1 : 0)
                     .Sum() ?? 0
             })
-            .Where(v => v.MatchCount >= minMatchingCharacters)
+            .Where(v => v.MatchCount >= minMatchingFromDb) // Usa valor do banco
             .OrderByDescending(v => v.MatchCount)
             .Select(v => v.Veiculo)
             .ToList();

@@ -27,6 +27,7 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
         string newStage = null;
         object response = null;
         bool enviado = false;
+        bool marcadoComoEnviado = false;
 
         switch (stage)
         {
@@ -34,6 +35,7 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
                 if (!alphadigi.Enviado)
                 {
                     response = HandleDelete(alphadigi);
+                    marcadoComoEnviado = true;
                 }
                 else
                 {
@@ -55,16 +57,37 @@ public class HandleAlphadigiStageCommandHandler : IRequestHandler<HandleAlphadig
                 }
                 break;
             case "SEND":
+                _logger.LogInformation("📤 Executando SEND - Enviado: {Enviado}, UltimoId: {UltimoId}",
+                    alphadigi.Enviado, alphadigi.UltimoId);
+
                 var sendQuery = new HandleCreateQuery { Alphadigi = alphadigi };
                 response = await _mediator.Send(sendQuery, cancellationToken);
+
                 if (response == null)
                 {
+                    _logger.LogInformation("✅ Nenhum veículo encontrado após ID {UltimoId} - Indo para FINAL",
+                        alphadigi.UltimoId);
+
+                    // IR PARA FINAL
                     newStage = "FINAL";
+                    alphadigi.ReiniciarEnvio();
+                    alphadigi.AtualizarUltimoId(null); // Resetar para próximo ciclo
                 }
-                if (enviado)
+                else
                 {
-                    newStage = response == null ? "FINAL" : "SEND";
-                    enviado = false;
+                    _logger.LogInformation("📊 {Count} veículos encontrados - Mantendo SEND",
+                        ((Domain.DTOs.Alphadigi.AddWhiteListDTO)response).AddWhiteList.Add_data.Count);
+
+                    // Se era o primeiro envio do SEND
+                    if (!alphadigi.Enviado)
+                    {
+                        alphadigi.MarcarComoEnviado();
+                        // Atualizar UltimoId com o máximo enviado
+                        // Isso depende da estrutura do response
+                    }
+
+                    // PERMANECER NO SEND para verificar mais dados
+                    newStage = "SEND";
                 }
                 break;
             case "FINAL":

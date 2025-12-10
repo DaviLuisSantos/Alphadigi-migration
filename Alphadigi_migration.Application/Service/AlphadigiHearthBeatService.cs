@@ -78,15 +78,23 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 }
                 break;
             case "SEND":
+                _logger.LogInformation("📤 Executando SEND - Enviado: {Enviado}, UltimoId: {UltimoId}",
+                    alphadigi.Enviado, alphadigi.UltimoId);
+
                 response = await HandleCreate(alphadigi);
+
                 if (response == null)
                 {
+                    _logger.LogInformation("✅ Nenhum veículo encontrado - indo para FINAL");
                     newStage = "FINAL";
+                    alphadigi.MarcarComoNaoEnviado(); // Reset para próximo ciclo
+                    alphadigi.AtualizarUltimoId(null); // Resetar UltimoId
                 }
-                if (enviado)
+                else
                 {
-                    newStage = response == null ? "FINAL" : "SEND";
-                    enviado = false;
+                    _logger.LogInformation("📊 Dados encontrados - mantendo SEND");
+                    newStage = "SEND";
+                    alphadigi.MarcarComoEnviado(); // Marcar que já enviou
                 }
                 break;
             case "FINAL":
@@ -139,14 +147,37 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
 
     public async Task<AddWhiteListDTO> HandleCreate(Alphadigi_migration.Domain.EntitiesNew.Alphadigi alphadigi)
     {
-        int ultimoId = alphadigi.UltimoId ?? 0;
+        // LÓGICA CORRIGIDA:
+        // Se está em SEND e JÁ FOI ENVIADO, buscar APÓS o UltimoId
+        // Se está em SEND mas NÃO FOI ENVIADO, buscar DO ZERO (primeira vez)
+        // Se está em CREATE, buscar DO ZERO
+
+        int ultimoId;
+
+        if (alphadigi.Estado == "SEND" && alphadigi.Enviado)
+        {
+            // Já enviou antes - buscar novos após o último ID
+            ultimoId = alphadigi.UltimoId ?? 0;
+            _logger.LogInformation("📡 Buscando NOVOS veículos após ID: {UltimoId}", ultimoId);
+        }
+        else
+        {
+            // Primeira vez no SEND ou está em CREATE - buscar do zero
+            ultimoId = 0;
+            _logger.LogInformation("🆕 Buscando TODOS os veículos (estado: {Estado})", alphadigi.Estado);
+        }
+
         var veiculosEnvio = await _veiculoService.GetVeiculosSend(ultimoId);
+
+        _logger.LogInformation("📊 Veículos encontrados após ID {UltimoId}: {Count}",
+            ultimoId, veiculosEnvio.Count);
 
         if (veiculosEnvio.Count == 0)
         {
             return null;
         }
 
+        // Atualizar UltimoId com o máximo encontrado
         int novoUltimoId = veiculosEnvio.Max(item => item.Id);
         alphadigi.AtualizarUltimoId(novoUltimoId);
 
@@ -162,14 +193,6 @@ public class AlphadigiHearthBeatService : IAlphadigiHearthBeatService
                 }).ToList()
             }
         };
-
-        await _alphadigiService.Update(alphadigi);
-
-        var filePath = "responseCreateHb.json";
-
-        var jsonResult = JsonSerializer.Serialize(envio);
-
-        await File.WriteAllTextAsync(filePath, jsonResult);
 
         return envio;
     }

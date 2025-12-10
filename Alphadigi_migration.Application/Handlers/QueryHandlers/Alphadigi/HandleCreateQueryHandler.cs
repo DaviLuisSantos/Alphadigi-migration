@@ -27,6 +27,18 @@ public class HandleCreateQueryHandler : IRequestHandler<HandleCreateQuery,
         var alphadigi = request.Alphadigi;
         int ultimoId = alphadigi.UltimoId ?? 0;
 
+        if (alphadigi.Estado == "SEND" && alphadigi.Enviado)
+        {
+            ultimoId = alphadigi.UltimoId ?? 0;
+            _logger.LogInformation("📡 Estado SEND (já enviado) - buscando após ID: {UltimoId}", ultimoId);
+        }
+        else
+        {
+            // Para CREATE ou primeiro envio do SEND
+            ultimoId = 0;
+            _logger.LogInformation("🆕 Estado {Estado} - buscando do início", alphadigi.Estado);
+        }
+
         // Buscar veículos usando query
         var veiculosQuery = new GetVeiculosSendQuery { UltimoId = ultimoId };
         var veiculosEnvio = await _mediator.Send(veiculosQuery, cancellationToken);
@@ -49,7 +61,8 @@ public class HandleCreateQueryHandler : IRequestHandler<HandleCreateQuery,
                 {
                     Carnum = item.Placa,
                     Startime = "20200718155220",
-                    Endtime = "30990718155220"
+                    Endtime = "30990718155220",
+
                 }).ToList()
             }
         };

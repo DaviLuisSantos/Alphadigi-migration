@@ -1,6 +1,8 @@
 ﻿using Alphadigi_migration.Domain.EntitiesNew;
 using Alphadigi_migration.Domain.Interfaces;
 using Alphadigi_migration.Domain.Options;
+
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -22,16 +24,17 @@ public class VeiculoService : IVeiculoService
 {
     private readonly IVeiculoRepository _veiculoRepository;
     private readonly ILogger<VeiculoService> _logger;
-    private readonly PlateComparisonSettings _plateSettings;
+   // private readonly PlateComparisonSettings _plateSettings;
+    //private readonly AppDbContextFirebird _contextFirebird;
 
     public VeiculoService(
         IVeiculoRepository veiculoRepository,
-        ILogger<VeiculoService> logger,
-        IOptions<PlateComparisonSettings> plateSettings)
+        ILogger<VeiculoService> logger
+       )
     {
         _veiculoRepository = veiculoRepository;
         _logger = logger;
-        _plateSettings = plateSettings.Value;
+       
     }
 
     public async Task<List<Veiculo>> GetVeiculos()
@@ -49,8 +52,8 @@ public class VeiculoService : IVeiculoService
     public async Task<Veiculo> GetByPlate(string plate)
     {
         _logger.LogInformation($"GetByPlate chamado com placa: {plate}");
-        int minMatching = _plateSettings.MinMatchingCharacters;
-        return await _veiculoRepository.GetByPlateAsync(plate, minMatching);
+      
+        return await _veiculoRepository.GetByPlateAsync(plate);
     }
 
     public async Task<bool> UpdateVagaVeiculo(int id, bool dentro)

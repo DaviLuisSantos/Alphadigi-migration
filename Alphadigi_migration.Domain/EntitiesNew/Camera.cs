@@ -34,6 +34,9 @@ public class Camera : EntityBase, IAggregateRoot
     [Column("FOTO_EVENTO")]
     public bool? FotoEvento { get; private set; } = false;
 
+    [Column("INDICE_DIGITO_A_DIGITO")]
+    public int? MinMatchingCharacters { get; private set; } = 7; 
+
     [NotMapped]
     public DateTime DataCriacao { get; private set; }
     [NotMapped]
@@ -51,7 +54,8 @@ public class Camera : EntityBase, IAggregateRoot
         int idArea,
         string modelo = null,
         string direcao = null,
-        bool fotoEvento = false)
+        bool fotoEvento = false,
+        int minMatchingCharacters =7)
     {
         ValidarNome(nome);
         ValidarIp(ip);
@@ -66,6 +70,8 @@ public class Camera : EntityBase, IAggregateRoot
         FotoEvento = fotoEvento;
         Ativa = true;
         DataCriacao = DateTime.UtcNow;
+        MinMatchingCharacters = minMatchingCharacters;
+
 
         AddDomainEvent(new CameraCriadaEvent(Id, Nome, Ip, IdArea));
     }
@@ -97,7 +103,7 @@ public class Camera : EntityBase, IAggregateRoot
 
         AddDomainEvent(new CameraAreaAtualizadaEvent(Id, Nome, novaAreaId));
     }
-
+    
     public void ConfigurarFotoEvento(bool habilitar)
     {
         FotoEvento = habilitar;
@@ -176,6 +182,7 @@ public class Camera : EntityBase, IAggregateRoot
     public bool EstaAtiva() => Ativa;
     public bool? CapturaFotoEvento() => FotoEvento;
     public string ObterLocalizacao() => Area?.Nome ?? "Área não especificada";
+    public int ObterMinMatchingCharacters() => MinMatchingCharacters ?? 7;
 
     public override string ToString()
     {

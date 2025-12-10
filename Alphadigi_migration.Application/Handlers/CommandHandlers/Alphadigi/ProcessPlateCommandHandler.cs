@@ -59,7 +59,7 @@ public class ProcessPlateCommandHandler : IRequestHandler<ProcessPlateCommand, o
             _logger.LogInformation("Placa lida registrada com ID: {LogId}", log.Id);
 
             // 3. Buscar veículo (morador)
-            var veiculo = await _mediator.Send(new GetVeiculoByPlateQuery { Plate = request.Plate, MinMatchingCharacters = 7 });
+            var veiculo = await _mediator.Send(new GetVeiculoByPlateQuery { Plate = request.Plate});
 
             Domain.EntitiesNew.Veiculo veiculoProcessado = null;
             bool isVisitante = false;

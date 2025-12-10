@@ -98,6 +98,10 @@ public class AppDbContextFirebird : DbContext
          );
         });
 
+        modelBuilder.Entity<Camera>()
+        .Property(c => c.MinMatchingCharacters)
+        .HasColumnName("INDICE_DIGITO_A_DIGITO");
+
         modelBuilder.Entity<Condominio>(entity =>
         {
             entity.OwnsOne(e => e.Cnpj, cnpj =>

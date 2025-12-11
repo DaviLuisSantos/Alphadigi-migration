@@ -154,35 +154,23 @@ public class VeiculoRepository : IVeiculoRepository
 
         try
         {
-            var veiculo = await _contextFirebird.Veiculo.FindAsync(lastAccess.IdVeiculo);
+            var veiculo = await _contextFirebird.Veiculo
+                .FirstOrDefaultAsync(v => v.Id == lastAccess.IdVeiculo);
+
             if (veiculo == null)
             {
                 _logger.LogWarning($"Veículo com ID {lastAccess.IdVeiculo} não encontrado.");
                 return false;
             }
-        
-                veiculo.RegistrarAcesso(lastAccess.IpCamera, lastAccess.TimeAccess);
-            //veiculo.IpCamUltAcesso = lastAccess.IpCamera;
-            //veiculo.DataHoraUltAcesso = lastAccess.TimeAccess;
-            _contextFirebird.Veiculo.Update(veiculo);
-            await _contextFirebird.SaveChangesAsync();
 
-            _logger.LogInformation($"Veículo com ID {lastAccess.IdVeiculo} atualizado com sucesso.");
-            return true;
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            var entry = ex.Entries.Single();
-            var databaseValues = await entry.GetDatabaseValuesAsync();
+            // USAR O MÉTODO DA ENTIDADE - ele já faz as validações
+            veiculo.RegistrarAcesso(lastAccess.IpCamera, lastAccess.TimeAccess);
 
-            if (databaseValues == null)
-            {
-                throw new Exception("O veículo foi excluído por outra transação.");
-            }
-            else
-            {
-                throw new Exception("Outra transação modificou o veículo. Tente novamente.");
-            }
+            // NÃO precisa do .Update() pois o EF já rastreia mudanças
+            int rowsAffected = await _contextFirebird.SaveChangesAsync();
+
+            _logger.LogInformation($"Veículo com ID {lastAccess.IdVeiculo} atualizado com sucesso. Linhas: {rowsAffected}");
+            return rowsAffected > 0;
         }
         catch (Exception e)
         {

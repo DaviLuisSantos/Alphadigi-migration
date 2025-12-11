@@ -1,7 +1,7 @@
 {
-  "Placa": "TUA0A48",
-  "Liberado": true,
-  "Acesso": "CADASTRADO",
+  "Placa": "SGR6569",
+  "Liberado": false,
+  "Acesso": "ACESSO NEGADO - ANTIPASSBACK",
   "Tipo": "MORADOR",
   "Visitante": null
 }

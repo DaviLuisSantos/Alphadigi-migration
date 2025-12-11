@@ -105,10 +105,10 @@ public class Veiculo : EntityBase, IAggregateRoot
 
     public void RegistrarAcesso(string ipCamera, DateTime dataHoraAcesso)
     {
-        //ValidarIpCamera(ipCamera);
+        ValidarIpCamera(ipCamera);
 
-        //IpCamUltAcesso = ipCamera;
-        //DataHoraUltAcesso = dataHoraAcesso;
+        IpCamUltAcesso = ipCamera;
+        DataHoraUltAcesso = dataHoraAcesso;
 
 
         //AddDomainEvent(new VeiculoAcessoRegistradoEvent(Id, Placa.Numero, ipCamera, dataHoraAcesso));
@@ -116,12 +116,12 @@ public class Veiculo : EntityBase, IAggregateRoot
 
     public void EntrarCondominio(string ipCamera)
     {
-        //ValidarIpCamera(ipCamera);
+        ValidarIpCamera(ipCamera);
 
-        //VeiculoDentro = null;
-        //IpCamUltAcesso = ipCamera;
-        //DataHoraUltAcesso = DateTime.UtcNow;
-       
+        VeiculoDentro = 1;
+        IpCamUltAcesso = ipCamera;
+        DataHoraUltAcesso = DateTime.UtcNow;
+
 
         //AddDomainEvent(new VeiculoEntrouEvent(Id, Placa.Numero, ipCamera));
     }
@@ -130,7 +130,7 @@ public class Veiculo : EntityBase, IAggregateRoot
     {
         ValidarIpCamera(ipCamera);
 
-        VeiculoDentro = null;
+        VeiculoDentro = 0;
         IpCamUltAcesso = ipCamera;
         DataHoraUltAcesso = DateTime.UtcNow;
        

@@ -24,7 +24,7 @@ public class GetVeiculoByPlateQueryHandler : IRequestHandler<GetVeiculoByPlateQu
     {
         _logger.LogInformation("Buscando veículo pela placa: {Plate}", request.Plate);
 
-        var veiculo = await _repository.GetByPlateAsync(request.Plate, request.MinMatchingCharacters);
+        var veiculo = await _repository.GetByPlateAsync(request.Plate);
 
         if (veiculo == null)
         {

@@ -26,7 +26,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
 
     [Required]
     [StringLength(50)]
-    public string Estado { get; private set; }
+    public string Estado { get; private set; } = "DELETE";
     public int? UltimoId { get; private set; }
 
     [StringLength(10)]
@@ -57,7 +57,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
         Nome = nome;
         AreaId = areaId;
         Sentido = sentido;
-        Estado = "ACTIVE";
+        Estado = "DELETE";
         LinhasDisplay = linhasDisplay;
         Enviado = false;
         FotoEvento = false;
@@ -106,7 +106,7 @@ public class Alphadigi : EntityBase, IAggregateRoot
     }
     public void AtualizarUltimoId(int? novoUltimoId)
     {
-        if (novoUltimoId <= 0 )
+        if (novoUltimoId < 0 )
             throw new Exception("Último ID não pode ser negativo");
 
         UltimoId = novoUltimoId;
@@ -126,15 +126,14 @@ public class Alphadigi : EntityBase, IAggregateRoot
         DataAtualizacao = DateTime.UtcNow;
     }
 
-    public void AtualizarEstado(string novoEstado)
+    public void AtualizarEstado(string stage)
     {
-        if (string.IsNullOrWhiteSpace(novoEstado))
-            throw new Exception("Estado não pode ser vazio");
+       
 
-        Estado = novoEstado;
-        DataAtualizacao = DateTime.UtcNow;
+        Estado = stage;
+      
 
-        AddDomainEvent(new AlphadigiEstadoAtualizadoEvent(Id, novoEstado));
+       // AddDomainEvent(new AlphadigiEstadoAtualizadoEvent(Id, novoEstado));
     }
 
     public void AtualizarInformacoes(string ip, string nome, int areaId, bool sentido, Area area = null)
@@ -181,6 +180,9 @@ public class Alphadigi : EntityBase, IAggregateRoot
         if (nome.Length > 100)
             throw new Exception("Nome não pode exceder 100 caracteres");
     }
-
-    
+    public void ReiniciarEnvio()
+    {
+        Enviado = false;
+      
+    }
 }
